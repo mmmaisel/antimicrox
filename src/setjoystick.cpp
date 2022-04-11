@@ -24,6 +24,7 @@
 #include "joybuttontypes/joycontrolstickbutton.h"
 #include "joycontrolstick.h"
 #include "joydpad.h"
+#include "joysensor.h"
 #include "vdpad.h"
 
 #include <QDebug>
@@ -107,6 +108,12 @@ void SetJoystick::refreshHats()
         hats.insert(i, dpad);
         enableHatConnections(dpad);
     }
+}
+
+void SetJoystick::refreshSensors()
+{
+    deleteSensors();
+    // TODO
 }
 
 void SetJoystick::deleteButtons()
@@ -199,11 +206,33 @@ void SetJoystick::deleteHats()
     hats.clear();
 }
 
+void SetJoystick::deleteSensors()
+{
+    QHashIterator<int, JoySensor *> iter(m_sensors);
+
+    while (iter.hasNext())
+    {
+        JoySensor *sensor = iter.next().value();
+
+        if (sensor != nullptr)
+        {
+            m_sensors.remove(iter.key());
+            sensor->deleteLater();
+        }
+    }
+
+    m_sensors.clear();
+}
+
 int SetJoystick::getNumberButtons() const { return getButtons().count(); }
 
 int SetJoystick::getNumberAxes() const { return axes.count(); }
 
 int SetJoystick::getNumberHats() const { return getHats().count(); }
+
+int SetJoystick::hasAccelerometer() const { return getSensors().contains(ACCELEROMETER); }
+
+int SetJoystick::hasGyroscope() const { return getSensors().contains(GYROSCOPE); }
 
 int SetJoystick::getNumberSticks() const { return getSticks().size(); }
 
@@ -216,6 +245,7 @@ void SetJoystick::reset()
     refreshAxes();
     refreshButtons();
     refreshHats();
+    refreshSensors();
     m_name = QString();
 }
 
@@ -946,6 +976,8 @@ QHash<int, JoyAxis *> *SetJoystick::getAxes() { return &axes; }
 QHash<int, JoyButton *> const &SetJoystick::getButtons() const { return m_buttons; }
 
 QHash<int, JoyDPad *> const &SetJoystick::getHats() const { return hats; }
+
+QHash<int, JoySensor *> const &SetJoystick::getSensors() const { return m_sensors; }
 
 QHash<int, JoyControlStick *> const &SetJoystick::getSticks() const { return sticks; }
 

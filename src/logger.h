@@ -100,7 +100,7 @@ class Logger : public QObject
         return instance;
     }
 
-    static Logger *createInstance(QTextStream *stream = nullptr, LogLevel outputLevel = LOG_INFO, QObject *parent = nullptr);
+    static Logger *createInstance(QTextStream *stream = nullptr, LogLevel outputLevel = LOG_DEBUG, QObject *parent = nullptr);
 
   protected:
     explicit Logger(QTextStream *stream, LogLevel output_lvl = LOG_INFO, QObject *parent = nullptr);

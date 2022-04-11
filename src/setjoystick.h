@@ -26,6 +26,7 @@ class InputDevice;
 class JoyButton;
 class JoyDPad;
 class JoyControlStick;
+class JoySensor;
 class VDPad;
 
 class SetJoystick : public SetJoystickXml
@@ -46,11 +47,14 @@ class SetJoystick : public SetJoystickXml
     int getNumberButtons() const;
     int getNumberAxes() const;
     int getNumberHats() const;
+    int hasAccelerometer() const;
+    int hasGyroscope() const;
     int getNumberSticks() const;
     int getNumberVDPads() const;
 
     QHash<int, JoyButton *> const &getButtons() const;
     QHash<int, JoyDPad *> const &getHats() const;
+    QHash<int, JoySensor *> const &getSensors() const;
     QHash<int, JoyControlStick *> const &getSticks() const;
     QHash<int, VDPad *> const &getVdpads() const;
     QHash<int, JoyAxis *> *getAxes();
@@ -60,6 +64,7 @@ class SetJoystick : public SetJoystickXml
     virtual void refreshButtons(); // SetButton class
     virtual void refreshAxes();    // SetAxis class
     virtual void refreshHats();    // SetHat class
+    virtual void refreshSensors(); // SetSensor class
     void release();
     void addControlStick(int index, JoyControlStick *stick); // SetStick class
     void removeControlStick(int index);                      // SetStick class
@@ -83,9 +88,15 @@ class SetJoystick : public SetJoystickXml
     bool isSetEmpty();
 
   protected:
+    enum {
+        ACCELEROMETER,
+        GYROSCOPE
+    };
+
     void deleteButtons(); // SetButton class
     void deleteAxes();    // SetAxis class
     void deleteHats();    // SetHat class
+    void deleteSensors(); // SetSensor class
     void deleteSticks();  // SetStick class
     void deleteVDpads();  // SetVDPad class
 
@@ -164,6 +175,7 @@ class SetJoystick : public SetJoystickXml
     QHash<int, JoyButton *> m_buttons;
     QHash<int, JoyAxis *> axes;
     QHash<int, JoyDPad *> hats;
+    QHash<int, JoySensor *> m_sensors;
     QHash<int, JoyControlStick *> sticks;
     QHash<int, VDPad *> vdpads;
 

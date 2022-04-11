@@ -172,6 +172,16 @@ int GameController::getNumberRawAxes()
     return SDL_CONTROLLER_AXIS_MAX;
 }
 
+int GameController::hasRawAccelerometer()
+{
+    return SDL_GameControllerHasSensor(controller, SDL_SENSOR_ACCEL);
+}
+
+int GameController::hasRawGyroscope()
+{
+    return SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO);
+}
+
 int GameController::getNumberRawHats() { return 0; }
 
 void GameController::setCounterUniques(int counter) { counterUniques = counter; }

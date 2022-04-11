@@ -149,6 +149,16 @@ int Joystick::getNumberRawHats()
     return numhats;
 }
 
+int Joystick::hasRawAccelerometer()
+{
+    return 0;
+}
+
+int Joystick::hasRawGyroscope()
+{
+    return 0;
+}
+
 void Joystick::setCounterUniques(int counter) { counterUniques = counter; }
 
 SDL_JoystickID Joystick::getSDLJoystickID() { return joystickID; }

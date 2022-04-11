@@ -95,6 +95,8 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     ui->joystickAxesLabel->setText(QString::number(joystick->getNumberRawAxes()));
     ui->joystickButtonsLabel->setText(QString::number(joystick->getNumberRawButtons()));
     ui->joystickHatsLabel->setText(QString::number(joystick->getNumberRawHats()));
+    ui->joystickSensorsLabel->setText(
+            QString::number(joystick->hasRawAccelerometer() + joystick->hasRawGyroscope()));
 
     joystick->getActiveSetJoystick()->setIgnoreEventState(true);
     joystick->getActiveSetJoystick()->release();
@@ -188,6 +190,63 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     }
 
     ui->hatsGroupBox->setLayout(hatsBox);
+
+    QVBoxLayout *sensorsBox = new QVBoxLayout();
+    sensorsBox->setSpacing(4);
+    if (joystick->hasAccelerometer())
+    {
+        //JoyAxis *axis = joystick->getActiveSetJoystick()->getJoyAxis(i);
+
+        if (true/*axis != nullptr*/)
+        {
+            for(int i = 0; i < 3; ++i)
+            {
+                QHBoxLayout *hbox = new QHBoxLayout();
+
+                QLabel *axisLabel = new QLabel();
+                axisLabel->setText(tr("Accelerometer %1").arg(i/*axis->getRealJoyIndex()*/));
+                QProgressBar *axisBar = new QProgressBar();
+                axisBar->setMinimum(GlobalVariables::JoyAxis::AXISMIN);
+                axisBar->setMaximum(GlobalVariables::JoyAxis::AXISMAX);
+                axisBar->setFormat("%v");
+                axisBar->setValue(0/*axis->getCurrentRawValue()*/);
+                hbox->addWidget(axisLabel);
+                hbox->addWidget(axisBar);
+                hbox->addSpacing(10);
+                sensorsBox->addLayout(hbox);
+                //connect(axis, &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+            }
+        }
+    }
+
+    if (joystick->hasGyroscope())
+    {
+        //JoyAxis *axis = joystick->getActiveSetJoystick()->getJoyAxis(i);
+
+        if (true/*axis != nullptr*/)
+        {
+            for(int i = 0; i < 3; ++i)
+            {
+                QHBoxLayout *hbox = new QHBoxLayout();
+
+                QLabel *axisLabel = new QLabel();
+                axisLabel->setText(tr("Gyroscope %1").arg(i/*axis->getRealJoyIndex()*/));
+                QProgressBar *axisBar = new QProgressBar();
+                axisBar->setMinimum(GlobalVariables::JoyAxis::AXISMIN);
+                axisBar->setMaximum(GlobalVariables::JoyAxis::AXISMAX);
+                axisBar->setFormat("%v");
+                axisBar->setValue(0/*axis->getCurrentRawValue()*/);
+                hbox->addWidget(axisLabel);
+                hbox->addWidget(axisBar);
+                hbox->addSpacing(10);
+                sensorsBox->addLayout(hbox);
+                //connect(axis, &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+            }
+        }
+    }
+
+    sensorsBox->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Preferred, QSizePolicy::Fixed));
+    ui->sensorsGroupBox->setLayout(sensorsBox);
 
     //    QString guidString = joystick->getGUIDString();
     //    if (!guidString.isEmpty())
