@@ -30,6 +30,7 @@ class JoyAxisButton;
 class QXmlStreamReader;
 class QXmlStreamWriter;
 class JoyAxis;
+class JoySensor;
 
 class JoyAxis : public QObject
 {
@@ -87,6 +88,10 @@ class JoyAxis : public QObject
     void removeControlStick(bool performRelease = true);
     bool isPartControlStick();
     JoyControlStick *getControlStick();
+    void setSensor(JoySensor *sensor);
+    void removeSensor(bool performRelease = true);
+    bool isPartSensor();
+    JoySensor *getSensor();
     bool hasControlOfButtons();
     void removeVDPads();
 

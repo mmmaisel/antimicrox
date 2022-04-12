@@ -1357,6 +1357,37 @@ void InputDevice::activatePossibleAxisEvents()
     }
 }
 
+void InputDevice::activatePossibleSensorEvents()
+{
+    SetJoystick *currentSet = getActiveSetJoystick();
+
+    if (currentSet->hasAccelerometer())
+    {
+        JoyAxis* axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_X);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+        axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_Y);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+        axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_Z);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+    }
+
+    if (currentSet->hasGyroscope())
+    {
+        JoyAxis* axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_X);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+        axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_Y);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+        axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_Z);
+        if ((axis != nullptr) && axis->hasPendingEvent())
+            axis->activatePendingEvent();
+    }
+}
+
 void InputDevice::activatePossibleDPadEvents()
 {
     SetJoystick *currentSet = getActiveSetJoystick();

@@ -23,6 +23,7 @@
 #include "gamecontrollertrigger.h"
 #include "inputdevice.h"
 #include "joycontrolstick.h"
+#include "joysensor.h"
 #include "xml/joyaxisxml.h"
 #include "xml/joybuttonxml.h"
 #include "xml/joydpadxml.h"
@@ -69,6 +70,30 @@ void GameControllerSet::populateSticksDPad()
         new GameControllerDPad(buttonUp, buttonDown, buttonLeft, buttonRight, 0, getIndex(), this, this);
     controllerDPad->setDefaultDPadName("DPad");
     addVDPad(0, controllerDPad);
+
+    // Sensor Assignment
+    JoyAxis *axisZ = 0;
+    if (hasAccelerometer())
+    {
+        axisX = getSensorAxis(ACCEL_AXIS_X);
+        axisY = getSensorAxis(ACCEL_AXIS_Y);
+        axisZ = getSensorAxis(ACCEL_AXIS_Z);
+        JoySensor *sensor =
+            new JoySensor(axisX, axisY, axisZ, ACCELEROMETER, getIndex(), this, this);
+        sensor->setDefaultSensorName("Accelerometer");
+        addSensor(ACCELEROMETER, sensor);
+    }
+
+    if (hasGyroscope())
+    {
+        axisX = getSensorAxis(GYRO_AXIS_X);
+        axisY = getSensorAxis(GYRO_AXIS_Y);
+        axisZ = getSensorAxis(GYRO_AXIS_Z);
+        JoySensor *sensor =
+            new JoySensor(axisX, axisY, axisZ, GYROSCOPE, getIndex(), this, this);
+        sensor->setDefaultSensorName("Gyroscope");
+        addSensor(GYROSCOPE, sensor);
+    }
 
     // Give default names to buttons
     getJoyButton(SDL_CONTROLLER_BUTTON_A)->setDefaultButtonName("A");

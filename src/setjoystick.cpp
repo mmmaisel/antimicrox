@@ -60,9 +60,19 @@ JoyAxis *SetJoystick::getJoyAxis(int index) const
     return axes.value(index);
 }
 
+JoyAxis *SetJoystick::getSensorAxis(int index) const
+{
+    Q_ASSERT(!m_sensor_axes.isEmpty());
+    return m_sensor_axes.value(index);
+}
+
 JoyDPad *SetJoystick::getJoyDPad(int index) const { return getHats().value(index); }
 
 VDPad *SetJoystick::getVDPad(int index) const { return getVdpads().value(index); }
+
+JoySensor *SetJoystick::getAccelerometer() const { return getSensors().value(ACCELEROMETER); }
+
+JoySensor *SetJoystick::getGyroscope() const { return getSensors().value(GYROSCOPE); }
 
 JoyControlStick *SetJoystick::getJoyStick(int index) const { return getSticks().value(index); }
 
@@ -113,7 +123,34 @@ void SetJoystick::refreshHats()
 void SetJoystick::refreshSensors()
 {
     deleteSensors();
-    // TODO
+
+    if (getInputDevice()->hasRawAccelerometer())
+    {
+        JoyAxis *axisX = new JoyAxis(ACCEL_AXIS_X, m_index, this, this);
+        JoyAxis *axisY = new JoyAxis(ACCEL_AXIS_Y, m_index, this, this);
+        JoyAxis *axisZ = new JoyAxis(ACCEL_AXIS_Z, m_index, this, this);
+
+        m_sensor_axes.insert(ACCEL_AXIS_X, axisX);
+        m_sensor_axes.insert(ACCEL_AXIS_Y, axisY);
+        m_sensor_axes.insert(ACCEL_AXIS_Z, axisZ);
+        JoySensor *sensor = new JoySensor(axisX, axisY, axisZ, ACCELEROMETER, m_index, this, this);
+        m_sensors.insert(ACCELEROMETER, sensor);
+        //enableSensorConnections(sensor);
+    }
+
+    if (getInputDevice()->hasRawGyroscope())
+    {
+        JoyAxis *axisX = new JoyAxis(GYRO_AXIS_X, m_index, this, this);
+        JoyAxis *axisY = new JoyAxis(GYRO_AXIS_Y, m_index, this, this);
+        JoyAxis *axisZ = new JoyAxis(GYRO_AXIS_Z, m_index, this, this);
+
+        m_sensor_axes.insert(GYRO_AXIS_X, axisX);
+        m_sensor_axes.insert(GYRO_AXIS_Y, axisY);
+        m_sensor_axes.insert(GYRO_AXIS_Z, axisZ);
+        JoySensor *sensor = new JoySensor(axisX, axisY, axisZ, GYROSCOPE, m_index, this, this);
+        m_sensors.insert(GYROSCOPE, sensor);
+        //enableSensorConnections(sensor);
+    }
 }
 
 void SetJoystick::deleteButtons()
@@ -241,11 +278,12 @@ int SetJoystick::getNumberVDPads() const { return getVdpads().size(); }
 void SetJoystick::reset()
 {
     deleteSticks();
+    deleteSensors();
     deleteVDpads();
     refreshAxes();
+    refreshSensors();
     refreshButtons();
     refreshHats();
-    refreshSensors();
     m_name = QString();
 }
 
@@ -380,6 +418,22 @@ void SetJoystick::propogateSetAxisThrottleSetting(int index)
 
     if (axis != nullptr)
         emit setAssignmentAxisThrottleChanged(index, axis->getCurrentlyAssignedSet());
+}
+
+void SetJoystick::addSensor(int index, JoySensor *sensor)
+{
+    m_sensors.insert(index, sensor);
+    // XXX: imlpement more
+}
+
+void SetJoystick::removeSensor(int index)
+{
+    if (m_sensors.contains(index))
+    {
+        JoySensor *sensor = m_sensors.value(index);
+        m_sensors.remove(index);
+        sensor->deleteLater();
+    }
 }
 
 void SetJoystick::addControlStick(int index, JoyControlStick *stick)
@@ -811,6 +865,11 @@ void SetJoystick::enableHatConnections(JoyDPad *dpad)
     }
 }
 
+void SetJoystick::enableSensorConnections(JoySensor *sensor)
+{
+    // XXX: implement
+}
+
 InputDevice *SetJoystick::getInputDevice() const { return m_device; }
 
 void SetJoystick::setName(QString name)
@@ -972,6 +1031,8 @@ void SetJoystick::setAxisThrottle(int axisNum, JoyAxis::ThrottleTypes throttle)
 }
 
 QHash<int, JoyAxis *> *SetJoystick::getAxes() { return &axes; }
+
+QHash<int, JoyAxis *> *SetJoystick::getSensorAxes() { return &m_sensor_axes; }
 
 QHash<int, JoyButton *> const &SetJoystick::getButtons() const { return m_buttons; }
 

@@ -123,6 +123,7 @@ class InputDevice : public QObject
     void activatePossiblePendingEvents();
     void activatePossibleControlStickEvents(); // InputDeviceStick class
     void activatePossibleAxisEvents();         // InputDeviceAxis class
+    void activatePossibleSensorEvents();       // InputDeviceSensorclass
     void activatePossibleDPadEvents();         // InputDeviceHat class
     void activatePossibleVDPadEvents();        // InputDeviceVDPad class
     void activatePossibleButtonEvents();       // InputDeviceButton class

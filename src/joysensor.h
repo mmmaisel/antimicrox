@@ -19,6 +19,8 @@
 
 #include <QObject>
 
+#include "joyaxis.h"
+
 class SetJoystick;
 
 class JoySensor : public QObject
@@ -26,12 +28,30 @@ class JoySensor : public QObject
     Q_OBJECT
 
   public:
-    explicit JoySensor(int type, int originset, SetJoystick *parentSet, QObject *parent);
+    explicit JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
+        int index, int originset, SetJoystick *parentSet, QObject *parent);
     ~JoySensor();
 
+    void queuePendingEvent(float* data, bool ignoresets = false, bool updateLastValues = true);
+
+    virtual void setDefaultSensorName(QString tempname);
+    virtual QString getDefaultSensorName();
+
+    JoyAxis *getAxisX();
+    JoyAxis *getAxisY();
+    JoyAxis *getAxisZ();
+
+  public slots:
+    void reset();
+
   protected:
-    int m_type;
+    int m_index;
+
+    QString m_sensor_name;
+    QString m_default_sensor_name;
 
   private:
-    void resetPrivateVars();
+    QPointer<JoyAxis> m_axisX;
+    QPointer<JoyAxis> m_axisY;
+    QPointer<JoyAxis> m_axisZ;
 };

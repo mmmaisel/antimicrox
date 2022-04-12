@@ -25,6 +25,7 @@
 #include "joybuttonstatusbox.h"
 #include "joybuttontypes/joydpadbutton.h"
 #include "joydpad.h"
+#include "joysensor.h"
 
 #include <QDebug>
 #include <QGridLayout>
@@ -195,52 +196,72 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     sensorsBox->setSpacing(4);
     if (joystick->hasAccelerometer())
     {
-        //JoyAxis *axis = joystick->getActiveSetJoystick()->getJoyAxis(i);
+        JoySensor *sensor = joystick->getActiveSetJoystick()->getAccelerometer();
 
-        if (true/*axis != nullptr*/)
+        if (sensor != nullptr)
         {
             for(int i = 0; i < 3; ++i)
             {
                 QHBoxLayout *hbox = new QHBoxLayout();
 
                 QLabel *axisLabel = new QLabel();
-                axisLabel->setText(tr("Accelerometer %1").arg(i/*axis->getRealJoyIndex()*/));
                 QProgressBar *axisBar = new QProgressBar();
                 axisBar->setMinimum(GlobalVariables::JoyAxis::AXISMIN);
                 axisBar->setMaximum(GlobalVariables::JoyAxis::AXISMAX);
                 axisBar->setFormat("%v");
-                axisBar->setValue(0/*axis->getCurrentRawValue()*/);
+                if (i == 0) {
+                    axisLabel->setText(tr("Accelerometer X"));
+                    axisBar->setValue(sensor->getAxisX()->getCurrentRawValue());
+                    connect(sensor->getAxisX(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                } else if (i == 1) {
+                    axisLabel->setText(tr("Accelerometer Y"));
+                    axisBar->setValue(sensor->getAxisY()->getCurrentRawValue());
+                    connect(sensor->getAxisY(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                } else {
+                    axisLabel->setText(tr("Accelerometer Z"));
+                    axisBar->setValue(sensor->getAxisZ()->getCurrentRawValue());
+                    connect(sensor->getAxisZ(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                }
                 hbox->addWidget(axisLabel);
                 hbox->addWidget(axisBar);
                 hbox->addSpacing(10);
                 sensorsBox->addLayout(hbox);
-                //connect(axis, &JoyAxis::moved, axisBar, &QProgressBar::setValue);
             }
         }
     }
 
     if (joystick->hasGyroscope())
     {
-        //JoyAxis *axis = joystick->getActiveSetJoystick()->getJoyAxis(i);
+        JoySensor *sensor = joystick->getActiveSetJoystick()->getGyroscope();
 
-        if (true/*axis != nullptr*/)
+        if (sensor != nullptr)
         {
             for(int i = 0; i < 3; ++i)
             {
                 QHBoxLayout *hbox = new QHBoxLayout();
 
                 QLabel *axisLabel = new QLabel();
-                axisLabel->setText(tr("Gyroscope %1").arg(i/*axis->getRealJoyIndex()*/));
                 QProgressBar *axisBar = new QProgressBar();
                 axisBar->setMinimum(GlobalVariables::JoyAxis::AXISMIN);
                 axisBar->setMaximum(GlobalVariables::JoyAxis::AXISMAX);
                 axisBar->setFormat("%v");
-                axisBar->setValue(0/*axis->getCurrentRawValue()*/);
+                if (i == 0) {
+                    axisLabel->setText(tr("Gyroscope X"));
+                    axisBar->setValue(sensor->getAxisX()->getCurrentRawValue());
+                    connect(sensor->getAxisX(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                } else if (i == 1) {
+                    axisLabel->setText(tr("Gyroscope Y"));
+                    axisBar->setValue(sensor->getAxisY()->getCurrentRawValue());
+                    connect(sensor->getAxisY(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                } else {
+                    axisLabel->setText(tr("Gyroscope Z"));
+                    axisBar->setValue(sensor->getAxisZ()->getCurrentRawValue());
+                    connect(sensor->getAxisZ(), &JoyAxis::moved, axisBar, &QProgressBar::setValue);
+                }
                 hbox->addWidget(axisLabel);
                 hbox->addWidget(axisBar);
                 hbox->addSpacing(10);
                 sensorsBox->addLayout(hbox);
-                //connect(axis, &JoyAxis::moved, axisBar, &QProgressBar::setValue);
             }
         }
     }

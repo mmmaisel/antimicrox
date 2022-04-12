@@ -39,10 +39,13 @@ class SetJoystick : public SetJoystickXml
     ~SetJoystick();
 
     JoyAxis *getJoyAxis(int index) const;
+    JoyAxis *getSensorAxis(int index) const;
     JoyButton *getJoyButton(int index) const;
     JoyDPad *getJoyDPad(int index) const;
     JoyControlStick *getJoyStick(int index) const;
     VDPad *getVDPad(int index) const;
+    JoySensor *getAccelerometer() const;
+    JoySensor *getGyroscope() const;
 
     int getNumberButtons() const;
     int getNumberAxes() const;
@@ -58,6 +61,7 @@ class SetJoystick : public SetJoystickXml
     QHash<int, JoyControlStick *> const &getSticks() const;
     QHash<int, VDPad *> const &getVdpads() const;
     QHash<int, JoyAxis *> *getAxes();
+    QHash<int, JoyAxis *> *getSensorAxes();
 
     int getIndex() const;
     int getRealIndex() const;
@@ -66,6 +70,8 @@ class SetJoystick : public SetJoystickXml
     virtual void refreshHats();    // SetHat class
     virtual void refreshSensors(); // SetSensor class
     void release();
+    void addSensor(int index, JoySensor *sensor);            // SetSensor class
+    void removeSensor(int index);                            // SetSensor class
     void addControlStick(int index, JoyControlStick *stick); // SetStick class
     void removeControlStick(int index);                      // SetStick class
     void addVDPad(int index, VDPad *vdpad);                  // SetVDPad class
@@ -87,6 +93,16 @@ class SetJoystick : public SetJoystickXml
     int getCountBtnInList(QString partialName);
     bool isSetEmpty();
 
+    enum {
+        // XXX: avoid axis index clashes
+        ACCEL_AXIS_X,
+        ACCEL_AXIS_Y,
+        ACCEL_AXIS_Z,
+        GYRO_AXIS_X,
+        GYRO_AXIS_Y,
+        GYRO_AXIS_Z
+    };
+
   protected:
     enum {
         ACCELEROMETER,
@@ -103,6 +119,7 @@ class SetJoystick : public SetJoystickXml
     void enableButtonConnections(JoyButton *button); // SetButton class
     void enableAxisConnections(JoyAxis *axis);       // SetAxis class
     void enableHatConnections(JoyDPad *dpad);        // SetHat class
+    void enableSensorConnections(JoySensor *sensor); // SetSensor class
 
   signals:
     void setChangeActivated(int index);
@@ -174,6 +191,7 @@ class SetJoystick : public SetJoystickXml
   private:
     QHash<int, JoyButton *> m_buttons;
     QHash<int, JoyAxis *> axes;
+    QHash<int, JoyAxis *> m_sensor_axes;
     QHash<int, JoyDPad *> hats;
     QHash<int, JoySensor *> m_sensors;
     QHash<int, JoyControlStick *> sticks;

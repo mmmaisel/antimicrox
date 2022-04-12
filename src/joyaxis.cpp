@@ -130,6 +130,7 @@ void JoyAxis::stickPassEvent(int value, bool ignoresets, bool updateLastValues)
 
 void JoyAxis::joyEvent(int value, bool ignoresets, bool updateLastValues)
 {
+    // XXX: use sensorpassevent ? or use no axes at all
     if ((m_stick != nullptr) && !pendingEvent)
     {
         stickPassEvent(value, ignoresets, updateLastValues);
