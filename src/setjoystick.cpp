@@ -70,9 +70,9 @@ JoyDPad *SetJoystick::getJoyDPad(int index) const { return getHats().value(index
 
 VDPad *SetJoystick::getVDPad(int index) const { return getVdpads().value(index); }
 
-JoySensor *SetJoystick::getAccelerometer() const { return getSensors().value(ACCELEROMETER); }
+JoySensor *SetJoystick::getAccelerometer() const { return getSensors().value(JoySensor::ACCELEROMETER); }
 
-JoySensor *SetJoystick::getGyroscope() const { return getSensors().value(GYROSCOPE); }
+JoySensor *SetJoystick::getGyroscope() const { return getSensors().value(JoySensor::GYROSCOPE); }
 
 JoyControlStick *SetJoystick::getJoyStick(int index) const { return getSticks().value(index); }
 
@@ -133,8 +133,9 @@ void SetJoystick::refreshSensors()
         m_sensor_axes.insert(ACCEL_AXIS_X, axisX);
         m_sensor_axes.insert(ACCEL_AXIS_Y, axisY);
         m_sensor_axes.insert(ACCEL_AXIS_Z, axisZ);
-        JoySensor *sensor = new JoySensor(axisX, axisY, axisZ, ACCELEROMETER, m_index, this, this);
-        m_sensors.insert(ACCELEROMETER, sensor);
+        JoySensor *sensor = new JoySensor(
+            axisX, axisY, axisZ, JoySensor::ACCELEROMETER, m_index, this, this);
+        m_sensors.insert(JoySensor::ACCELEROMETER, sensor);
         //enableSensorConnections(sensor);
     }
 
@@ -147,8 +148,9 @@ void SetJoystick::refreshSensors()
         m_sensor_axes.insert(GYRO_AXIS_X, axisX);
         m_sensor_axes.insert(GYRO_AXIS_Y, axisY);
         m_sensor_axes.insert(GYRO_AXIS_Z, axisZ);
-        JoySensor *sensor = new JoySensor(axisX, axisY, axisZ, GYROSCOPE, m_index, this, this);
-        m_sensors.insert(GYROSCOPE, sensor);
+        JoySensor *sensor = new JoySensor(
+            axisX, axisY, axisZ, JoySensor::GYROSCOPE, m_index, this, this);
+        m_sensors.insert(JoySensor::GYROSCOPE, sensor);
         //enableSensorConnections(sensor);
     }
 }
@@ -267,9 +269,9 @@ int SetJoystick::getNumberAxes() const { return axes.count(); }
 
 int SetJoystick::getNumberHats() const { return getHats().count(); }
 
-int SetJoystick::hasAccelerometer() const { return getSensors().contains(ACCELEROMETER); }
+int SetJoystick::hasAccelerometer() const { return getSensors().contains(JoySensor::ACCELEROMETER); }
 
-int SetJoystick::hasGyroscope() const { return getSensors().contains(GYROSCOPE); }
+int SetJoystick::hasGyroscope() const { return getSensors().contains(JoySensor::GYROSCOPE); }
 
 int SetJoystick::getNumberSticks() const { return getSticks().size(); }
 

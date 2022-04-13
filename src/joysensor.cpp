@@ -22,9 +22,9 @@
 #include <QDebug>
 
 JoySensor::JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-    int index, int originset, SetJoystick *parentSet, QObject *parent)
+    int type, int originset, SetJoystick *parentSet, QObject *parent)
     : QObject(parent),
-    m_index(index),
+    m_type(type),
     m_axisX(axisX),
     m_axisY(axisY),
     m_axisZ(axisZ)
@@ -46,6 +46,51 @@ void JoySensor::queuePendingEvent(float* data, bool ignoresets, bool updateLastV
     m_axisZ->queuePendingEvent(static_cast<int>(data[2] * 1000), ignoresets, updateLastValues);
 }
 
+bool JoySensor::hasSlotsAssigned()
+{
+    bool hasSlots = false;
+    // XXX: implement
+    return hasSlots;
+}
+
+QString JoySensor::getName(bool forceFullFormat, bool displayNames)
+{
+    QString label = getPartialName(forceFullFormat, displayNames);
+    label.append(": ");
+    return label;
+}
+
+QString JoySensor::getPartialName(bool forceFullFormat, bool displayNames)
+{
+    QString label = QString();
+
+    if (!m_sensor_name.isEmpty() && displayNames)
+    {
+        if (forceFullFormat)
+        {
+            label.append(sensorTypeName()).append(" ");
+        }
+
+        label.append(m_sensor_name);
+    } else if (!m_default_sensor_name.isEmpty())
+    {
+        if (forceFullFormat)
+        {
+            label.append(sensorTypeName()).append(" ");
+        }
+
+        label.append(m_default_sensor_name);
+    } else
+    {
+        label.append(sensorTypeName()).append(" ");
+        //label.append(QString::number(getRealJoyIndex()));
+    }
+
+    return label;
+}
+
+int JoySensor::getType() { return m_type; }
+
 void JoySensor::setDefaultSensorName(QString tempname) { m_default_sensor_name = tempname; }
 
 QString JoySensor::getDefaultSensorName() { return m_default_sensor_name; }
@@ -58,4 +103,11 @@ JoyAxis *JoySensor::getAxisZ() { return m_axisZ; }
 
 void JoySensor::reset()
 {
+}
+
+QString JoySensor::sensorTypeName() const {
+    if (m_type == ACCELEROMETER)
+        return tr("Accelerometer");
+    else
+        return tr("Gyroscope");
 }

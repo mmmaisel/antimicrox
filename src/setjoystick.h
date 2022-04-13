@@ -104,11 +104,6 @@ class SetJoystick : public SetJoystickXml
     };
 
   protected:
-    enum {
-        ACCELEROMETER,
-        GYROSCOPE
-    };
-
     void deleteButtons(); // SetButton class
     void deleteAxes();    // SetAxis class
     void deleteHats();    // SetHat class

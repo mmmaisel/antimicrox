@@ -29,10 +29,17 @@ class JoySensor : public QObject
 
   public:
     explicit JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-        int index, int originset, SetJoystick *parentSet, QObject *parent);
+        int type, int originset, SetJoystick *parentSet, QObject *parent);
     ~JoySensor();
 
     void queuePendingEvent(float* data, bool ignoresets = false, bool updateLastValues = true);
+
+    bool hasSlotsAssigned();
+
+    virtual QString getName(bool forceFullFormat = false, bool displayNames = false);
+    virtual QString getPartialName(bool forceFullFormat = false, bool displayNames = false);
+
+    int getType();
 
     virtual void setDefaultSensorName(QString tempname);
     virtual QString getDefaultSensorName();
@@ -41,14 +48,21 @@ class JoySensor : public QObject
     JoyAxis *getAxisY();
     JoyAxis *getAxisZ();
 
+    enum {
+        ACCELEROMETER,
+        GYROSCOPE
+    };
+
   public slots:
     void reset();
 
   protected:
-    int m_index;
+    int m_type;
 
     QString m_sensor_name;
     QString m_default_sensor_name;
+
+    QString sensorTypeName() const;
 
   private:
     QPointer<JoyAxis> m_axisX;

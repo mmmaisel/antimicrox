@@ -79,9 +79,9 @@ void GameControllerSet::populateSticksDPad()
         axisY = getSensorAxis(ACCEL_AXIS_Y);
         axisZ = getSensorAxis(ACCEL_AXIS_Z);
         JoySensor *sensor =
-            new JoySensor(axisX, axisY, axisZ, ACCELEROMETER, getIndex(), this, this);
+            new JoySensor(axisX, axisY, axisZ, JoySensor::ACCELEROMETER, getIndex(), this, this);
         sensor->setDefaultSensorName("Accelerometer");
-        addSensor(ACCELEROMETER, sensor);
+        addSensor(JoySensor::ACCELEROMETER, sensor);
     }
 
     if (hasGyroscope())
@@ -90,9 +90,9 @@ void GameControllerSet::populateSticksDPad()
         axisY = getSensorAxis(GYRO_AXIS_Y);
         axisZ = getSensorAxis(GYRO_AXIS_Z);
         JoySensor *sensor =
-            new JoySensor(axisX, axisY, axisZ, GYROSCOPE, getIndex(), this, this);
+            new JoySensor(axisX, axisY, axisZ, JoySensor::GYROSCOPE, getIndex(), this, this);
         sensor->setDefaultSensorName("Gyroscope");
-        addSensor(GYROSCOPE, sensor);
+        addSensor(JoySensor::GYROSCOPE, sensor);
     }
 
     // Give default names to buttons
