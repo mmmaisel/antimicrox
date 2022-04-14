@@ -18,19 +18,22 @@
 #include "joysensor.h"
 
 #include "setjoystick.h"
+#include "joybuttontypes/joysensorbutton.h"
 
 #include <QDebug>
 
 JoySensor::JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-    int type, int originset, SetJoystick *parentSet, QObject *parent)
+    int type, int originset, SetJoystick *parent_set, QObject *parent)
     : QObject(parent),
     m_type(type),
+    m_originset(originset),
+    m_parent_set(parent_set),
     m_axisX(axisX),
     m_axisY(axisY),
     m_axisZ(axisZ)
 {
-
     reset();
+    populateButtons();
 }
 
 JoySensor::~JoySensor()
@@ -89,11 +92,36 @@ QString JoySensor::getPartialName(bool forceFullFormat, bool displayNames)
     return label;
 }
 
+JoySensorDirection JoySensor::getCurrentDirection()
+{
+    return m_current_direction;
+}
+
 int JoySensor::getType() { return m_type; }
+
+QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &m_buttons; }
 
 void JoySensor::setDefaultSensorName(QString tempname) { m_default_sensor_name = tempname; }
 
 QString JoySensor::getDefaultSensorName() { return m_default_sensor_name; }
+
+/**
+ * @brief Get pointer to the set that a sensor belongs to.
+ * @return Pointer to the set that a sensor belongs to.
+ */
+SetJoystick *JoySensor::getParentSet()
+{
+    SetJoystick *temp = nullptr;
+
+    if (m_axisX != nullptr)
+        temp = m_axisX->getParentSet();
+    else if (m_axisY != nullptr)
+        temp = m_axisY->getParentSet();
+    else if (m_axisZ != nullptr)
+        temp = m_axisZ->getParentSet();
+
+    return temp;
+}
 
 JoyAxis *JoySensor::getAxisX() { return m_axisX; }
 
@@ -103,6 +131,63 @@ JoyAxis *JoySensor::getAxisZ() { return m_axisZ; }
 
 void JoySensor::reset()
 {
+}
+
+void JoySensor::populateButtons()
+{
+    JoySensorButton *button = nullptr;
+    if (m_type == ACCELEROMETER)
+    {
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_UP, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_UP, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_DOWN, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_DOWN, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_LEFT, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_LEFT, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_RIGHT, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_RIGHT, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_FWD, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_FWD, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::ACCEL_BWD, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::ACCEL_BWD, button);
+    }
+    else
+    {
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_NICK_P, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_NICK_P, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_NICK_N, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_NICK_N, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_ROLL_P, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_ROLL_P, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_ROLL_N, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_ROLL_N, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_YAW_P, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_YAW_P, button);
+
+        button = new JoySensorButton(
+            this, JoySensorDirection::GYRO_YAW_N, m_originset, getParentSet(), this);
+        m_buttons.insert(JoySensorDirection::GYRO_YAW_N, button);
+    }
 }
 
 QString JoySensor::sensorTypeName() const {

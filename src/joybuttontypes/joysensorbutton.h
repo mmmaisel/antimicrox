@@ -14,24 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #pragma once
 
-enum JoySensorDirection
-{
-    CENTERED,
-    GYRO_YAW_P,
-    GYRO_YAW_N,
-    GYRO_NICK_P,
-    GYRO_NICK_N,
-    GYRO_ROLL_P,
-    GYRO_ROLL_N,
+#include "joybuttontypes/joygradientbutton.h"
+#include "logger.h"
 
-    // XXX: is this distinction necessary?
-    ACCEL_UP,
-    ACCEL_DOWN,
-    ACCEL_LEFT,
-    ACCEL_RIGHT,
-    ACCEL_FWD,
-    ACCEL_BWD
+class VDPad;
+class SetJoystick;
+class JoySensor;
+
+class JoySensorButton : public JoyGradientButton
+{
+    Q_OBJECT
+
+  public:
+    explicit JoySensorButton(JoySensor *sensor, int index, int originset, SetJoystick *parentSet, QObject *parent);
+
+    virtual QString getPartialName(bool forceFullFormat = false, bool displayNames = false) const;
+
+    virtual bool isPartRealAxis();
+
+    JoySensor *getSensor() const;
+    QString getDirectionName() const;
+
+  signals:
+    void setAssignmentChanged(int current_button, int axis_index, int associated_set, int mode);
+
+  private:
+    JoySensor *m_sensor;
 };

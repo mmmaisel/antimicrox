@@ -20,8 +20,10 @@
 #include <QObject>
 
 #include "joyaxis.h"
+#include "joysensordirection.h"
 
 class SetJoystick;
+class JoySensorButton;
 
 class JoySensor : public QObject
 {
@@ -29,7 +31,7 @@ class JoySensor : public QObject
 
   public:
     explicit JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-        int type, int originset, SetJoystick *parentSet, QObject *parent);
+        int type, int originset, SetJoystick *parent_set, QObject *parent);
     ~JoySensor();
 
     void queuePendingEvent(float* data, bool ignoresets = false, bool updateLastValues = true);
@@ -39,11 +41,15 @@ class JoySensor : public QObject
     virtual QString getName(bool forceFullFormat = false, bool displayNames = false);
     virtual QString getPartialName(bool forceFullFormat = false, bool displayNames = false);
 
+    JoySensorDirection getCurrentDirection();
+
     int getType();
+    QHash<JoySensorDirection, JoySensorButton *> *getButtons();
 
     virtual void setDefaultSensorName(QString tempname);
     virtual QString getDefaultSensorName();
 
+    SetJoystick *getParentSet();
     JoyAxis *getAxisX();
     JoyAxis *getAxisY();
     JoyAxis *getAxisZ();
@@ -53,19 +59,30 @@ class JoySensor : public QObject
         GYROSCOPE
     };
 
+  signals:
+    void active(int value);
+    void released(int value);
+    void sensorNameChanged();
+    void joyModeChanged();
+
   public slots:
     void reset();
 
   protected:
+    void populateButtons();
+    QString sensorTypeName() const;
+
     int m_type;
+    int m_originset;
 
     QString m_sensor_name;
     QString m_default_sensor_name;
 
-    QString sensorTypeName() const;
-
   private:
+    JoySensorDirection m_current_direction;
+    SetJoystick *m_parent_set;
     QPointer<JoyAxis> m_axisX;
     QPointer<JoyAxis> m_axisY;
     QPointer<JoyAxis> m_axisZ;
+    QHash<JoySensorDirection, JoySensorButton *> m_buttons;
 };

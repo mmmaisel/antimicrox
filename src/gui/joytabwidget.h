@@ -136,6 +136,7 @@ class JoyTabWidget : public QWidget
     void checkButtonDisplay();
 
     void checkStickEmptyDisplay();
+    void checkSensorEmptyDisplay();
     void checkDPadButtonEmptyDisplay();
     void checkAxisButtonEmptyDisplay();
     void checkButtonEmptyDisplay();

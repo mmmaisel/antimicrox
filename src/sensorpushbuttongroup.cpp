@@ -19,7 +19,7 @@
 
 //#include "buttoneditdialog.h"
 #include "inputdevice.h"
-//#include "joybuttontypes/joycontrolstickbutton.h"
+#include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
 #include "joysensorbuttonpushbutton.h"
 //#include "joysensoreditdialog.h"
@@ -65,7 +65,8 @@ void SensorPushButtonGroup::generateButtons()
         QIcon(":/images/actions/games_config_options.png"))
     );
 
-    //connect(m_sensor_widget, &JoySensorPushButton::clicked, this, &SensorButtonGroup::showSensorDialog);
+    connect(m_sensor_widget, &JoySensorPushButton::clicked, this,
+        &SensorPushButtonGroup::showSensorDialog);
 
     addWidget(m_sensor_widget, 1, 1);
 }
@@ -74,14 +75,16 @@ JoySensorButtonPushButton *
 SensorPushButtonGroup::generateBtnToGrid(
     JoySensorDirection sensorDir, int gridRow, int gridCol)
 {
-    //JoySensorButton *button = sensor->getButtons()->value(sensorDir);
-    pushbutton = new JoySensorButtonPushButton(/*button,*/ m_display_names, parentWidget());
+    JoySensorButton *button = m_sensor->getButtons()->value(sensorDir);
+    JoySensorButtonPushButton *pushbutton =
+        new JoySensorButtonPushButton(button, m_display_names, parentWidget());
 
-    /*connect(pushbutton, &JoySensorButtonPushButton::clicked, this,
-            [this, pushbutton] { openSensorButtonDialog(pushbutton); });*/
+    connect(pushbutton, &JoySensorButtonPushButton::clicked, this,
+        [this, pushbutton] { openSensorButtonDialog(pushbutton); });
 
-    //button->establishPropertyUpdatedConnections();
-    //connect(button, &JoySensorButton::slotsChanged, this, &SensorPushButtonGroup::propogateSlotsChanged);
+    button->establishPropertyUpdatedConnections();
+    connect(button, &JoySensorButton::slotsChanged, this,
+        &SensorPushButtonGroup::propogateSlotsChanged);
 
     addWidget(pushbutton, gridRow, gridCol);
     return pushbutton;

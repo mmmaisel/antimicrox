@@ -181,6 +181,7 @@ set(antimicrox_SOURCES
         src/joybuttontypes/joycontrolstickmodifierbutton.cpp
         src/joybuttontypes/joydpadbutton.cpp
         src/joybuttontypes/joygradientbutton.cpp
+        src/joybuttontypes/joysensorbutton.cpp
         src/joycontrolstick.cpp
         src/joycontrolstickbuttonpushbutton.cpp
         src/joycontrolstickcontextmenu.cpp
@@ -297,6 +298,7 @@ set(antimicrox_HEADERS
         src/joybuttontypes/joycontrolstickmodifierbutton.h
         src/joybuttontypes/joydpadbutton.h
         src/joybuttontypes/joygradientbutton.h
+        src/joybuttontypes/joysensorbutton.h
         src/joycontrolstick.h
         src/joycontrolstickbuttonpushbutton.h
         src/joycontrolstickcontextmenu.h

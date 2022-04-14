@@ -31,11 +31,15 @@ JoySensorPushButton::JoySensorPushButton(JoySensor *sensor, bool displayNames, Q
     tryFlash();
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-/*    connect(this, &JoySensorPushButton::customContextMenuRequested, this, &JoySensorPushButton::showContextMenu);
+    connect(this, &JoySensorPushButton::customContextMenuRequested, this,
+        &JoySensorPushButton::showContextMenu);
 
-    connect(m_sensor, &JoySensor::active, this, &JoySensorPushButton::flash, Qt::QueuedConnection);
-    connect(m_sensor, &JoySensor::released, this, &JoySensorPushButton::unflash, Qt::QueuedConnection);
-    connect(m_sensor, &JoySensor::stickNameChanged, this, &JoySensorPushButton::refreshLabel);*/
+    connect(m_sensor, &JoySensor::active, this,
+        &JoySensorPushButton::flash, Qt::QueuedConnection);
+    connect(m_sensor, &JoySensor::released, this,
+        &JoySensorPushButton::unflash, Qt::QueuedConnection);
+    connect(m_sensor, &JoySensor::sensorNameChanged, this,
+        &JoySensorPushButton::refreshLabel);
 }
 
 JoySensor *JoySensorPushButton::getSensor() const { return m_sensor; }
@@ -59,11 +63,17 @@ QString JoySensorPushButton::generateLabel()
 
 void JoySensorPushButton::disableFlashes()
 {
+    disconnect(m_sensor, &JoySensor::active, this, &JoySensorPushButton::flash);
+    disconnect(m_sensor, &JoySensor::released, this, &JoySensorPushButton::unflash);
     unflash();
 }
 
 void JoySensorPushButton::enableFlashes()
 {
+    connect(m_sensor, &JoySensor::active, this,
+        &JoySensorPushButton::flash, Qt::QueuedConnection);
+    connect(m_sensor, &JoySensor::released, this,
+        &JoySensorPushButton::unflash, Qt::QueuedConnection);
 }
 
 void JoySensorPushButton::showContextMenu(const QPoint &point)
@@ -72,4 +82,6 @@ void JoySensorPushButton::showContextMenu(const QPoint &point)
 
 void JoySensorPushButton::tryFlash()
 {
+    if (m_sensor->getCurrentDirection() != JoySensorDirection::CENTERED)
+        flash();
 }

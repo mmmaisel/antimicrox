@@ -1822,6 +1822,18 @@ void JoyTabWidget::checkStickEmptyDisplay()
     }
 }
 
+void JoyTabWidget::checkSensorEmptyDisplay()
+{
+    SensorPushButtonGroup *group = qobject_cast<SensorPushButtonGroup *>(sender()); // static_cast
+    JoySensor *sensor = group->getSensor();
+    if ((sensor != nullptr) && !sensor->hasSlotsAssigned())
+    {
+        SetJoystick *currentSet = m_joystick->getActiveSetJoystick();
+        removeSetButtons(currentSet);
+        fillSetButtons(currentSet);
+    }
+}
+
 void JoyTabWidget::checkDPadButtonEmptyDisplay()
 {
     DPadPushButtonGroup *group = qobject_cast<DPadPushButtonGroup *>(sender()); // static_cast
@@ -2008,15 +2020,17 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
             }
 
             QWidget *groupContainer = new QWidget(sensorGroup);
-            SensorPushButtonGroup *sensorButtonGroup =
-                new SensorPushButtonGroup(sensor, isKeypadUnlocked(), displayingNames, groupContainer);
-            /*if (hideEmptyButtons)
+            SensorPushButtonGroup *sensorButtonGroup = new SensorPushButtonGroup(
+                sensor, isKeypadUnlocked(), displayingNames, groupContainer);
+            if (hideEmptyButtons)
             {
-                connect(stickButtonGroup, &StickPushButtonGroup::buttonSlotChanged, this,
-                        &JoyTabWidget::checkStickEmptyDisplay);
+                connect(sensorButtonGroup,
+                    &SensorPushButtonGroup::buttonSlotChanged, this,
+                    &JoyTabWidget::checkStickEmptyDisplay);
             }
 
-            connect(namesPushButton, &QPushButton::clicked, stickButtonGroup, &StickPushButtonGroup::toggleNameDisplay);*/
+            connect(namesPushButton, &QPushButton::clicked, sensorButtonGroup,
+                &SensorPushButtonGroup::toggleNameDisplay);
 
             if (sensorGridColumn > 1)
             {
@@ -2049,15 +2063,17 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
             }
 
             QWidget *groupContainer = new QWidget(sensorGroup);
-            SensorPushButtonGroup *sensorButtonGroup =
-                new SensorPushButtonGroup(sensor, isKeypadUnlocked(), displayingNames, groupContainer);
-            /*if (hideEmptyButtons)
+            SensorPushButtonGroup *sensorButtonGroup = new SensorPushButtonGroup(
+                sensor, isKeypadUnlocked(), displayingNames, groupContainer);
+            if (hideEmptyButtons)
             {
-                connect(stickButtonGroup, &StickPushButtonGroup::buttonSlotChanged, this,
-                        &JoyTabWidget::checkStickEmptyDisplay);
+                connect(sensorButtonGroup,
+                    &SensorPushButtonGroup::buttonSlotChanged, this,
+                    &JoyTabWidget::checkSensorEmptyDisplay);
             }
 
-            connect(namesPushButton, &QPushButton::clicked, stickButtonGroup, &StickPushButtonGroup::toggleNameDisplay);*/
+            connect(namesPushButton, &QPushButton::clicked, sensorButtonGroup,
+                &SensorPushButtonGroup::toggleNameDisplay);
 
             if (sensorGridColumn > 1)
             {

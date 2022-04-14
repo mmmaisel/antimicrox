@@ -27,8 +27,10 @@ class JoySensorButtonPushButton : public FlashButtonWidget
     Q_PROPERTY(bool isflashing READ isButtonFlashing)
 
   public:
-    explicit JoySensorButtonPushButton(/*JoySensorButton *button, */bool displayNames, QWidget *parent = nullptr);
+    explicit JoySensorButtonPushButton(
+        JoySensorButton *button, bool displayNames, QWidget *parent = nullptr);
 
+    JoySensorButton *getButton();
     void tryFlash();
 
   protected:
@@ -42,5 +44,5 @@ class JoySensorButtonPushButton : public FlashButtonWidget
     void showContextMenu(const QPoint &point);
 
   private:
-    //JoySensorButton *m_button;
+    JoySensorButton *m_button;
 };

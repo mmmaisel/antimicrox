@@ -18,8 +18,7 @@
 #include "joysensorbuttonpushbutton.h"
 
 //#include "joybuttoncontextmenu.h"
-//#include "joybuttontypes/joycontrolstickbutton.h"
-//#include "joybuttontypes/joycontrolstickmodifierbutton.h"
+#include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
 
 #include <QDebug>
@@ -27,9 +26,9 @@
 #include <QWidget>
 
 JoySensorButtonPushButton::JoySensorButtonPushButton(
-    /*JoySensorButton *button,*/ bool displayNames, QWidget *parent)
-    : FlashButtonWidget(displayNames, parent)//,
-    //m_button(button)
+    JoySensorButton *button, bool displayNames, QWidget *parent)
+    : FlashButtonWidget(displayNames, parent),
+    m_button(button)
 {
     refreshLabel();
     enableFlashes();
@@ -37,21 +36,37 @@ JoySensorButtonPushButton::JoySensorButtonPushButton(
     tryFlash();
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    /*connect(this, &JoySensorButtonPushButton::customContextMenuRequested, this,
-            &JoySensorButtonPushButton::showContextMenu);
-    connect(button, &JoySensorButton::propertyUpdated, this, &JoySensorButtonPushButton::refreshLabel);
-    connect(button, &JoySensorButton::activeZoneChanged, this, &JoySensorButtonPushButton::refreshLabel);
-    connect(button->getSensor()->getModifierButton(), &JoySensorModifierButton::activeZoneChanged, this,
-            &JoySensorButtonPushButton::refreshLabel);*/
+    connect(this, &JoySensorButtonPushButton::customContextMenuRequested, this,
+        &JoySensorButtonPushButton::showContextMenu);
+    connect(m_button, &JoySensorButton::propertyUpdated, this,
+        &JoySensorButtonPushButton::refreshLabel);
+    connect(m_button, &JoySensorButton::activeZoneChanged, this,
+        &JoySensorButtonPushButton::refreshLabel);
 }
+
+JoySensorButton *JoySensorButtonPushButton::getButton() { return m_button; }
 
 void JoySensorButtonPushButton::disableFlashes()
 {
+    if (m_button != nullptr)
+    {
+        disconnect(m_button, &JoySensorButton::clicked, this,
+            &JoySensorButtonPushButton::flash);
+        disconnect(m_button, &JoySensorButton::released, this,
+            &JoySensorButtonPushButton::unflash);
+    }
     unflash();
 }
 
 void JoySensorButtonPushButton::enableFlashes()
 {
+    if (m_button != nullptr)
+    {
+        connect(m_button, &JoySensorButton::clicked, this,
+            &JoySensorButtonPushButton::flash, Qt::QueuedConnection);
+        connect(m_button, &JoySensorButton::released, this,
+            &JoySensorButtonPushButton::unflash, Qt::QueuedConnection);
+    }
 }
 
 /**
@@ -60,7 +75,20 @@ void JoySensorButtonPushButton::enableFlashes()
  */
 QString JoySensorButtonPushButton::generateLabel()
 {
-    QString temp = QString("[NO KEY]");
+    QString temp = QString();
+    if (m_button != nullptr)
+    {
+        if (!m_button->getActionName().isEmpty() && ifDisplayNames())
+        {
+            qDebug() << "Action name was not empty";
+            temp = m_button->getActionName().replace("&", "&&");
+
+        } else
+        {
+            qDebug() << "Action name was empty";
+            temp = m_button->getCalculatedActiveZoneSummary().replace("&", "&&");
+        }
+    }
 
     qDebug() << "Here is name of action for pushed sensor button: " << temp;
 
@@ -73,4 +101,6 @@ void JoySensorButtonPushButton::showContextMenu(const QPoint &point)
 
 void JoySensorButtonPushButton::tryFlash()
 {
+    if (m_button->getButtonState())
+        flash();
 }
