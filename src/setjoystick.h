@@ -43,6 +43,7 @@ class SetJoystick : public SetJoystickXml
     JoyButton *getJoyButton(int index) const;
     JoyDPad *getJoyDPad(int index) const;
     JoyControlStick *getJoyStick(int index) const;
+    JoySensor *getSensor(int type) const;
     VDPad *getVDPad(int index) const;
     JoySensor *getAccelerometer() const;
     JoySensor *getGyroscope() const;
@@ -138,11 +139,13 @@ class SetJoystick : public SetJoystickXml
     void setButtonNameChange(int index);                            // SetButton class
     void setAxisButtonNameChange(int axisIndex, int buttonIndex);   // SetAxis class
     void setStickButtonNameChange(int stickIndex, int buttonIndex); // SetStick class
+    void setSensorButtonNameChange(int sensorType, int buttonIndex);
     void setDPadButtonNameChange(int dpadIndex, int buttonIndex);   // SetHat class
     void setVDPadButtonNameChange(int vdpadIndex, int buttonIndex); // SetVDPad class
 
     void setAxisNameChange(int axisIndex);   // SetAxis class
     void setStickNameChange(int stickIndex); // SetStick class
+    void setSensorNameChange(int sensorType);
     void setDPadNameChange(int dpadIndex);   // SetHat class
     void setVDPadNameChange(int vdpadIndex); // SetVDPad class
     void propertyUpdated();

@@ -22,8 +22,10 @@
 #include "common.h"
 #include "globalvariables.h"
 #include "joybuttontypes/joycontrolstickbutton.h"
+#include "joybuttontypes/joysensorbutton.h"
 #include "joybuttontypes/joydpadbutton.h"
 #include "joycontrolstick.h"
+#include "joysensor.h"
 #include "joydpad.h"
 #include "vdpad.h"
 
@@ -826,6 +828,30 @@ void InputDevice::setStickButtonName(int stickIndex, int buttonIndex, QString te
     }
 }
 
+void InputDevice::setSensorButtonName(int sensorType, int buttonIndex, QString tempName)
+{
+    QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
+
+    while (iter.hasNext())
+    {
+        SetJoystick *tempSet = iter.next().value();
+        disconnect(tempSet, &SetJoystick::setStickButtonNameChange, this,
+            &InputDevice::updateSetStickButtonNames);
+        JoySensor *sensor = tempSet->getSensor(sensorType);
+
+        if (sensor != nullptr)
+        {
+            JoySensorButton *button = sensor->getDirectionButton(
+                JoySensorDirection(buttonIndex));
+
+            if (button != nullptr)
+                button->setButtonName(tempName);
+        }
+
+        connect(tempSet, &SetJoystick::setSensorButtonNameChange, this,
+            &InputDevice::updateSetSensorButtonNames);
+    }
+}
 void InputDevice::setDPadButtonName(int dpadIndex, int buttonIndex, QString tempName)
 {
     QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
@@ -904,6 +930,23 @@ void InputDevice::setStickName(int stickIndex, QString tempName)
     }
 }
 
+void InputDevice::setSensorName(int sensorType, QString tempName)
+{
+    QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
+
+    while (iter.hasNext())
+    {
+        SetJoystick *tempSet = iter.next().value();
+        disconnect(tempSet, &SetJoystick::setSensorNameChange, this, &InputDevice::updateSetSensorNames);
+        JoySensor *sensor = tempSet->getSensor(sensorType);
+
+        if (sensor != nullptr)
+            sensor->setSensorName(tempName);
+
+        connect(tempSet, &SetJoystick::setSensorNameChange, this, &InputDevice::updateSetSensorNames);
+    }
+}
+
 void InputDevice::setDPadName(int dpadIndex, QString tempName)
 {
     QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
@@ -977,6 +1020,20 @@ void InputDevice::updateSetStickButtonNames(int stickIndex, int buttonIndex)
     }
 }
 
+void InputDevice::updateSetSensorButtonNames(int sensorType, int buttonIndex)
+{
+    JoySensor *sensor = getActiveSetJoystick()->getSensor(sensorType);
+
+    if (sensor != nullptr)
+    {
+        JoySensorButton *button =
+            sensor->getDirectionButton(JoySensorDirection(buttonIndex));
+
+        if (button != nullptr)
+            setSensorButtonName(sensorType, buttonIndex, button->getButtonName());
+    }
+}
+
 void InputDevice::updateSetDPadButtonNames(int dpadIndex, int buttonIndex)
 {
     JoyDPad *dpad = getActiveSetJoystick()->getJoyDPad(dpadIndex);
@@ -1017,6 +1074,14 @@ void InputDevice::updateSetStickNames(int stickIndex)
 
     if (stick != nullptr)
         setStickName(stickIndex, stick->getStickName());
+}
+
+void InputDevice::updateSetSensorNames(int sensorType)
+{
+    JoySensor *sensor = getActiveSetJoystick()->getSensor(sensorType);
+
+    if (sensor != nullptr)
+        setSensorName(sensorType, sensor->getSensorName());
 }
 
 void InputDevice::updateSetDPadNames(int dpadIndex)

@@ -48,6 +48,7 @@ class GameControllerXml : public InputDeviceXml
     void writeXmlForAxes(SetJoystick *tempSet, QXmlStreamWriter *xml);                    // GameControllerXml class
     void writeXmlAxBtn(JoyAxis *axis, JoyAxisButton *naxisbutton, QXmlStreamWriter *xml); // GameControllerXml class
     void writeXmlForSticks(SetJoystick *tempSet, QXmlStreamWriter *xml);                  // GameControllerXml class
+    void writeXmlForSensors(SetJoystick *tempSet, QXmlStreamWriter *xml);                 // GameControllerXml class
     void writeXmlForVDpad(QXmlStreamWriter *xml);                                         // GameControllerXml class
     void readXmlNamesShort(QString name, QXmlStreamReader *xml);                          // GameControllerXml class
     void readXmlNamesMiddle(QString name, QXmlStreamReader *xml);                         // GameControllerXml class

@@ -82,11 +82,13 @@ class InputDevice : public QObject
     void setButtonName(int index, QString tempName);                            // InputDeviceXml class
     void setAxisButtonName(int axisIndex, int buttonIndex, QString tempName);   // InputDeviceXml class
     void setStickButtonName(int stickIndex, int buttonIndex, QString tempName); // InputDeviceXml class
+    void setSensorButtonName(int sensorType, int buttonIndex, QString tempName);
     void setDPadButtonName(int dpadIndex, int buttonIndex, QString tempName);   // InputDeviceXml class
     void setVDPadButtonName(int vdpadIndex, int buttonIndex, QString tempName); // InputDeviceXml class
 
     void setAxisName(int axisIndex, QString tempName);   // InputDeviceAxis class
     void setStickName(int stickIndex, QString tempName); // InputDeviceStick class
+    void setSensorName(int sensorType, QString tempName);
     void setDPadName(int dpadIndex, QString tempName);   // InputDeviceHat class
     void setVDPadName(int vdpadIndex, QString tempName); // InputDeviceVDPad class
 
@@ -219,11 +221,13 @@ class InputDevice : public QObject
     void updateSetButtonNames(int index);                            // InputDeviceButton class
     void updateSetAxisButtonNames(int axisIndex, int buttonIndex);   // InputDeviceAxis class
     void updateSetStickButtonNames(int stickIndex, int buttonIndex); // InputDeviceStick class
+    void updateSetSensorButtonNames(int stickIndex, int buttonIndex);
     void updateSetDPadButtonNames(int dpadIndex, int buttonIndex);   // InputDeviceHat class
     void updateSetVDPadButtonNames(int vdpadIndex, int buttonIndex); // InputDeviceVDPad class
 
     void updateSetAxisNames(int axisIndex);   // InputDeviceAxis class
     void updateSetStickNames(int stickIndex); // InputDeviceStick class
+    void updateSetSensorNames(int sensorType);
     void updateSetDPadNames(int dpadIndex);   // InputDeviceHat class
     void updateSetVDPadNames(int vdpadIndex); // InputDeviceVDPad class
 

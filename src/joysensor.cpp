@@ -19,8 +19,11 @@
 
 #include "setjoystick.h"
 #include "joybuttontypes/joysensorbutton.h"
+#include "xml/joybuttonxml.h"
 
 #include <QDebug>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 JoySensor::JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
     int type, int originset, SetJoystick *parent_set, QObject *parent)
@@ -101,9 +104,103 @@ int JoySensor::getType() { return m_type; }
 
 QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &m_buttons; }
 
+/**
+ * @brief Get a pointer to the sensor direction button for the desired
+ *     direction.
+ * @param Value of the direction of the sensor.
+ * @return Pointer to the sensor direction button for the sensor
+ *     direction.
+ */
+JoySensorButton *JoySensor::getDirectionButton(JoySensorDirection direction)
+{
+    return m_buttons.value(direction);
+}
+
+void JoySensor::setSensorName(QString tempName)
+{
+    if ((tempName.length() <= 20) && (tempName != m_sensor_name))
+    {
+        m_sensor_name = tempName;
+        emit sensorNameChanged();
+    }
+}
+
+QString JoySensor::getSensorName() { return m_sensor_name; }
+
+bool JoySensor::isDefault()
+{
+    bool value = false;
+    // XXX: implement
+    return value;
+}
 void JoySensor::setDefaultSensorName(QString tempname) { m_default_sensor_name = tempname; }
 
 QString JoySensor::getDefaultSensorName() { return m_default_sensor_name; }
+
+/**
+ * @brief Take a XML stream and set the sensor and direction button properties
+ *     according to the values contained within the stream.
+ * @param QXmlStreamReader instance that will be used to read property values.
+ */
+void JoySensor::readConfig(QXmlStreamReader *xml)
+{
+    if (xml->isStartElement() && (xml->name() == "sensor"))
+    {
+        xml->readNextStartElement();
+
+        while (!xml->atEnd() && (!xml->isEndElement() && (xml->name() != "sensor")))
+        {
+            if ((xml->name() == GlobalVariables::JoySensorButton::xmlName)
+                && xml->isStartElement())
+            {
+                int index = xml->attributes().value("index").toString().toInt();
+                JoySensorButton *button =
+                    m_buttons.value(static_cast<JoySensorDirection>(index));
+                QPointer<JoyButtonXml> joyButtonXml = new JoyButtonXml(button);
+
+                if (button != nullptr)
+                    joyButtonXml->readConfig(xml);
+                else
+                    xml->skipCurrentElement();
+
+                if (!joyButtonXml.isNull())
+                    delete joyButtonXml;
+            } else
+            {
+                xml->skipCurrentElement();
+            }
+
+            xml->readNextStartElement();
+        }
+    }
+}
+
+/**
+ * @brief Write the status of the properties of a sensor and direction buttons
+ *     to an XML stream.
+ * @param QXmlStreamWriter instance that will be used to write a profile.
+ */
+void JoySensor::writeConfig(QXmlStreamWriter *xml)
+{
+    if (!isDefault())
+    {
+        xml->writeStartElement("sensor");
+        xml->writeAttribute("type", QString::number(m_type));
+
+        QHashIterator<JoySensorDirection, JoySensorButton *> iter(m_buttons);
+
+        while (iter.hasNext())
+        {
+            JoySensorButton *button = iter.next().value();
+            JoyButtonXml *joyButtonXml = new JoyButtonXml(button);
+            joyButtonXml->writeConfig(xml);
+            delete joyButtonXml;
+            joyButtonXml = nullptr;
+        }
+
+        xml->writeEndElement();
+    }
+}
 
 /**
  * @brief Get pointer to the set that a sensor belongs to.

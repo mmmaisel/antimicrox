@@ -17,7 +17,7 @@
 
 #include "sensorpushbuttongroup.h"
 
-//#include "buttoneditdialog.h"
+#include "buttoneditdialog.h"
 #include "inputdevice.h"
 #include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
@@ -97,6 +97,10 @@ JoySensor *SensorPushButtonGroup::getSensor() const { return m_sensor; }
 void SensorPushButtonGroup::openSensorButtonDialog(JoySensorButtonPushButton *pushbutton)
 {
     // XXX: implement
+    ButtonEditDialog *dialog = new ButtonEditDialog(
+        pushbutton->getButton(), m_sensor->getParentSet()->getInputDevice(),
+        /*m_keypad_unlocked*/true, parentWidget());
+    dialog->show();
 }
 
 void SensorPushButtonGroup::showSensorDialog()

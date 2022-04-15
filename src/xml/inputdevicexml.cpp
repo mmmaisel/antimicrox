@@ -18,7 +18,9 @@
 #include "inputdevicexml.h"
 #include "inputdevice.h"
 #include "joybuttontypes/joycontrolstickbutton.h"
+#include "joybuttontypes/joysensorbutton.h"
 #include "joycontrolstick.h"
+#include "joysensor.h"
 #include "vdpad.h"
 
 #include "common.h"
@@ -237,6 +239,13 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         {
                             m_inputDevice->setStickButtonName(index, buttonIndex, temp);
                         }
+                    } else if ((xml->name() == "sensorbuttonname") && xml->isStartElement())
+                    {
+                        int type = xml->attributes().value("type").toString().toInt();
+                        int buttonIndex = xml->attributes().value("button").toString().toInt();
+                        QString temp = xml->readElementText();
+                        if (!temp.isEmpty())
+                            m_inputDevice->setSensorButtonName(type, buttonIndex, temp);
                     } else if ((xml->name() == "dpadbuttonname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();
@@ -279,6 +288,12 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         {
                             m_inputDevice->setStickName(index, temp);
                         }
+                    } else if ((xml->name() == "sensorname") && xml->isStartElement())
+                    {
+                        int type = xml->attributes().value("type").toString().toInt();
+                        QString temp = xml->readElementText();
+                        if (!temp.isEmpty())
+                            m_inputDevice->setSensorName(type, temp);
                     } else if ((xml->name() == "dpadname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();
@@ -544,6 +559,43 @@ void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
                     {
                         xml->writeStartElement("controlstickbuttonname");
                         xml->writeAttribute("index", QString::number(stick->getRealJoyIndex()));
+                        xml->writeAttribute("button", QString::number(button->getRealJoyNumber()));
+                        xml->writeCharacters(button->getButtonName());
+                        xml->writeEndElement();
+                    }
+                }
+            }
+        }
+
+        // write sensors
+        QListIterator<JoySensor *> currSensor(m_inputDevice->getActiveSetJoystick()->getSensors().values());
+
+        while (currSensor.hasNext())
+        {
+            JoySensor *sensor = currSensor.next();
+
+            if (sensor != nullptr)
+            {
+                if (!sensor->getSensorName().isEmpty())
+                {
+                    xml->writeStartElement("sensorname");
+                    xml->writeAttribute("type", QString::number(sensor->getType()));
+                    xml->writeCharacters(sensor->getSensorName());
+                    xml->writeEndElement();
+                }
+
+                // write button of each sensor
+                QHash<JoySensorDirection, JoySensorButton *> *buttons = sensor->getButtons();
+                QHashIterator<JoySensorDirection, JoySensorButton *> iter(*buttons);
+
+                while (iter.hasNext())
+                {
+                    JoySensorButton *button = iter.next().value();
+
+                    if (button && !button->getButtonName().isEmpty())
+                    {
+                        xml->writeStartElement("sensorbuttonname");
+                        xml->writeAttribute("type", QString::number(sensor->getType()));
                         xml->writeAttribute("button", QString::number(button->getRealJoyNumber()));
                         xml->writeCharacters(button->getButtonName());
                         xml->writeEndElement();

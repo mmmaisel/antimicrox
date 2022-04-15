@@ -28,9 +28,13 @@ class JoySensorButton : public JoyGradientButton
     Q_OBJECT
 
   public:
-    explicit JoySensorButton(JoySensor *sensor, int index, int originset, SetJoystick *parentSet, QObject *parent);
+    explicit JoySensorButton(JoySensor *sensor, int index, int originset,
+        SetJoystick *parentSet, QObject *parent);
 
-    virtual QString getPartialName(bool forceFullFormat = false, bool displayNames = false) const;
+    virtual int getRealJoyNumber() const;
+    virtual QString getPartialName(
+        bool forceFullFormat = false, bool displayNames = false) const;
+    virtual QString getXmlName();
 
     virtual bool isPartRealAxis();
 
@@ -38,7 +42,8 @@ class JoySensorButton : public JoyGradientButton
     QString getDirectionName() const;
 
   signals:
-    void setAssignmentChanged(int current_button, int axis_index, int associated_set, int mode);
+    void setAssignmentChanged(
+        int current_button, int axis_index, int associated_set, int mode);
 
   private:
     JoySensor *m_sensor;

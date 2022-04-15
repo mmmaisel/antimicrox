@@ -45,9 +45,15 @@ class JoySensor : public QObject
 
     int getType();
     QHash<JoySensorDirection, JoySensorButton *> *getButtons();
+    JoySensorButton *getDirectionButton(JoySensorDirection direction);
 
+    QString getSensorName();
+
+    bool isDefault();
     virtual void setDefaultSensorName(QString tempname);
     virtual QString getDefaultSensorName();
+    void readConfig(QXmlStreamReader *xml);
+    void writeConfig(QXmlStreamWriter *xml);
 
     SetJoystick *getParentSet();
     JoyAxis *getAxisX();
@@ -67,6 +73,7 @@ class JoySensor : public QObject
 
   public slots:
     void reset();
+    void setSensorName(QString tempName);
 
   protected:
     void populateButtons();

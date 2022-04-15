@@ -25,6 +25,7 @@
 #include "joyaxis.h"
 #include "joybutton.h"
 #include "joycontrolstick.h"
+#include "joysensor.h"
 #include "joydpad.h"
 #include "vdpad.h"
 
@@ -97,6 +98,15 @@ void SetJoystickXml::readConfig(QXmlStreamReader *xml)
                 {
                     xml->skipCurrentElement();
                 }
+            } else if ((xml->name() == "sensor") && xml->isStartElement())
+            {
+                int type = xml->attributes().value("type").toString().toInt();
+                JoySensor *sensor = m_setJoystick->getSensor(type);
+
+                if (sensor != nullptr)
+                    sensor->readConfig(xml);
+                else
+                    xml->skipCurrentElement();
             } else if ((xml->name() == "vdpad") && xml->isStartElement())
             {
                 int index = xml->attributes().value("index").toString().toInt();
@@ -137,6 +147,11 @@ void SetJoystickXml::writeConfig(QXmlStreamWriter *xml)
         QListIterator<JoyControlStick *> i(sticksList);
         while (i.hasNext())
             i.next()->writeConfig(xml);
+
+        QList<JoySensor *> sensorsList = m_setJoystick->getSensors().values();
+        QListIterator<JoySensor *> sensor(sensorsList);
+        while (sensor.hasNext())
+            sensor.next()->writeConfig(xml);
 
         QList<VDPad *> vdpadsList = m_setJoystick->getVdpads().values();
         QListIterator<VDPad *> vdpad(vdpadsList);

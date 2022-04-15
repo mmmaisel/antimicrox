@@ -76,6 +76,8 @@ JoySensor *SetJoystick::getGyroscope() const { return getSensors().value(JoySens
 
 JoyControlStick *SetJoystick::getJoyStick(int index) const { return getSticks().value(index); }
 
+JoySensor *SetJoystick::getSensor(int type) const { return m_sensors.value(type); }
+
 void SetJoystick::refreshButtons()
 {
     deleteButtons();

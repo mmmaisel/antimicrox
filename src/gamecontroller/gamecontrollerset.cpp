@@ -214,6 +214,9 @@ void GameControllerSet::readJoystickConfig(QXmlStreamReader *xml, QHash<int, SDL
             } else if ((xml->name() == "stick") && xml->isStartElement())
             {
                 getElemFromXml("stick", xml);
+            } else if ((xml->name() == "sensor") && xml->isStartElement())
+            {
+                getElemFromXml("sensor", xml);
             } else if ((xml->name() == "vdpad") && xml->isStartElement())
             {
                 readConfDpad(xml, hatButtons, vdpadExists, dpadExists);
@@ -253,6 +256,9 @@ void GameControllerSet::readConfig(QXmlStreamReader *xml)
             } else if ((xml->name() == "stick") && xml->isStartElement())
             {
                 getElemFromXml("stick", xml);
+            } else if ((xml->name() == "sensor") && xml->isStartElement())
+            {
+                getElemFromXml("sensor", xml);
             } else if ((xml->name() == "dpad") && xml->isStartElement())
             {
                 getElemFromXml("dpad", xml);
@@ -335,6 +341,10 @@ void GameControllerSet::getElemFromXml(QString elemName, QXmlStreamReader *xml)
         {
             xml->skipCurrentElement();
         }
+    } else if (elemName == "sensor")
+    {
+        JoySensor *sensor = getSensor(index);
+        readConf(sensor, xml);
     }
 }
 

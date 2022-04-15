@@ -35,6 +35,12 @@ JoySensorButton::JoySensorButton(JoySensor *sensor,
 {
 }
 
+/**
+ * @brief Get a 0 indexed number of button
+ * @return 0 indexed button index number
+ */
+int JoySensorButton::getRealJoyNumber() const { return m_index; }
+
 QString JoySensorButton::getPartialName(bool forceFullFormat, bool displayNames) const
 {
     QString temp = m_sensor->getPartialName(forceFullFormat, displayNames);
@@ -58,6 +64,8 @@ QString JoySensorButton::getPartialName(bool forceFullFormat, bool displayNames)
 
     return temp;
 }
+
+QString JoySensorButton::getXmlName() { return GlobalVariables::JoySensorButton::xmlName; }
 
 /**
  * @brief Check if button should be considered a part of a real controller
