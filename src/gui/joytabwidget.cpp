@@ -2005,7 +2005,7 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
 
     if (m_joystick->hasAccelerometer())
     {
-        JoySensor *sensor = currentSet->getAccelerometer();
+        JoySensor *sensor = currentSet->getSensor(JoySensor::ACCELEROMETER);
         if (!hideEmptyButtons || sensor->hasSlotsAssigned())
         {
             if (sensorGroup == nullptr)
@@ -2048,7 +2048,7 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
     }
     if (m_joystick->hasGyroscope())
     {
-        JoySensor *sensor = currentSet->getGyroscope();
+        JoySensor *sensor = currentSet->getSensor(JoySensor::GYROSCOPE);
         if (!hideEmptyButtons || sensor->hasSlotsAssigned())
         {
             if (sensorGroup == nullptr)

@@ -245,7 +245,8 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         int buttonIndex = xml->attributes().value("button").toString().toInt();
                         QString temp = xml->readElementText();
                         if (!temp.isEmpty())
-                            m_inputDevice->setSensorButtonName(type, buttonIndex, temp);
+                            m_inputDevice->setSensorButtonName(
+                                static_cast<JoySensor::Type>(type), buttonIndex, temp);
                     } else if ((xml->name() == "dpadbuttonname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();
@@ -293,7 +294,8 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         int type = xml->attributes().value("type").toString().toInt();
                         QString temp = xml->readElementText();
                         if (!temp.isEmpty())
-                            m_inputDevice->setSensorName(type, temp);
+                            m_inputDevice->setSensorName(
+                                static_cast<JoySensor::Type>(type), temp);
                     } else if ((xml->name() == "dpadname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();

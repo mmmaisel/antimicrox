@@ -154,22 +154,29 @@ void JoySensorEditDialog::implementPresets(int index)
     // XXX: implement
 }
 
-void JoySensorEditDialog::refreshSensorStats(int x, int y, int z)
+void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
 {
     Q_UNUSED(x);
     Q_UNUSED(y);
     Q_UNUSED(z);
+    float value;
 
     PadderCommon::inputDaemonMutex.lock();
 
-    QString xCoorString = QString::number(m_sensor->getXCoordinate());
-    m_ui->xCoordinateLabel->setText(xCoorString);
+    value = m_sensor->getXCoordinate();
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+        value *= 180.0 / M_PI;
+    m_ui->xCoordinateValue->setText(QString::number(value));
 
-    QString yCoorString = QString::number(m_sensor->getYCoordinate());
-    m_ui->yCoordinateLabel->setText(yCoorString);
+    value = m_sensor->getYCoordinate();
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+        value *= 180.0 / M_PI;
+    m_ui->yCoordinateValue->setText(QString::number(value));
 
-    QString zCoorString = QString::number(m_sensor->getZCoordinate());
-    m_ui->zCoordinateLabel->setText(zCoorString);
+    value = m_sensor->getZCoordinate();
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+        value *= 180.0 / M_PI;
+    m_ui->zCoordinateValue->setText(QString::number(value));
 
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {

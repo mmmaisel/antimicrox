@@ -828,7 +828,8 @@ void InputDevice::setStickButtonName(int stickIndex, int buttonIndex, QString te
     }
 }
 
-void InputDevice::setSensorButtonName(int sensorType, int buttonIndex, QString tempName)
+void InputDevice::setSensorButtonName(
+    JoySensor::Type type, int buttonIndex, QString tempName)
 {
     QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
 
@@ -837,7 +838,7 @@ void InputDevice::setSensorButtonName(int sensorType, int buttonIndex, QString t
         SetJoystick *tempSet = iter.next().value();
         disconnect(tempSet, &SetJoystick::setStickButtonNameChange, this,
             &InputDevice::updateSetStickButtonNames);
-        JoySensor *sensor = tempSet->getSensor(sensorType);
+        JoySensor *sensor = tempSet->getSensor(type);
 
         if (sensor != nullptr)
         {
@@ -930,7 +931,7 @@ void InputDevice::setStickName(int stickIndex, QString tempName)
     }
 }
 
-void InputDevice::setSensorName(int sensorType, QString tempName)
+void InputDevice::setSensorName(JoySensor::Type type, QString tempName)
 {
     QHashIterator<int, SetJoystick *> iter(getJoystick_sets());
 
@@ -938,7 +939,7 @@ void InputDevice::setSensorName(int sensorType, QString tempName)
     {
         SetJoystick *tempSet = iter.next().value();
         disconnect(tempSet, &SetJoystick::setSensorNameChange, this, &InputDevice::updateSetSensorNames);
-        JoySensor *sensor = tempSet->getSensor(sensorType);
+        JoySensor *sensor = tempSet->getSensor(type);
 
         if (sensor != nullptr)
             sensor->setSensorName(tempName);
@@ -1020,9 +1021,9 @@ void InputDevice::updateSetStickButtonNames(int stickIndex, int buttonIndex)
     }
 }
 
-void InputDevice::updateSetSensorButtonNames(int sensorType, int buttonIndex)
+void InputDevice::updateSetSensorButtonNames(JoySensor::Type type, int buttonIndex)
 {
-    JoySensor *sensor = getActiveSetJoystick()->getSensor(sensorType);
+    JoySensor *sensor = getActiveSetJoystick()->getSensor(type);
 
     if (sensor != nullptr)
     {
@@ -1030,7 +1031,7 @@ void InputDevice::updateSetSensorButtonNames(int sensorType, int buttonIndex)
             sensor->getDirectionButton(JoySensorDirection(buttonIndex));
 
         if (button != nullptr)
-            setSensorButtonName(sensorType, buttonIndex, button->getButtonName());
+            setSensorButtonName(type, buttonIndex, button->getButtonName());
     }
 }
 
@@ -1076,12 +1077,12 @@ void InputDevice::updateSetStickNames(int stickIndex)
         setStickName(stickIndex, stick->getStickName());
 }
 
-void InputDevice::updateSetSensorNames(int sensorType)
+void InputDevice::updateSetSensorNames(JoySensor::Type type)
 {
-    JoySensor *sensor = getActiveSetJoystick()->getSensor(sensorType);
+    JoySensor *sensor = getActiveSetJoystick()->getSensor(type);
 
     if (sensor != nullptr)
-        setSensorName(sensorType, sensor->getSensorName());
+        setSensorName(type, sensor->getSensorName());
 }
 
 void InputDevice::updateSetDPadNames(int dpadIndex)
@@ -1425,32 +1426,15 @@ void InputDevice::activatePossibleAxisEvents()
 void InputDevice::activatePossibleSensorEvents()
 {
     SetJoystick *currentSet = getActiveSetJoystick();
+    JoySensor* sensor = nullptr;
 
-    if (currentSet->hasAccelerometer())
-    {
-        JoyAxis* axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_X);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-        axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_Y);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-        axis = currentSet->getSensorAxis(SetJoystick::ACCEL_AXIS_Z);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-    }
+    sensor = currentSet->getSensor(JoySensor::ACCELEROMETER);
+    if (sensor != nullptr)
+        sensor->activatePendingEvent();
 
-    if (currentSet->hasGyroscope())
-    {
-        JoyAxis* axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_X);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-        axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_Y);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-        axis = currentSet->getSensorAxis(SetJoystick::GYRO_AXIS_Z);
-        if ((axis != nullptr) && axis->hasPendingEvent())
-            axis->activatePendingEvent();
-    }
+    sensor = currentSet->getSensor(JoySensor::GYROSCOPE);
+    if (sensor != nullptr)
+        sensor->activatePendingEvent();
 }
 
 void InputDevice::activatePossibleDPadEvents()

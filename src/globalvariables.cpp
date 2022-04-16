@@ -181,6 +181,13 @@ const int GlobalVariables::JoyControlStick::DEFAULTDIAGONALRANGE = 45;
 const double GlobalVariables::JoyControlStick::DEFAULTCIRCLE = 0.0;
 const int GlobalVariables::JoyControlStick::DEFAULTSTICKDELAY = 0;
 
+// ---- JoySensor ---- //
+
+const double GlobalVariables::JoySensor::ACCEL_MIN = -100;
+const double GlobalVariables::JoySensor::ACCEL_MAX =  100;
+const double GlobalVariables::JoySensor::GYRO_MIN = -10;
+const double GlobalVariables::JoySensor::GYRO_MAX =  10;
+
 // ---- JoyButtonSlot ---- //
 
 const int GlobalVariables::JoyButtonSlot::JOYSPEED = 20;

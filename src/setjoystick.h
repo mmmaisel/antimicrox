@@ -20,13 +20,13 @@
 #define SETJOYSTICK_H
 
 #include "joyaxis.h"
+#include "joysensor.h"
 #include "xml/setjoystickxml.h"
 
 class InputDevice;
 class JoyButton;
 class JoyDPad;
 class JoyControlStick;
-class JoySensor;
 class VDPad;
 
 class SetJoystick : public SetJoystickXml
@@ -39,14 +39,11 @@ class SetJoystick : public SetJoystickXml
     ~SetJoystick();
 
     JoyAxis *getJoyAxis(int index) const;
-    JoyAxis *getSensorAxis(int index) const;
     JoyButton *getJoyButton(int index) const;
     JoyDPad *getJoyDPad(int index) const;
     JoyControlStick *getJoyStick(int index) const;
-    JoySensor *getSensor(int type) const;
+    JoySensor *getSensor(JoySensor::Type type) const;
     VDPad *getVDPad(int index) const;
-    JoySensor *getAccelerometer() const;
-    JoySensor *getGyroscope() const;
 
     int getNumberButtons() const;
     int getNumberAxes() const;
@@ -58,21 +55,20 @@ class SetJoystick : public SetJoystickXml
 
     QHash<int, JoyButton *> const &getButtons() const;
     QHash<int, JoyDPad *> const &getHats() const;
-    QHash<int, JoySensor *> const &getSensors() const;
+    QHash<JoySensor::Type, JoySensor *> const &getSensors() const;
     QHash<int, JoyControlStick *> const &getSticks() const;
     QHash<int, VDPad *> const &getVdpads() const;
     QHash<int, JoyAxis *> *getAxes();
-    QHash<int, JoyAxis *> *getSensorAxes();
 
     int getIndex() const;
     int getRealIndex() const;
     virtual void refreshButtons(); // SetButton class
     virtual void refreshAxes();    // SetAxis class
     virtual void refreshHats();    // SetHat class
-    virtual void refreshSensors(); // SetSensor class
+    virtual void refreshSensors();
     void release();
-    void addSensor(int index, JoySensor *sensor);            // SetSensor class
-    void removeSensor(int index);                            // SetSensor class
+    void addSensor(JoySensor::Type type, JoySensor *sensor);
+    void removeSensor(JoySensor::Type type);
     void addControlStick(int index, JoyControlStick *stick); // SetStick class
     void removeControlStick(int index);                      // SetStick class
     void addVDPad(int index, VDPad *vdpad);                  // SetVDPad class
@@ -94,28 +90,18 @@ class SetJoystick : public SetJoystickXml
     int getCountBtnInList(QString partialName);
     bool isSetEmpty();
 
-    enum {
-        // XXX: avoid axis index clashes
-        ACCEL_AXIS_X,
-        ACCEL_AXIS_Y,
-        ACCEL_AXIS_Z,
-        GYRO_AXIS_X,
-        GYRO_AXIS_Y,
-        GYRO_AXIS_Z
-    };
-
   protected:
     void deleteButtons(); // SetButton class
     void deleteAxes();    // SetAxis class
     void deleteHats();    // SetHat class
-    void deleteSensors(); // SetSensor class
+    void deleteSensors();
     void deleteSticks();  // SetStick class
     void deleteVDpads();  // SetVDPad class
 
     void enableButtonConnections(JoyButton *button); // SetButton class
     void enableAxisConnections(JoyAxis *axis);       // SetAxis class
     void enableHatConnections(JoyDPad *dpad);        // SetHat class
-    void enableSensorConnections(JoySensor *sensor); // SetSensor class
+    void enableSensorConnections(JoySensor *sensor);
 
   signals:
     void setChangeActivated(int index);
@@ -139,13 +125,13 @@ class SetJoystick : public SetJoystickXml
     void setButtonNameChange(int index);                            // SetButton class
     void setAxisButtonNameChange(int axisIndex, int buttonIndex);   // SetAxis class
     void setStickButtonNameChange(int stickIndex, int buttonIndex); // SetStick class
-    void setSensorButtonNameChange(int sensorType, int buttonIndex);
+    void setSensorButtonNameChange(JoySensor::Type type, int buttonIndex);
     void setDPadButtonNameChange(int dpadIndex, int buttonIndex);   // SetHat class
     void setVDPadButtonNameChange(int vdpadIndex, int buttonIndex); // SetVDPad class
 
     void setAxisNameChange(int axisIndex);   // SetAxis class
     void setStickNameChange(int stickIndex); // SetStick class
-    void setSensorNameChange(int sensorType);
+    void setSensorNameChange(JoySensor::Type type);
     void setDPadNameChange(int dpadIndex);   // SetHat class
     void setVDPadNameChange(int vdpadIndex); // SetVDPad class
     void propertyUpdated();
@@ -189,9 +175,8 @@ class SetJoystick : public SetJoystickXml
   private:
     QHash<int, JoyButton *> m_buttons;
     QHash<int, JoyAxis *> axes;
-    QHash<int, JoyAxis *> m_sensor_axes;
     QHash<int, JoyDPad *> hats;
-    QHash<int, JoySensor *> m_sensors;
+    QHash<JoySensor::Type, JoySensor *> m_sensors;
     QHash<int, JoyControlStick *> sticks;
     QHash<int, VDPad *> vdpads;
 

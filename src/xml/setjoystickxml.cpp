@@ -101,7 +101,8 @@ void SetJoystickXml::readConfig(QXmlStreamReader *xml)
             } else if ((xml->name() == "sensor") && xml->isStartElement())
             {
                 int type = xml->attributes().value("type").toString().toInt();
-                JoySensor *sensor = m_setJoystick->getSensor(type);
+                JoySensor *sensor = m_setJoystick->getSensor(
+                    static_cast<JoySensor::Type>(type));
 
                 if (sensor != nullptr)
                     sensor->readConfig(xml);

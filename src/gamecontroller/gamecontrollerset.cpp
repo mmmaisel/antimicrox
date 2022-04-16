@@ -72,25 +72,18 @@ void GameControllerSet::populateSticksDPad()
     addVDPad(0, controllerDPad);
 
     // Sensor Assignment
-    JoyAxis *axisZ = 0;
     if (hasAccelerometer())
     {
-        axisX = getSensorAxis(ACCEL_AXIS_X);
-        axisY = getSensorAxis(ACCEL_AXIS_Y);
-        axisZ = getSensorAxis(ACCEL_AXIS_Z);
         JoySensor *sensor =
-            new JoySensor(axisX, axisY, axisZ, JoySensor::ACCELEROMETER, getIndex(), this, this);
+            new JoySensor(JoySensor::ACCELEROMETER, getIndex(), this, this);
         sensor->setDefaultSensorName("Accelerometer");
         addSensor(JoySensor::ACCELEROMETER, sensor);
     }
 
     if (hasGyroscope())
     {
-        axisX = getSensorAxis(GYRO_AXIS_X);
-        axisY = getSensorAxis(GYRO_AXIS_Y);
-        axisZ = getSensorAxis(GYRO_AXIS_Z);
         JoySensor *sensor =
-            new JoySensor(axisX, axisY, axisZ, JoySensor::GYROSCOPE, getIndex(), this, this);
+            new JoySensor(JoySensor::GYROSCOPE, getIndex(), this, this);
         sensor->setDefaultSensorName("Gyroscope");
         addSensor(JoySensor::GYROSCOPE, sensor);
     }
@@ -343,7 +336,7 @@ void GameControllerSet::getElemFromXml(QString elemName, QXmlStreamReader *xml)
         }
     } else if (elemName == "sensor")
     {
-        JoySensor *sensor = getSensor(index);
+        JoySensor *sensor = getSensor(static_cast<JoySensor::Type>(index));
         readConf(sensor, xml);
     }
 }

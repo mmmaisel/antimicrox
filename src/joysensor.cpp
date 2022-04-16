@@ -25,15 +25,12 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-JoySensor::JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-    int type, int originset, SetJoystick *parent_set, QObject *parent)
+JoySensor::JoySensor(
+    Type type, int originset, SetJoystick *parent_set, QObject *parent)
     : QObject(parent),
     m_type(type),
     m_originset(originset),
-    m_parent_set(parent_set),
-    m_axisX(axisX),
-    m_axisY(axisY),
-    m_axisZ(axisZ)
+    m_parent_set(parent_set)
 {
     reset();
     populateButtons();
@@ -41,15 +38,43 @@ JoySensor::JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
 
 JoySensor::~JoySensor()
 {
-    // XXX: are axes necessary for this?
 }
 
-void JoySensor::queuePendingEvent(float* data, bool ignoresets, bool updateLastValues)
+void JoySensor::joyEvent(float* values, bool ignoresets)
 {
-    // XXX: this is hacky, do not use axis, there is no guarenteed maximum
-    m_axisX->queuePendingEvent(static_cast<int>(data[0] * 1000), ignoresets, updateLastValues);
-    m_axisY->queuePendingEvent(static_cast<int>(data[1] * 1000), ignoresets, updateLastValues);
-    m_axisZ->queuePendingEvent(static_cast<int>(data[2] * 1000), ignoresets, updateLastValues);
+    // XXX: implement
+    m_current_value[0] = values[0];
+    m_current_value[1] = values[1];
+    m_current_value[2] = values[2];
+
+    emit moved(values[0], values[1], values[2]);
+}
+
+void JoySensor::queuePendingEvent(float* values, bool ignoresets)
+{
+    m_pending_event = true;
+    m_pending_value[0] = values[0];
+    m_pending_value[1] = values[1];
+    m_pending_value[2] = values[2];
+    m_pending_ignore_sets = ignoresets;
+}
+
+void JoySensor::activatePendingEvent()
+{
+    if (!m_pending_event)
+        return;
+
+    joyEvent(m_pending_value, m_pending_ignore_sets);
+
+    clearPendingEvent();
+}
+
+bool JoySensor::hasPendingEvent() { return m_pending_event; }
+
+void JoySensor::clearPendingEvent()
+{
+    m_pending_event = false;
+    m_pending_ignore_sets = false;
 }
 
 bool JoySensor::hasSlotsAssigned()
@@ -100,7 +125,7 @@ JoySensorDirection JoySensor::getCurrentDirection()
     return m_current_direction;
 }
 
-int JoySensor::getType() { return m_type; }
+JoySensor::Type JoySensor::getType() { return m_type; }
 
 /**
  * @brief Get the assigned dead zone value.
@@ -118,21 +143,21 @@ int JoySensor::getMaxZone() { return m_max_zone; }
 
 /**
  * @brief Get the value for the corresponding X axis.
- * @return X axis value.
+ * @return X axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-int JoySensor::getXCoordinate() { return m_axisX->getCurrentRawValue(); }
+float JoySensor::getXCoordinate() { return m_current_value[0]; }
 
 /**
  * @brief Get the value for the corresponding Y axis.
- * @return Y axis value.
+ * @return X axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-int JoySensor::getYCoordinate() { return m_axisY->getCurrentRawValue(); }
+float JoySensor::getYCoordinate() { return m_current_value[1]; }
 
 /**
  * @brief Get the value for the corresponding Z axis.
- * @return Z axis value.
+ * @return Z axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-int JoySensor::getZCoordinate() { return m_axisZ->getCurrentRawValue(); }
+float JoySensor::getZCoordinate() { return m_current_value[2]; }
 
 unsigned int JoySensor::getSensorDelay() { return m_sensor_delay; }
 
@@ -146,9 +171,9 @@ QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &
 double JoySensor::getDistanceFromDeadZone()
 {
     return getDistanceFromDeadZone(
-        m_axisX->getCurrentRawValue(),
-        m_axisY->getCurrentRawValue(),
-        m_axisZ->getCurrentRawValue()
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2]
     );
 }
 
@@ -160,25 +185,27 @@ double JoySensor::getDistanceFromDeadZone()
  * @param Z axis value
  * @return Distance percentage in the range of 0.0 - 1.0.
  */
-double JoySensor::getDistanceFromDeadZone(int axisXValue, int axisYValue, int axisZValue)
+double JoySensor::getDistanceFromDeadZone(
+    float axisXValue, float axisYValue, float axisZValue)
 {
     // XXX: implement
 }
 
 /**
  * @brief Get the raw gravity vector length of the sensor.
- * @return Gryvity strength in g.
+ * @return Gravity strength in m/s^2.
  */
 double JoySensor::getAbsoluteRawGravity()
 {
     return getAbsoluteRawGravity(
-        m_axisX->getCurrentRawValue(),
-        m_axisY->getCurrentRawValue(),
-        m_axisZ->getCurrentRawValue()
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2]
     );
 }
 
-double JoySensor::getAbsoluteRawGravity(int axisXValue, int axisYValue, int axisZValue)
+double JoySensor::getAbsoluteRawGravity(
+    float axisXValue, float axisYValue, float axisZValue)
 {
     // XXX: implement
 }
@@ -191,9 +218,9 @@ double JoySensor::getAbsoluteRawGravity(int axisXValue, int axisYValue, int axis
 double JoySensor::calculatePitch()
 {
     return calculatePitch(
-        m_axisX->getCurrentRawValue(),
-        m_axisY->getCurrentRawValue(),
-        m_axisZ->getCurrentRawValue()
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2]
     );
 }
 
@@ -206,7 +233,8 @@ double JoySensor::calculatePitch()
  * @param Z axis value
  * @return Pitch (in degrees)
  */
-double JoySensor::calculatePitch(int axisXValue, int axisYValue, int axisZValue)
+double JoySensor::calculatePitch(
+    float axisXValue, float axisYValue, float axisZValue)
 {
     // XXX: implement
 }
@@ -219,9 +247,9 @@ double JoySensor::calculatePitch(int axisXValue, int axisYValue, int axisZValue)
 double JoySensor::calculateRoll()
 {
     return calculateRoll(
-        m_axisX->getCurrentRawValue(),
-        m_axisY->getCurrentRawValue(),
-        m_axisZ->getCurrentRawValue()
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2]
     );
 }
 
@@ -234,7 +262,8 @@ double JoySensor::calculateRoll()
  * @param Z axis value
  * @return Roll (in degrees)
  */
-double JoySensor::calculateRoll(int axisXValue, int axisYValue, int axisZValue)
+double JoySensor::calculateRoll(
+    float axisXValue, float axisYValue, float axisZValue)
 {
     // XXX: implement
 }
@@ -343,23 +372,8 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
  */
 SetJoystick *JoySensor::getParentSet()
 {
-    SetJoystick *temp = nullptr;
-
-    if (m_axisX != nullptr)
-        temp = m_axisX->getParentSet();
-    else if (m_axisY != nullptr)
-        temp = m_axisY->getParentSet();
-    else if (m_axisZ != nullptr)
-        temp = m_axisZ->getParentSet();
-
-    return temp;
+    return m_parent_set;
 }
-
-JoyAxis *JoySensor::getAxisX() { return m_axisX; }
-
-JoyAxis *JoySensor::getAxisY() { return m_axisY; }
-
-JoyAxis *JoySensor::getAxisZ() { return m_axisZ; }
 
 void JoySensor::reset()
 {

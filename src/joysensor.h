@@ -18,8 +18,10 @@
 #pragma once
 
 #include <QObject>
+#include <QHash>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
-#include "joyaxis.h"
 #include "joysensordirection.h"
 
 class SetJoystick;
@@ -30,11 +32,19 @@ class JoySensor : public QObject
     Q_OBJECT
 
   public:
-    explicit JoySensor(JoyAxis *axisX, JoyAxis *axisY, JoyAxis *axisZ,
-        int type, int originset, SetJoystick *parent_set, QObject *parent);
+    enum Type {
+        ACCELEROMETER,
+        GYROSCOPE
+    };
+
+    explicit JoySensor(Type type, int originset, SetJoystick *parent_set, QObject *parent);
     ~JoySensor();
 
-    void queuePendingEvent(float* data, bool ignoresets = false, bool updateLastValues = true);
+    void joyEvent(float* values, bool ignoresets = false);
+    void queuePendingEvent(float* values, bool ignoresets = false);
+    void activatePendingEvent();
+    bool hasPendingEvent();
+    void clearPendingEvent();
 
     bool hasSlotsAssigned();
 
@@ -43,23 +53,23 @@ class JoySensor : public QObject
 
     JoySensorDirection getCurrentDirection();
 
-    int getType();
+    Type getType();
     int getDeadZone();
     int getDiagonalRange();
     int getMaxZone();
-    int getXCoordinate();
-    int getYCoordinate();
-    int getZCoordinate();
+    float getXCoordinate();
+    float getYCoordinate();
+    float getZCoordinate();
     unsigned int getSensorDelay();
 
     double getDistanceFromDeadZone();
-    double getDistanceFromDeadZone(int axisXValue, int axisYValue, int axisZValue);
+    double getDistanceFromDeadZone(float axisXValue, float axisYValue, float axisZValue);
     double getAbsoluteRawGravity();
-    double getAbsoluteRawGravity(int axisXValue, int axisYValue, int axisZValue);
+    double getAbsoluteRawGravity(float axisXValue, float axisYValue, float axisZValue);
     double calculatePitch();
-    double calculatePitch(int axisXValue, int axisYValue, int axisZValue);
+    double calculatePitch(float axisXValue, float axisYValue, float axisZValue);
     double calculateRoll();
-    double calculateRoll(int axisXValue, int axisYValue, int axisZValue);
+    double calculateRoll(float axisXValue, float axisYValue, float axisZValue);
 
     QHash<JoySensorDirection, JoySensorButton *> *getButtons();
     JoySensorButton *getDirectionButton(JoySensorDirection direction);
@@ -73,17 +83,9 @@ class JoySensor : public QObject
     void writeConfig(QXmlStreamWriter *xml);
 
     SetJoystick *getParentSet();
-    JoyAxis *getAxisX();
-    JoyAxis *getAxisY();
-    JoyAxis *getAxisZ();
-
-    enum {
-        ACCELEROMETER,
-        GYROSCOPE
-    };
 
   signals:
-    void moved(int xaxis, int yaxis, int zaxis);
+    void moved(float xaxis, float yaxis, float zaxis);
     void active(int value);
     void released(int value);
     void deadZoneChanged(int value);
@@ -105,8 +107,13 @@ class JoySensor : public QObject
     void populateButtons();
     QString sensorTypeName() const;
 
-    int m_type;
+    Type m_type;
     int m_originset;
+    float m_last_known_raw_value[3];
+    float m_current_value[3];
+    float m_pending_value[3];
+    bool m_pending_event;
+    bool m_pending_ignore_sets;
     int m_dead_zone;
     int m_diagonal_range;
     int m_max_zone;
@@ -118,8 +125,5 @@ class JoySensor : public QObject
   private:
     JoySensorDirection m_current_direction;
     SetJoystick *m_parent_set;
-    QPointer<JoyAxis> m_axisX;
-    QPointer<JoyAxis> m_axisY;
-    QPointer<JoyAxis> m_axisZ;
     QHash<JoySensorDirection, JoySensorButton *> m_buttons;
 };

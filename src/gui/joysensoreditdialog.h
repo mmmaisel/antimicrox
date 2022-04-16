@@ -49,7 +49,7 @@ class JoySensorEditDialog : public QDialog
   private slots:
     void implementPresets(int index);
 
-    void refreshSensorStats(int x, int y, int z);
+    void refreshSensorStats(float x, float y, float z);
 
     void checkMaxZone(int value);
     void openMouseSettingsDialog();
