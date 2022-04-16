@@ -51,7 +51,7 @@ class JoySensorEditDialog : public QDialog
 
     void refreshSensorStats(float x, float y, float z);
 
-    void checkMaxZone(int value);
+    void checkMaxZone(float value);
     void openMouseSettingsDialog();
     void enableMouseSettingButton();
     void updateWindowTitleSensorName();

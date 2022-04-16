@@ -42,10 +42,10 @@ JoySensorStatusBox::JoySensorStatusBox(JoySensor *sensor, QWidget *parent)
     m_sensor(sensor)
 {
 
-    connect(m_sensor, SIGNAL(deadZoneChanged(int)), this, SLOT(update()));
+    connect(m_sensor, SIGNAL(deadZoneChanged(float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(moved(float, float, float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(diagonalRangeChanged(int)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(maxZoneChanged(int)), this, SLOT(update()));
+    connect(m_sensor, SIGNAL(maxZoneChanged(float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(joyModeChanged()), this, SLOT(update()));
     connect(m_sensor, SIGNAL(circleAdjustChange(double)), this, SLOT(update()));
 }
@@ -54,18 +54,18 @@ void JoySensorStatusBox::setSensor(JoySensor *sensor)
 {
     if (m_sensor != nullptr)
     {
-        disconnect(m_sensor, SIGNAL(deadZoneChanged(int)), this, nullptr);
+        disconnect(m_sensor, SIGNAL(deadZoneChanged(float)), this, nullptr);
         disconnect(m_sensor, SIGNAL(moved(float, float, float)), this, nullptr);
         disconnect(m_sensor, SIGNAL(diagonalRangeChanged(int)), this, nullptr);
-        disconnect(m_sensor, SIGNAL(maxZoneChanged(int)), this, nullptr);
+        disconnect(m_sensor, SIGNAL(maxZoneChanged(float)), this, nullptr);
         disconnect(m_sensor, SIGNAL(joyModeChanged()), this, nullptr);
     }
 
     m_sensor = sensor;
-    connect(m_sensor, SIGNAL(deadZoneChanged(int)), this, SLOT(update()));
+    connect(m_sensor, SIGNAL(deadZoneChanged(float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(moved(float, float, float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(diagonalRangeChanged(int)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(maxZoneChanged(int)), this, SLOT(update()));
+    connect(m_sensor, SIGNAL(maxZoneChanged(float)), this, SLOT(update()));
     connect(m_sensor, SIGNAL(joyModeChanged()), this, SLOT(update()));
 
     update();

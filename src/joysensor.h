@@ -54,13 +54,15 @@ class JoySensor : public QObject
     JoySensorDirection getCurrentDirection();
 
     Type getType();
-    int getDeadZone();
+    float getDeadZone();
     int getDiagonalRange();
-    int getMaxZone();
+    float getMaxZone();
     float getXCoordinate();
     float getYCoordinate();
     float getZCoordinate();
     unsigned int getSensorDelay();
+
+    void resetButtons();
 
     double getDistanceFromDeadZone();
     double getDistanceFromDeadZone(float axisXValue, float axisYValue, float axisZValue);
@@ -88,17 +90,18 @@ class JoySensor : public QObject
     void moved(float xaxis, float yaxis, float zaxis);
     void active(int value);
     void released(int value);
-    void deadZoneChanged(int value);
+    void deadZoneChanged(float value);
     void diagonalRangeChanged(int value);
-    void maxZoneChanged(int value);
+    void maxZoneChanged(float value);
     void sensorDelayChanged(int value);
     void sensorNameChanged();
     void joyModeChanged();
+    void propertyUpdated();
 
   public slots:
     void reset();
-    void setDeadZone(int value);
-    void setMaxZone(int value);
+    void setDeadZone(float value);
+    void setMaxZone(float value);
     void setDiagonalRange(int value);
     void setSensorName(QString tempName);
     void setSensorDelay(unsigned int value);
@@ -114,9 +117,9 @@ class JoySensor : public QObject
     float m_pending_value[3];
     bool m_pending_event;
     bool m_pending_ignore_sets;
-    int m_dead_zone;
+    float m_dead_zone;
     int m_diagonal_range;
-    int m_max_zone;
+    float m_max_zone;
     unsigned int m_sensor_delay;
 
     QString m_sensor_name;

@@ -109,7 +109,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>X:</string>
+                 <string>X (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -139,7 +139,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Y:</string>
+                 <string>Y (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -169,7 +169,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Z:</string>
+                 <string>Z (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -199,7 +199,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Gravity:</string>
+              <string>Gravity (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -229,7 +229,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Pitch:</string>
+              <string>Pitch (°):</string>
              </property>
             </widget>
            </item>
@@ -259,7 +259,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Roll:</string>
+              <string>Roll (°):</string>
              </property>
             </widget>
            </item>
@@ -442,16 +442,16 @@
               <number>1</number>
              </property>
              <property name="maximum">
-              <number>32737</number>
+              <number>30</number>
              </property>
              <property name="singleStep">
-              <number>100</number>
+              <double>0.1</double>
              </property>
              <property name="pageStep">
-              <number>1000</number>
+              <number>1</number>
              </property>
              <property name="value">
-              <number>6000</number>
+              <double>0.5</double>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -459,18 +459,21 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="deadZoneSpinBox">
+            <widget class="QDoubleSpinBox" name="deadZoneSpinBox">
              <property name="toolTip">
               <string>Dead zone value to use for an analog sensor.</string>
              </property>
              <property name="minimum">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="maximum">
-              <number>32737</number>
+              <number>30</number>
+             </property>
+             <property name="decimals">
+              <number>2</number>
              </property>
              <property name="value">
-              <number>8000</number>
+              <double>0.5</double>
              </property>
             </widget>
            </item>
@@ -491,19 +494,19 @@
               <string>Value when an analog sensor is considered moved 100%.</string>
              </property>
              <property name="minimum">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="maximum">
-              <number>32737</number>
+              <number>30</number>
              </property>
              <property name="singleStep">
-              <number>100</number>
+              <double>0.1</double>
              </property>
              <property name="pageStep">
-              <number>1000</number>
+              <number>10</number>
              </property>
              <property name="value">
-              <number>32000</number>
+              <number>1</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -511,7 +514,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="maxZoneSpinBox">
+            <widget class="QDoubleSpinBox" name="maxZoneSpinBox">
              <property name="toolTip">
               <string>Value when an analog sensor is considered moved 100%.</string>
              </property>
@@ -519,10 +522,13 @@
               <number>1</number>
              </property>
              <property name="maximum">
-              <number>32737</number>
+              <number>30</number>
+             </property>
+             <property name="decimals">
+              <number>2</number>
              </property>
              <property name="value">
-              <number>32000</number>
+              <number>1</number>
              </property>
             </widget>
            </item>

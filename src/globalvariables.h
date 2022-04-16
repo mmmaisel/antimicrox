@@ -215,6 +215,10 @@ class JoySensor
     static const double ACCEL_MAX;
     static const double GYRO_MIN;
     static const double GYRO_MAX;
+    static const double DEFAULTDEADZONE;
+    static const double DEFAULTMAXZONE;
+    static const int DEFAULTDIAGONALRANGE;
+    static const int DEFAULTSENSORDELAY;
 };
 
 class JoyButtonSlot

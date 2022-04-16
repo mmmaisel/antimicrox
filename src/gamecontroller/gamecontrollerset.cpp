@@ -336,7 +336,8 @@ void GameControllerSet::getElemFromXml(QString elemName, QXmlStreamReader *xml)
         }
     } else if (elemName == "sensor")
     {
-        JoySensor *sensor = getSensor(static_cast<JoySensor::Type>(index));
+        int type = xml->attributes().value("type").toString().toInt();
+        JoySensor *sensor = getSensor(static_cast<JoySensor::Type>(type));
         readConf(sensor, xml);
     }
 }

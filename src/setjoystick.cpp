@@ -379,6 +379,16 @@ bool SetJoystick::isSetEmpty()
             result = false;
     }
 
+    QHashIterator<JoySensor::Type, JoySensor *> sensors(getSensors());
+
+    while (sensors.hasNext() && result)
+    {
+        JoySensor *sensor = sensors.next().value();
+
+        if (!sensor->isDefault())
+            result = false;
+    }
+
     QHashIterator<int, VDPad *> iter5(getVdpads());
 
     while (iter5.hasNext() && result)

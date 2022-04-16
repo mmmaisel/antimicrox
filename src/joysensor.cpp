@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <math.h>
 
 JoySensor::JoySensor(
     Type type, int originset, SetJoystick *parent_set, QObject *parent)
@@ -131,7 +132,7 @@ JoySensor::Type JoySensor::getType() { return m_type; }
  * @brief Get the assigned dead zone value.
  * @return Assigned dead zone value
  */
-int JoySensor::getDeadZone() { return m_dead_zone; }
+float JoySensor::getDeadZone() { return m_dead_zone; }
 
 /**
  * @brief Get the assigned diagonal range value.
@@ -139,7 +140,7 @@ int JoySensor::getDeadZone() { return m_dead_zone; }
  */
 int JoySensor::getDiagonalRange() { return m_diagonal_range; }
 
-int JoySensor::getMaxZone() { return m_max_zone; }
+float JoySensor::getMaxZone() { return m_max_zone; }
 
 /**
  * @brief Get the value for the corresponding X axis.
@@ -162,6 +163,22 @@ float JoySensor::getZCoordinate() { return m_current_value[2]; }
 unsigned int JoySensor::getSensorDelay() { return m_sensor_delay; }
 
 QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &m_buttons; }
+
+/**
+ * @brief Reset all the properties of the sensor direction buttons.
+ */
+void JoySensor::resetButtons()
+{
+    QHashIterator<JoySensorDirection, JoySensorButton *> iter(m_buttons);
+
+    while (iter.hasNext())
+    {
+        JoyButton *button = iter.next().value();
+
+        if (button != nullptr)
+            button->reset();
+    }
+}
 
 /**
  * @brief Get current radial distance of the sensor past the assigned
@@ -188,7 +205,10 @@ double JoySensor::getDistanceFromDeadZone()
 double JoySensor::getDistanceFromDeadZone(
     float axisXValue, float axisYValue, float axisZValue)
 {
-    // XXX: implement
+    double distance = sqrt(axisXValue*axisXValue + axisYValue*axisYValue + axisZValue * axisZValue);
+    double distance_outside = std::max(0.0, distance - m_dead_zone);
+
+    return distance_outside / m_max_zone;
 }
 
 /**
@@ -207,7 +227,7 @@ double JoySensor::getAbsoluteRawGravity()
 double JoySensor::getAbsoluteRawGravity(
     float axisXValue, float axisYValue, float axisZValue)
 {
-    // XXX: implement
+    return sqrt(axisXValue*axisXValue + axisYValue*axisYValue + axisZValue*axisZValue);
 }
 
 /**
@@ -236,7 +256,8 @@ double JoySensor::calculatePitch()
 double JoySensor::calculatePitch(
     float axisXValue, float axisYValue, float axisZValue)
 {
-    // XXX: implement
+    double rad = getAbsoluteRawGravity();
+    return -asinf(axisYValue / rad);
 }
 
 /**
@@ -265,7 +286,9 @@ double JoySensor::calculateRoll()
 double JoySensor::calculateRoll(
     float axisXValue, float axisYValue, float axisZValue)
 {
-    // XXX: implement
+    double rad = getAbsoluteRawGravity(axisXValue, axisYValue, axisZValue);
+    double pitch = calculatePitch(axisXValue, axisYValue, axisZValue);
+    return asinf(axisXValue / (cos(pitch) * rad));
 }
 
 /**
@@ -314,7 +337,22 @@ void JoySensor::readConfig(QXmlStreamReader *xml)
 
         while (!xml->atEnd() && (!xml->isEndElement() && (xml->name() != "sensor")))
         {
-            if ((xml->name() == GlobalVariables::JoySensorButton::xmlName)
+            if ((xml->name() == "deadZone") && xml->isStartElement())
+            {
+                QString temptext = xml->readElementText();
+                float tempchoice = temptext.toFloat();
+                setDeadZone(tempchoice);
+            } else if ((xml->name() == "maxZone") && xml->isStartElement())
+            {
+                QString temptext = xml->readElementText();
+                float tempchoice = temptext.toFloat();
+                setMaxZone(tempchoice);
+            } else if ((xml->name() == "diagonalRange") && xml->isStartElement())
+            {
+                QString temptext = xml->readElementText();
+                int tempchoice = temptext.toInt();
+                setDiagonalRange(tempchoice);
+            } else if ((xml->name() == GlobalVariables::JoySensorButton::xmlName)
                 && xml->isStartElement())
             {
                 int index = xml->attributes().value("index").toString().toInt();
@@ -329,6 +367,11 @@ void JoySensor::readConfig(QXmlStreamReader *xml)
 
                 if (!joyButtonXml.isNull())
                     delete joyButtonXml;
+            } else if ((xml->name() == "sensorDelay") && xml->isStartElement())
+            {
+                QString temptext = xml->readElementText();
+                int tempchoice = temptext.toInt();
+                setSensorDelay(tempchoice);
             } else
             {
                 xml->skipCurrentElement();
@@ -350,6 +393,18 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
     {
         xml->writeStartElement("sensor");
         xml->writeAttribute("type", QString::number(m_type));
+
+        if (m_dead_zone != GlobalVariables::JoySensor::DEFAULTDEADZONE)
+            xml->writeTextElement("deadZone", QString::number(m_dead_zone));
+
+        if (m_max_zone != GlobalVariables::JoySensor::DEFAULTMAXZONE)
+            xml->writeTextElement("maxZone", QString::number(m_max_zone));
+
+        if (m_diagonal_range != GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE)
+            xml->writeTextElement("diagonalRange", QString::number(m_diagonal_range));
+
+        if (m_sensor_delay > GlobalVariables::JoySensor::DEFAULTSENSORDELAY)
+            xml->writeTextElement("sensorDelay", QString::number(m_sensor_delay));
 
         QHashIterator<JoySensorDirection, JoySensorButton *> iter(m_buttons);
 
@@ -377,32 +432,70 @@ SetJoystick *JoySensor::getParentSet()
 
 void JoySensor::reset()
 {
-    // XXX: implement
+    m_dead_zone = GlobalVariables::JoySensor::DEFAULTDEADZONE;
+    m_max_zone = GlobalVariables::JoySensor::DEFAULTMAXZONE;
+    m_diagonal_range = GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE;
+    m_pending_event = false;
+
+    m_current_direction = JoySensorDirection::CENTERED;
+    m_sensor_name.clear();
+    m_sensor_delay = GlobalVariables::JoySensor::DEFAULTSENSORDELAY;
+
+    resetButtons();
 }
 
-void JoySensor::setDeadZone(int value)
+void JoySensor::setDeadZone(float value)
 {
-    // XXX: implement
+    // XXX: do not compare floats
+    if ((value != m_dead_zone) && (value <= m_max_zone))
+    {
+        m_dead_zone = value;
+        emit deadZoneChanged(value);
+        emit propertyUpdated();
+    }
 }
 
-void JoySensor::setMaxZone(int value)
+void JoySensor::setMaxZone(float value)
 {
-    // XXX: implement
+    value = abs(value);
+
+    // XXX: implement calibration
+
+    // XXX: do not compare floats
+    if ((value != m_max_zone) && (value > m_dead_zone))
+    {
+        m_max_zone = value;
+        emit maxZoneChanged(value);
+        emit propertyUpdated();
+    }
 }
 
+/**
+ * @brief Set the diagonal range value for a sensor.
+ * @param Value between 1 - 90.
+ */
 void JoySensor::setDiagonalRange(int value)
 {
-    // XXX: implement
+    if (value < 1)
+        value = 1;
+    else if (value > 90)
+        value = 90;
+
+    if (value != m_diagonal_range)
+    {
+        m_diagonal_range = value;
+        emit diagonalRangeChanged(value);
+        emit propertyUpdated();
+    }
 }
 
 void JoySensor::setSensorDelay(unsigned int value)
 {
-    // XXX: implement
     if (((value >= 10) && (value <= 1000)) || (value == 0))
     {
         m_sensor_delay = value;
         emit sensorDelayChanged(value);
-        //emit propertyUpdated();
+        emit propertyUpdated();
     }
 }
 

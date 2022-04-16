@@ -68,14 +68,17 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
 
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
+        float value;
         m_ui->gravityValue->setText(QString::number(m_sensor->getAbsoluteRawGravity()));
-        m_ui->pitchValue->setText(QString::number(m_sensor->calculatePitch()));
-        m_ui->rollValue->setText(QString::number(m_sensor->calculateRoll()));
+        value = m_sensor->calculatePitch() * 180.0 / M_PI;
+        m_ui->pitchValue->setText(QString::number(value));
+        value = m_sensor->calculateRoll() * 180.0 / M_PI;
+        m_ui->rollValue->setText(QString::number(value));
     } else
     {
-        m_ui->xCoordinateLabel->setText(tr("Roll"));
-        m_ui->yCoordinateLabel->setText(tr("Pitch"));
-        m_ui->zCoordinateLabel->setText(tr("Yaw"));
+        m_ui->xCoordinateLabel->setText(tr("Roll (°/s)"));
+        m_ui->yCoordinateLabel->setText(tr("Pitch (°/s)"));
+        m_ui->zCoordinateLabel->setText(tr("Yaw (°/s)"));
         m_ui->gravityLabel->setVisible(false);
         m_ui->gravityValue->setVisible(false);
         m_ui->pitchLabel->setVisible(false);
@@ -106,27 +109,29 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         this, &JoySensorEditDialog::implementPresets);
 
     connect(m_ui->deadZoneSlider, &QSlider::valueChanged,
-        m_ui->deadZoneSpinBox, &QSpinBox::setValue);
+        m_ui->deadZoneSpinBox, &QDoubleSpinBox::setValue);
     connect(m_ui->maxZoneSlider, &QSlider::valueChanged,
-        m_ui->maxZoneSpinBox, &QSpinBox::setValue);
+        m_ui->maxZoneSpinBox, &QDoubleSpinBox::setValue);
     connect(m_ui->diagonalRangeSlider, &QSlider::valueChanged,
         m_ui->diagonalRangeSpinBox, &QSpinBox::setValue);
+    connect(m_ui->sensorDelaySlider, &QSlider::valueChanged, &m_helper,
+        &JoySensorEditDialogHelper::updateSensorDelay);
 
     connect(m_ui->deadZoneSpinBox,
-        static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
         m_ui->deadZoneSlider, &QSlider::setValue);
     connect(m_ui->maxZoneSpinBox,
-        static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
         m_ui->maxZoneSlider, &QSlider::setValue);
     connect(m_ui->maxZoneSpinBox,
-        static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
         this, &JoySensorEditDialog::checkMaxZone);
     connect(m_ui->diagonalRangeSpinBox,
         static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
         m_ui->diagonalRangeSlider, &QSlider::setValue);
 
     connect(m_ui->deadZoneSpinBox,
-        static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+        static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
         m_sensor, &JoySensor::setDeadZone);
     connect(m_ui->diagonalRangeSpinBox,
         static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -181,8 +186,10 @@ void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
         m_ui->gravityValue->setText(QString::number(m_sensor->getAbsoluteRawGravity()));
-        m_ui->pitchValue->setText(QString::number(m_sensor->calculatePitch()));
-        m_ui->rollValue->setText(QString::number(m_sensor->calculateRoll()));
+        value = m_sensor->calculatePitch() * 180.0 / M_PI;
+        m_ui->pitchValue->setText(QString::number(value));
+        value = m_sensor->calculateRoll() * 180.0 / M_PI;
+        m_ui->rollValue->setText(QString::number(value));
     }
 
     double validDistance = m_sensor->getDistanceFromDeadZone() * 100.0;
@@ -191,10 +198,10 @@ void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
     PadderCommon::inputDaemonMutex.unlock();
 }
 
-void JoySensorEditDialog::checkMaxZone(int value)
+void JoySensorEditDialog::checkMaxZone(float value)
 {
     if (value > m_ui->deadZoneSpinBox->value())
-        QMetaObject::invokeMethod(m_sensor, "setMaxZone", Q_ARG(int, value));
+        QMetaObject::invokeMethod(m_sensor, "setMaxZone", Q_ARG(float, value));
 }
 
 void JoySensorEditDialog::selectCurrentPreset()
