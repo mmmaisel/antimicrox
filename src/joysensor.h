@@ -44,6 +44,23 @@ class JoySensor : public QObject
     JoySensorDirection getCurrentDirection();
 
     int getType();
+    int getDeadZone();
+    int getDiagonalRange();
+    int getMaxZone();
+    int getXCoordinate();
+    int getYCoordinate();
+    int getZCoordinate();
+    unsigned int getSensorDelay();
+
+    double getDistanceFromDeadZone();
+    double getDistanceFromDeadZone(int axisXValue, int axisYValue, int axisZValue);
+    double getAbsoluteRawGravity();
+    double getAbsoluteRawGravity(int axisXValue, int axisYValue, int axisZValue);
+    double calculatePitch();
+    double calculatePitch(int axisXValue, int axisYValue, int axisZValue);
+    double calculateRoll();
+    double calculateRoll(int axisXValue, int axisYValue, int axisZValue);
+
     QHash<JoySensorDirection, JoySensorButton *> *getButtons();
     JoySensorButton *getDirectionButton(JoySensorDirection direction);
 
@@ -66,14 +83,23 @@ class JoySensor : public QObject
     };
 
   signals:
+    void moved(int xaxis, int yaxis, int zaxis);
     void active(int value);
     void released(int value);
+    void deadZoneChanged(int value);
+    void diagonalRangeChanged(int value);
+    void maxZoneChanged(int value);
+    void sensorDelayChanged(int value);
     void sensorNameChanged();
     void joyModeChanged();
 
   public slots:
     void reset();
+    void setDeadZone(int value);
+    void setMaxZone(int value);
+    void setDiagonalRange(int value);
     void setSensorName(QString tempName);
+    void setSensorDelay(unsigned int value);
 
   protected:
     void populateButtons();
@@ -81,6 +107,10 @@ class JoySensor : public QObject
 
     int m_type;
     int m_originset;
+    int m_dead_zone;
+    int m_diagonal_range;
+    int m_max_zone;
+    unsigned int m_sensor_delay;
 
     QString m_sensor_name;
     QString m_default_sensor_name;

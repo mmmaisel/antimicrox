@@ -102,7 +102,142 @@ JoySensorDirection JoySensor::getCurrentDirection()
 
 int JoySensor::getType() { return m_type; }
 
+/**
+ * @brief Get the assigned dead zone value.
+ * @return Assigned dead zone value
+ */
+int JoySensor::getDeadZone() { return m_dead_zone; }
+
+/**
+ * @brief Get the assigned diagonal range value.
+ * @return Assigned diagonal range.
+ */
+int JoySensor::getDiagonalRange() { return m_diagonal_range; }
+
+int JoySensor::getMaxZone() { return m_max_zone; }
+
+/**
+ * @brief Get the value for the corresponding X axis.
+ * @return X axis value.
+ */
+int JoySensor::getXCoordinate() { return m_axisX->getCurrentRawValue(); }
+
+/**
+ * @brief Get the value for the corresponding Y axis.
+ * @return Y axis value.
+ */
+int JoySensor::getYCoordinate() { return m_axisY->getCurrentRawValue(); }
+
+/**
+ * @brief Get the value for the corresponding Z axis.
+ * @return Z axis value.
+ */
+int JoySensor::getZCoordinate() { return m_axisZ->getCurrentRawValue(); }
+
+unsigned int JoySensor::getSensorDelay() { return m_sensor_delay; }
+
 QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &m_buttons; }
+
+/**
+ * @brief Get current radial distance of the sensor past the assigned
+ *   dead zone.
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::getDistanceFromDeadZone()
+{
+    return getDistanceFromDeadZone(
+        m_axisX->getCurrentRawValue(),
+        m_axisY->getCurrentRawValue(),
+        m_axisZ->getCurrentRawValue()
+    );
+}
+
+/**
+ * @brief Get radial distance of the sensor past the assigned dead zone
+ *   based on the passed X, Y and Z axes values associated with the sensor.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::getDistanceFromDeadZone(int axisXValue, int axisYValue, int axisZValue)
+{
+    // XXX: implement
+}
+
+/**
+ * @brief Get the raw gravity vector length of the sensor.
+ * @return Gryvity strength in g.
+ */
+double JoySensor::getAbsoluteRawGravity()
+{
+    return getAbsoluteRawGravity(
+        m_axisX->getCurrentRawValue(),
+        m_axisY->getCurrentRawValue(),
+        m_axisZ->getCurrentRawValue()
+    );
+}
+
+double JoySensor::getAbsoluteRawGravity(int axisXValue, int axisYValue, int axisZValue)
+{
+    // XXX: implement
+}
+
+/**
+ * @brief Calculate the pitch angle (in degrees) corresponding to the current
+ *   position of controller.
+ * @return Pitch (in degrees)
+ */
+double JoySensor::calculatePitch()
+{
+    return calculatePitch(
+        m_axisX->getCurrentRawValue(),
+        m_axisY->getCurrentRawValue(),
+        m_axisZ->getCurrentRawValue()
+    );
+}
+
+/**
+ * @brief Calculate the pitch angle (in degrees) corresponding to the current
+ *   passed X, Y and Z axes values associated with the sensor.
+ *   position of controller.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Pitch (in degrees)
+ */
+double JoySensor::calculatePitch(int axisXValue, int axisYValue, int axisZValue)
+{
+    // XXX: implement
+}
+
+/**
+ * @brief Calculate the roll angle (in degrees) corresponding to the current
+ *   position of controller.
+ * @return Roll (in degrees)
+ */
+double JoySensor::calculateRoll()
+{
+    return calculateRoll(
+        m_axisX->getCurrentRawValue(),
+        m_axisY->getCurrentRawValue(),
+        m_axisZ->getCurrentRawValue()
+    );
+}
+
+/**
+ * @brief Calculate the roll angle (in degrees) corresponding to the current
+ *   passed X, Y and Z axes values associated with the sensor.
+ *   position of controller.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Roll (in degrees)
+ */
+double JoySensor::calculateRoll(int axisXValue, int axisYValue, int axisZValue)
+{
+    // XXX: implement
+}
 
 /**
  * @brief Get a pointer to the sensor direction button for the desired
@@ -228,6 +363,33 @@ JoyAxis *JoySensor::getAxisZ() { return m_axisZ; }
 
 void JoySensor::reset()
 {
+    // XXX: implement
+}
+
+void JoySensor::setDeadZone(int value)
+{
+    // XXX: implement
+}
+
+void JoySensor::setMaxZone(int value)
+{
+    // XXX: implement
+}
+
+void JoySensor::setDiagonalRange(int value)
+{
+    // XXX: implement
+}
+
+void JoySensor::setSensorDelay(unsigned int value)
+{
+    // XXX: implement
+    if (((value >= 10) && (value <= 1000)) || (value == 0))
+    {
+        m_sensor_delay = value;
+        emit sensorDelayChanged(value);
+        //emit propertyUpdated();
+    }
 }
 
 void JoySensor::populateButtons()

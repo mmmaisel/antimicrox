@@ -22,7 +22,7 @@
 #include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
 #include "joysensorbuttonpushbutton.h"
-//#include "joysensoreditdialog.h"
+#include "joysensoreditdialog.h"
 #include "joysensorpushbutton.h"
 
 #include <QDebug>
@@ -105,7 +105,9 @@ void SensorPushButtonGroup::openSensorButtonDialog(JoySensorButtonPushButton *pu
 
 void SensorPushButtonGroup::showSensorDialog()
 {
-    // XXX: implement
+    JoySensorEditDialog *dialog =
+        new JoySensorEditDialog(m_sensor, parentWidget());
+    dialog->show();
 }
 
 void SensorPushButtonGroup::toggleNameDisplay()

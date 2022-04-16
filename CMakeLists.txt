@@ -155,6 +155,7 @@ set(antimicrox_SOURCES
         src/gui/joybuttonwidget.cpp
         src/gui/joycontrolstickeditdialog.cpp
         src/gui/joydpadbuttonwidget.cpp
+        src/gui/joysensoreditdialog.cpp
         src/gui/joystickstatuswindow.cpp
         src/gui/joytabwidget.cpp
         src/gui/joytabwidgetcontainer.cpp
@@ -191,6 +192,7 @@ set(antimicrox_SOURCES
         src/joysensor.cpp
         src/joysensorbuttonpushbutton.cpp
         src/joysensorpushbutton.cpp
+        src/joysensorstatusbox.cpp
         src/joystick.cpp
         src/keyboard/virtualkeyboardmousewidget.cpp
         src/keyboard/virtualkeypushbutton.cpp
@@ -221,6 +223,7 @@ set(antimicrox_SOURCES
         src/uihelpers/joyaxiscontextmenuhelper.cpp
         src/uihelpers/joycontrolstickcontextmenuhelper.cpp
         src/uihelpers/joycontrolstickeditdialoghelper.cpp
+        src/uihelpers/joysensoreditdialoghelper.cpp
         src/uihelpers/joytabwidgethelper.cpp
         src/vdpad.cpp
         src/xml/inputdevicexml.cpp
@@ -272,6 +275,7 @@ set(antimicrox_HEADERS
         src/gui/joybuttonwidget.h
         src/gui/joycontrolstickeditdialog.h
         src/gui/joydpadbuttonwidget.h
+        src/gui/joysensoreditdialog.h
         src/gui/joystickstatuswindow.h
         src/gui/joytabwidget.h
         src/gui/joytabwidgetcontainer.h
@@ -309,6 +313,7 @@ set(antimicrox_HEADERS
         src/joysensordirection.h
         src/joysensorbuttonpushbutton.h
         src/joysensorpushbutton.h
+        src/joysensorstatusbox.h
         src/joystick.h
         src/keyboard/virtualkeyboardmousewidget.h
         src/keyboard/virtualkeypushbutton.h
@@ -339,6 +344,7 @@ set(antimicrox_HEADERS
         src/uihelpers/joyaxiscontextmenuhelper.h
         src/uihelpers/joycontrolstickcontextmenuhelper.h
         src/uihelpers/joycontrolstickeditdialoghelper.h
+        src/uihelpers/joysensoreditdialoghelper.h
         src/uihelpers/joytabwidgethelper.h
         src/vdpad.h
         src/xml/inputdevicexml.h
@@ -376,6 +382,7 @@ set(antimicrox_FORMS
         src/gui/extraprofilesettingsdialog.ui
         src/gui/gamecontrollermappingdialog.ui
         src/gui/joycontrolstickeditdialog.ui
+        src/gui/joysensoreditdialog.ui
         src/gui/joystickstatuswindow.ui
         src/gui/mainsettingsdialog.ui
         src/gui/mainwindow.ui
