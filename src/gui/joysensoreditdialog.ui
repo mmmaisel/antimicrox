@@ -37,7 +37,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_10">
+    <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,2">
      <property name="spacing">
       <number>20</number>
      </property>
@@ -109,7 +109,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-                 <string>X (m/s^2):</string>
+              <string>X (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -120,6 +120,12 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
              </property>
              <property name="text">
               <string>0</string>
@@ -139,7 +145,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-                 <string>Y (m/s^2):</string>
+              <string>Y (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -169,7 +175,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-                 <string>Z (m/s^2):</string>
+              <string>Z (m/s^2):</string>
              </property>
             </widget>
            </item>
@@ -445,13 +451,13 @@
               <number>30</number>
              </property>
              <property name="singleStep">
-              <double>0.1</double>
+              <number>0</number>
              </property>
              <property name="pageStep">
               <number>1</number>
              </property>
              <property name="value">
-              <double>0.5</double>
+              <number>1</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -463,17 +469,17 @@
              <property name="toolTip">
               <string>Dead zone value to use for an analog sensor.</string>
              </property>
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>30</number>
-             </property>
              <property name="decimals">
               <number>2</number>
              </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>30.000000000000000</double>
+             </property>
              <property name="value">
-              <double>0.5</double>
+              <double>0.500000000000000</double>
              </property>
             </widget>
            </item>
@@ -500,7 +506,7 @@
               <number>30</number>
              </property>
              <property name="singleStep">
-              <double>0.1</double>
+              <number>0</number>
              </property>
              <property name="pageStep">
               <number>10</number>
@@ -518,17 +524,17 @@
              <property name="toolTip">
               <string>Value when an analog sensor is considered moved 100%.</string>
              </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>30</number>
-             </property>
              <property name="decimals">
               <number>2</number>
              </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>30.000000000000000</double>
+             </property>
              <property name="value">
-              <number>1</number>
+              <double>1.000000000000000</double>
              </property>
             </widget>
            </item>

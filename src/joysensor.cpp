@@ -54,9 +54,18 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
 void JoySensor::queuePendingEvent(float* values, bool ignoresets)
 {
     m_pending_event = true;
-    m_pending_value[0] = values[0];
-    m_pending_value[1] = values[1];
-    m_pending_value[2] = values[2];
+    if (m_type == ACCELEROMETER)
+    {
+        m_pending_value[0] = values[0];
+        m_pending_value[1] = values[1];
+        m_pending_value[2] = values[2];
+    } else
+    {
+        // SDL uses unintuitive rotation axes.
+        m_pending_value[0] = values[2];
+        m_pending_value[1] = -values[0];
+        m_pending_value[2] = values[1];
+    }
     m_pending_ignore_sets = ignoresets;
 }
 
@@ -397,7 +406,9 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
         if (m_dead_zone != GlobalVariables::JoySensor::DEFAULTDEADZONE)
             xml->writeTextElement("deadZone", QString::number(m_dead_zone));
 
-        if (m_max_zone != GlobalVariables::JoySensor::DEFAULTMAXZONE)
+        if (m_max_zone != (m_type == ACCELEROMETER
+                ? GlobalVariables::JoySensor::ACCEL_MAX
+                : GlobalVariables::JoySensor::GYRO_MAX))
             xml->writeTextElement("maxZone", QString::number(m_max_zone));
 
         if (m_diagonal_range != GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE)
@@ -433,7 +444,9 @@ SetJoystick *JoySensor::getParentSet()
 void JoySensor::reset()
 {
     m_dead_zone = GlobalVariables::JoySensor::DEFAULTDEADZONE;
-    m_max_zone = GlobalVariables::JoySensor::DEFAULTMAXZONE;
+    m_max_zone = m_type == ACCELEROMETER
+        ? GlobalVariables::JoySensor::ACCEL_MAX
+        : GlobalVariables::JoySensor::GYRO_MAX;
     m_diagonal_range = GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE;
     m_pending_event = false;
 

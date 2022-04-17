@@ -183,12 +183,12 @@ const int GlobalVariables::JoyControlStick::DEFAULTSTICKDELAY = 0;
 
 // ---- JoySensor ---- //
 
-const double GlobalVariables::JoySensor::ACCEL_MIN = -100;
-const double GlobalVariables::JoySensor::ACCEL_MAX =  100;
-const double GlobalVariables::JoySensor::GYRO_MIN = -10;
-const double GlobalVariables::JoySensor::GYRO_MAX =  10;
+const double GlobalVariables::JoySensor::ACCEL_MIN = -30.0;
+const double GlobalVariables::JoySensor::ACCEL_MAX =  30.0;
+const double GlobalVariables::JoySensor::GRAVITY = 9.80665;
+const double GlobalVariables::JoySensor::GYRO_MIN = -10.0;
+const double GlobalVariables::JoySensor::GYRO_MAX =  10.0;
 const double GlobalVariables::JoySensor::DEFAULTDEADZONE = 0.5;
-const double GlobalVariables::JoySensor::DEFAULTMAXZONE = 30.0;
 const int GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE = 45;
 const int GlobalVariables::JoySensor::DEFAULTSENSORDELAY = 0;
 

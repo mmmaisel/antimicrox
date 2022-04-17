@@ -39,8 +39,7 @@ class JoySensorStatusBox : public QWidget
 
   protected:
     virtual void paintEvent(QPaintEvent *event);
-    void drawAccelerometerBox();
-    void drawGyroscopeBox();
+    void drawSensorBox(float scale);
 
   private:
     JoySensor *m_sensor;

@@ -66,6 +66,10 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
     QString zCoorString = QString::number(m_sensor->getZCoordinate());
     m_ui->zCoordinateValue->setText(zCoorString);
 
+    auto min_width = m_ui->xCoordinateLabel->fontMetrics().
+        boundingRect(QString("X.XXXXXXX")).width();
+    m_ui->xCoordinateLabel->setMinimumWidth(min_width);
+
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
         float value;
@@ -74,6 +78,8 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         m_ui->pitchValue->setText(QString::number(value));
         value = m_sensor->calculateRoll() * 180.0 / M_PI;
         m_ui->rollValue->setText(QString::number(value));
+        m_ui->maxZoneSlider->setMaximum(GlobalVariables::JoySensor::ACCEL_MAX);
+        m_ui->maxZoneSpinBox->setMaximum(GlobalVariables::JoySensor::ACCEL_MAX);
     } else
     {
         m_ui->xCoordinateLabel->setText(tr("Roll (°/s)"));
@@ -85,6 +91,8 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         m_ui->pitchValue->setVisible(false);
         m_ui->rollLabel->setVisible(false);
         m_ui->rollValue->setVisible(false);
+        m_ui->maxZoneSlider->setMaximum(GlobalVariables::JoySensor::GYRO_MAX);
+        m_ui->maxZoneSpinBox->setMaximum(GlobalVariables::JoySensor::GYRO_MAX);
     }
 
     m_ui->sensorStatusBoxWidget->setSensor(m_sensor);
