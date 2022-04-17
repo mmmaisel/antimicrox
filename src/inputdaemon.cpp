@@ -192,6 +192,7 @@ void InputDaemon::refreshJoysticks()
                 SDL_Joystick *sdlStick = SDL_GameControllerGetJoystick(controller);
                 SDL_JoystickID tempJoystickID = SDL_JoystickInstanceID(sdlStick);
 
+#if SDL_VERSION_ATLEAST(2,0,14)
                 if (SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO)) {
                     SDL_GameControllerSetSensorEnabled(controller, SDL_SENSOR_GYRO, SDL_TRUE);
                 }
@@ -199,6 +200,7 @@ void InputDaemon::refreshJoysticks()
                 if (SDL_GameControllerHasSensor(controller, SDL_SENSOR_ACCEL)) {
                     SDL_GameControllerSetSensorEnabled(controller, SDL_SENSOR_ACCEL, SDL_TRUE);
                 }
+#endif
 
                 // Check if device has already been grabbed.
                 if (!m_joysticks->contains(tempJoystickID))
@@ -814,6 +816,7 @@ void InputDaemon::firstInputPass(QQueue<SDL_Event> *sdlEventQueue)
             break;
         }
 
+#if SDL_VERSION_ATLEAST(2,0,14)
         case SDL_CONTROLLERSENSORUPDATE: {
             InputDevice *joy = trackcontrollers.value(event.caxis.which);
 
@@ -824,6 +827,7 @@ void InputDaemon::firstInputPass(QQueue<SDL_Event> *sdlEventQueue)
             }
             break;
         }
+#endif
 
         case SDL_CONTROLLERBUTTONDOWN:
         case SDL_CONTROLLERBUTTONUP: {
@@ -960,11 +964,13 @@ void InputDaemon::modifyUnplugEvents(QQueue<SDL_Event> *sdlEventQueue)
 
                             break;
                         }
+#if SDL_VERSION_ATLEAST(2,0,14)
                         case SDL_CONTROLLERSENSORUPDATE: {
                             // XXX: implement more
                             tempQueue.enqueue(event);
                             break;
                         }
+#endif
                         case SDL_CONTROLLERBUTTONDOWN:
                         case SDL_CONTROLLERBUTTONUP: {
                             tempQueue.enqueue(event);
@@ -1115,6 +1121,7 @@ void InputDaemon::secondInputPass(QQueue<SDL_Event> *sdlEventQueue)
             break;
         }
 
+#if SDL_VERSION_ATLEAST(2,0,14)
         case SDL_CONTROLLERSENSORUPDATE: {
             InputDevice *joy = trackcontrollers.value(event.csensor.which);
 
@@ -1140,6 +1147,7 @@ void InputDaemon::secondInputPass(QQueue<SDL_Event> *sdlEventQueue)
 
             break;
         }
+#endif
 
         case SDL_CONTROLLERBUTTONDOWN:
         case SDL_CONTROLLERBUTTONUP: {

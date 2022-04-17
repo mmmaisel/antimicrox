@@ -61,7 +61,11 @@ SDLEventReader::~SDLEventReader()
 void SDLEventReader::initSDL()
 { // SDL_INIT_GAMECONTROLLER should automatically initialize SDL_INIT_JOYSTICK
     // but it doesn't seem to be the case with v2.0.4
+#if SDL_VERSION_ATLEAST(2,0,14)
     SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR);
+#else
+    SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+#endif
     SDL_JoystickEventState(SDL_ENABLE);
 
     sdlIsOpen = true;

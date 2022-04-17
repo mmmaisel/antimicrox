@@ -149,14 +149,14 @@ int Joystick::getNumberRawHats()
     return numhats;
 }
 
-int Joystick::hasRawAccelerometer()
+bool Joystick::hasRawAccelerometer()
 {
-    return 0;
+    return false;
 }
 
-int Joystick::hasRawGyroscope()
+bool Joystick::hasRawGyroscope()
 {
-    return 0;
+    return false;
 }
 
 void Joystick::setCounterUniques(int counter) { counterUniques = counter; }

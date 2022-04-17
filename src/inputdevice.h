@@ -40,8 +40,8 @@ class InputDevice : public QObject
     virtual int getNumberButtons();
     virtual int getNumberAxes();
     virtual int getNumberHats();
-    virtual int hasAccelerometer();
-    virtual int hasGyroscope();
+    virtual bool hasAccelerometer();
+    virtual bool hasGyroscope();
     virtual int getNumberSticks();
     virtual int getNumberVDPads();
 
@@ -95,8 +95,8 @@ class InputDevice : public QObject
     virtual int getNumberRawButtons() = 0;
     virtual int getNumberRawAxes() = 0;
     virtual int getNumberRawHats() = 0;
-    virtual int hasRawAccelerometer() = 0;
-    virtual int hasRawGyroscope() = 0;
+    virtual bool hasRawAccelerometer() = 0;
+    virtual bool hasRawGyroscope() = 0;
 
     int getDeviceKeyPressTime(); // unsigned
 

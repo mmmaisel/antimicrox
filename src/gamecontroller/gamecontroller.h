@@ -59,8 +59,8 @@ class GameController : public InputDevice
     virtual int getNumberRawButtons() override;
     virtual int getNumberRawAxes() override;
     virtual int getNumberRawHats() override;
-    virtual int hasRawAccelerometer() override;
-    virtual int hasRawGyroscope() override;
+    virtual bool hasRawAccelerometer() override;
+    virtual bool hasRawGyroscope() override;
     void setCounterUniques(int counter) override;
 
     QString getBindStringForAxis(int index, bool trueIndex = true);
