@@ -324,6 +324,24 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
 
                     xml->readNextStartElement();
                 }
+            } else if ((xml->name() == "calibration") && xml->isStartElement())
+            {
+                xml->readNextStartElement();
+                while (!xml->atEnd() && (!xml->isEndElement() && (xml->name() != "calibration")))
+                {
+                    if ((xml->name() == "gyroscope"))
+                    {
+                        float x0 = xml->attributes().value("x0").toString().toFloat();
+                        float y0 = xml->attributes().value("y0").toString().toFloat();
+                        float z0 = xml->attributes().value("z0").toString().toFloat();
+                        m_inputDevice->applyGyroscopeCalibration(x0, y0, z0);
+                    } else
+                    {
+                        // If none of the above, skip the element
+                        xml->skipCurrentElement();
+                    }
+                    xml->readNextStartElement();
+                }
             } else if ((xml->name() == "keyPressTime") && xml->isStartElement())
             {
                 int tempchoice = xml->readElementText().toInt();
@@ -350,6 +368,8 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
 
 void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
 {
+    qDebug() << "InputDeviceXml::writeConfig";
+
     xml->writeStartElement(m_inputDevice->getXmlName());
     xml->writeAttribute("configversion", QString::number(PadderCommon::LATESTCONFIGFILEVERSION));
     xml->writeAttribute("appversion", PadderCommon::programVersion);
@@ -686,6 +706,22 @@ void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
     if ((m_inputDevice->getDeviceKeyPressTime() > 0) &&
         (m_inputDevice->getDeviceKeyPressTime() != GlobalVariables::InputDevice::DEFAULTKEYPRESSTIME))
         xml->writeTextElement("keyPressTime", QString::number(m_inputDevice->getDeviceKeyPressTime()));
+
+    JoySensor* gyroscope = m_inputDevice->getActiveSetJoystick()->
+        getSensor(JoySensor::GYROSCOPE);
+
+    xml->writeStartElement("calibration"); // <calibration>
+    if (gyroscope != nullptr)
+    {
+        float data[3];
+        gyroscope->getCalibration(data);
+        xml->writeStartElement("gyroscope");
+        xml->writeAttribute("x0", QString::number(data[0]));
+        xml->writeAttribute("y0", QString::number(data[1]));
+        xml->writeAttribute("z0", QString::number(data[2]));
+        xml->writeEndElement();
+    }
+    xml->writeEndElement(); // </calibration>
 
     xml->writeStartElement("sets");
 

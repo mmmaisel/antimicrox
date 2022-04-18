@@ -28,6 +28,7 @@
 //#include "autoprofilewatcher.h"
 #include "advancestickassignmentdialog.h"
 #include "calibration.h"
+#include "sensorcalibration.h"
 #include "common.h"
 #include "dpadpushbutton.h"
 #include "gamecontrollermappingdialog.h"
@@ -174,6 +175,7 @@ MainWindow::MainWindow(QMap<SDL_JoystickID, InputDevice *> *joysticks, CommandLi
     connect(ui->actionOptions, &QAction::triggered, this, &MainWindow::openMainSettingsDialog);
     connect(ui->actionWiki, &QAction::triggered, this, &MainWindow::openWikiPage);
     connect(ui->actionCalibration, &QAction::triggered, this, &MainWindow::openCalibration);
+    connect(ui->actionSensorCalibration, &QAction::triggered, this, &MainWindow::openSensorCalibration);
 
 #if defined(WITH_X11)
     if (QApplication::platformName() == QStringLiteral("xcb"))
@@ -1105,6 +1107,45 @@ void MainWindow::openCalibration()
                 {
                     QMessageBox::information(this, tr("Calibration is not available."),
                                              tr("Selected device doesn't have any joystick to calibrate."));
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::openSensorCalibration()
+{
+    if (m_joysticks->isEmpty())
+    {
+        QMessageBox::information(this, tr("Calibration couldn't be opened"),
+            tr("You must connect at least one controller to open the window"));
+
+    } else
+    {
+        int index = ui->tabWidget->currentIndex();
+        if (index >= 0)
+        {
+            JoyTabWidget *joyTab = qobject_cast<JoyTabWidget *>(ui->tabWidget->widget(index)); // static_cast
+            InputDevice *device = joyTab->getJoystick();
+
+            if (device != nullptr)
+            {
+                JoySensor *accelerometer = device->getActiveSetJoystick()->
+                    getSensor(JoySensor::ACCELEROMETER);
+                JoySensor *gyroscope = device->getActiveSetJoystick()->
+                    getSensor(JoySensor::GYROSCOPE);
+                if (accelerometer != nullptr || gyroscope != nullptr)
+                {
+                    QPointer<SensorCalibration> calibration =
+                        new SensorCalibration(device);
+                    calibration.data()->show();
+
+                    if (calibration.isNull())
+                        calibration.clear();
+                } else
+                {
+                    QMessageBox::information(this, tr("Calibration is not available."),
+                        tr("Selected device doesn't have any sensors to calibrate."));
                 }
             }
         }

@@ -164,6 +164,7 @@ set(antimicrox_SOURCES
         src/gui/mousesettingsdialog.cpp
         src/gui/qkeydisplaydialog.cpp
         src/gui/quicksetdialog.cpp
+        src/gui/sensorcalibration.cpp
         src/gui/setaxisthrottledialog.cpp
         src/gui/setnamesdialog.cpp
         src/gui/slotitemlistwidget.cpp
@@ -284,6 +285,7 @@ set(antimicrox_HEADERS
         src/gui/mousesettingsdialog.h
         src/gui/qkeydisplaydialog.h
         src/gui/quicksetdialog.h
+        src/gui/sensorcalibratrion.h
         src/gui/setaxisthrottledialog.h
         src/gui/setnamesdialog.h
         src/gui/slotitemlistwidget.h
@@ -389,6 +391,7 @@ set(antimicrox_FORMS
         src/gui/mousesettingsdialog.ui
         src/gui/qkeydisplaydialog.ui
         src/gui/quicksetdialog.ui
+        src/gui/sensorcalibration.ui
         src/gui/setaxisthrottledialog.ui
         src/gui/setnamesdialog.ui
         )

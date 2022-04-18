@@ -31,7 +31,8 @@ JoySensor::JoySensor(
     : QObject(parent),
     m_type(type),
     m_originset(originset),
-    m_parent_set(parent_set)
+    m_parent_set(parent_set),
+    m_calibrated(false)
 {
     reset();
     populateButtons();
@@ -48,7 +49,14 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
     m_current_value[1] = values[1];
     m_current_value[2] = values[2];
 
-    emit moved(values[0], values[1], values[2]);
+    if (m_calibrated)
+    {
+        m_current_value[0] += m_calibration_value[0];
+        m_current_value[1] += m_calibration_value[1];
+        m_current_value[2] += m_calibration_value[2];
+    }
+
+    emit moved(m_current_value[0], m_current_value[1], m_current_value[2]);
 }
 
 void JoySensor::queuePendingEvent(float* values, bool ignoresets)
@@ -298,6 +306,31 @@ double JoySensor::calculateRoll(
     double rad = getAbsoluteRawGravity(axisXValue, axisYValue, axisZValue);
     double pitch = calculatePitch(axisXValue, axisYValue, axisZValue);
     return asinf(axisXValue / (cos(pitch) * rad));
+}
+
+bool JoySensor::isCalibrated() const
+{
+    return m_calibrated;
+}
+
+void JoySensor::resetCalibration()
+{
+    m_calibrated = false;
+}
+
+void JoySensor::getCalibration(float* data)
+{
+    data[0] = m_calibration_value[0];
+    data[1] = m_calibration_value[1];
+    data[2] = m_calibration_value[2];
+}
+
+void JoySensor::setCalibration(float x0, float y0, float z0)
+{
+    m_calibration_value[0] = x0;
+    m_calibration_value[1] = y0;
+    m_calibration_value[2] = z0;
+    m_calibrated = true;
 }
 
 /**

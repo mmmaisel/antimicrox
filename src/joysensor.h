@@ -73,6 +73,11 @@ class JoySensor : public QObject
     double calculateRoll();
     double calculateRoll(float axisXValue, float axisYValue, float axisZValue);
 
+    bool isCalibrated() const;
+    void resetCalibration();
+    void getCalibration(float* data);
+    void setCalibration(float x0, float y0, float z0);
+
     QHash<JoySensorDirection, JoySensorButton *> *getButtons();
     JoySensorButton *getDirectionButton(JoySensorDirection direction);
 
@@ -115,6 +120,8 @@ class JoySensor : public QObject
     float m_last_known_raw_value[3];
     float m_current_value[3];
     float m_pending_value[3];
+    bool m_calibrated;
+    float m_calibration_value[3];
     bool m_pending_event;
     bool m_pending_ignore_sets;
     float m_dead_zone;

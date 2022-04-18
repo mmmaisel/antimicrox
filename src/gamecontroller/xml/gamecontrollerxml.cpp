@@ -395,6 +395,8 @@ void GameControllerXml::readConfig(QXmlStreamReader *xml)
 
 void GameControllerXml::writeConfig(QXmlStreamWriter *xml)
 {
+    qDebug() << "GameControllerXml::writeConfig";
+
     xml->writeStartElement(m_gameController->getXmlName());
     xml->writeAttribute("configversion", QString::number(PadderCommon::LATESTCONFIGFILEVERSION));
     xml->writeAttribute("appversion", PadderCommon::programVersion);
