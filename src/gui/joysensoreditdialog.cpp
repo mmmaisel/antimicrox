@@ -73,7 +73,7 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
         float value;
-        m_ui->gravityValue->setText(QString::number(m_sensor->getAbsoluteRawGravity()));
+        m_ui->gravityValue->setText(QString::number(m_sensor->calculateDistance()));
         value = m_sensor->calculatePitch() * 180.0 / M_PI;
         m_ui->pitchValue->setText(QString::number(value));
         value = m_sensor->calculateRoll() * 180.0 / M_PI;
@@ -193,7 +193,7 @@ void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
 
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
-        m_ui->gravityValue->setText(QString::number(m_sensor->getAbsoluteRawGravity()));
+        m_ui->gravityValue->setText(QString::number(m_sensor->calculateDistance()));
         value = m_sensor->calculatePitch() * 180.0 / M_PI;
         m_ui->pitchValue->setText(QString::number(value));
         value = m_sensor->calculateRoll() * 180.0 / M_PI;

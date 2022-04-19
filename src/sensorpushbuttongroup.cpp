@@ -51,12 +51,12 @@ void SensorPushButtonGroup::generateButtons()
     }
     else
     {
-        m_left_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_N, 1, 0);
-        m_right_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_P, 1, 2);
+        m_left_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_N, 1, 0);
+        m_right_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_P, 1, 2);
         m_up_button = generateBtnToGrid(JoySensorDirection::GYRO_NICK_P, 0, 1);
         m_down_button = generateBtnToGrid(JoySensorDirection::GYRO_NICK_N, 2, 1);
-        m_fwd_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_P, 0, 2);
-        m_bwd_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_N, 2, 0);
+        m_fwd_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_P, 0, 2);
+        m_bwd_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_N, 2, 0);
     }
 
     m_sensor_widget = new JoySensorPushButton(m_sensor, m_display_names, parentWidget());

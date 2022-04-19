@@ -64,14 +64,15 @@ class JoySensor : public QObject
 
     void resetButtons();
 
-    double getDistanceFromDeadZone();
-    double getDistanceFromDeadZone(float axisXValue, float axisYValue, float axisZValue);
-    double getAbsoluteRawGravity();
-    double getAbsoluteRawGravity(float axisXValue, float axisYValue, float axisZValue);
-    double calculatePitch();
-    double calculatePitch(float axisXValue, float axisYValue, float axisZValue);
-    double calculateRoll();
-    double calculateRoll(float axisXValue, float axisYValue, float axisZValue);
+    bool inDeadZone() const;
+    double getDistanceFromDeadZone() const;
+    double getDistanceFromDeadZone(float x, float y, float z) const;
+    double calculateDistance() const;
+    double calculateDistance(float x, float y, float z) const;
+    double calculatePitch() const;
+    double calculatePitch(float x, float y, float z) const;
+    double calculateRoll() const;
+    double calculateRoll(float x, float y, float z) const;
 
     bool isCalibrated() const;
     void resetCalibration();
@@ -93,8 +94,8 @@ class JoySensor : public QObject
 
   signals:
     void moved(float xaxis, float yaxis, float zaxis);
-    void active(int value);
-    void released(int value);
+    void active(float xaxis, float yaxis, float zaxis);
+    void released(float xaxis, float yaxis, float zaxis);
     void deadZoneChanged(float value);
     void diagonalRangeChanged(int value);
     void maxZoneChanged(float value);
@@ -113,10 +114,15 @@ class JoySensor : public QObject
 
   protected:
     void populateButtons();
+    void createDeskEvent(bool safezone, bool ignoresets = false);
     QString sensorTypeName() const;
 
     Type m_type;
     int m_originset;
+    bool m_active;
+    static const size_t ACTIVE_BUTTON_COUNT = 3;
+    JoySensorButton *m_active_button[ACTIVE_BUTTON_COUNT];
+
     float m_last_known_raw_value[3];
     float m_current_value[3];
     float m_pending_value[3];

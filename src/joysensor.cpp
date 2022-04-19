@@ -31,8 +31,8 @@ JoySensor::JoySensor(
     : QObject(parent),
     m_type(type),
     m_originset(originset),
-    m_parent_set(parent_set),
-    m_calibrated(false)
+    m_calibrated(false),
+    m_parent_set(parent_set)
 {
     reset();
     populateButtons();
@@ -44,7 +44,7 @@ JoySensor::~JoySensor()
 
 void JoySensor::joyEvent(float* values, bool ignoresets)
 {
-    // XXX: implement
+    bool safezone = false;
     m_current_value[0] = values[0];
     m_current_value[1] = values[1];
     m_current_value[2] = values[2];
@@ -54,6 +54,36 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
         m_current_value[0] += m_calibration_value[0];
         m_current_value[1] += m_calibration_value[1];
         m_current_value[2] += m_calibration_value[2];
+    }
+
+    double distance = calculateDistance();
+    // XXX: gravity threshold
+    if (m_type == ACCELEROMETER) {
+        double pitch = calculatePitch();
+        double roll = calculateRoll();
+        safezone = abs(pitch) > m_dead_zone || abs(roll) > m_dead_zone
+            || distance > 20;
+    }
+    else {
+        safezone = distance > m_dead_zone;
+    }
+
+    if (safezone && !m_active)
+    {
+        m_active = true;
+        emit active(m_current_value[0], m_current_value[1], m_current_value[2]);
+        createDeskEvent(safezone, ignoresets);
+        // XXX: implement delay
+    } else if (!safezone && m_active)
+    {
+        m_active = false;
+        emit released(m_current_value[0], m_current_value[1], m_current_value[2]);
+        createDeskEvent(safezone, ignoresets);
+        // XXX: implement delay
+    } else if (m_active)
+    {
+        createDeskEvent(safezone, ignoresets);
+        // XXX: implement delay
     }
 
     emit moved(m_current_value[0], m_current_value[1], m_current_value[2]);
@@ -197,12 +227,17 @@ void JoySensor::resetButtons()
     }
 }
 
+bool JoySensor::inDeadZone() const
+{
+    return calculateDistance() < m_dead_zone;
+}
+
 /**
  * @brief Get current radial distance of the sensor past the assigned
  *   dead zone.
  * @return Distance percentage in the range of 0.0 - 1.0.
  */
-double JoySensor::getDistanceFromDeadZone()
+double JoySensor::getDistanceFromDeadZone() const
 {
     return getDistanceFromDeadZone(
         m_current_value[0],
@@ -219,32 +254,30 @@ double JoySensor::getDistanceFromDeadZone()
  * @param Z axis value
  * @return Distance percentage in the range of 0.0 - 1.0.
  */
-double JoySensor::getDistanceFromDeadZone(
-    float axisXValue, float axisYValue, float axisZValue)
+double JoySensor::getDistanceFromDeadZone(float x, float y, float z) const
 {
-    double distance = sqrt(axisXValue*axisXValue + axisYValue*axisYValue + axisZValue * axisZValue);
+    double distance = calculateDistance(x, y, z);
     double distance_outside = std::max(0.0, distance - m_dead_zone);
 
     return distance_outside / m_max_zone;
 }
 
 /**
- * @brief Get the raw gravity vector length of the sensor.
- * @return Gravity strength in m/s^2.
+ * @brief Get the vector length of the sensor.
+ * @return Length.
  */
-double JoySensor::getAbsoluteRawGravity()
+double JoySensor::calculateDistance() const
 {
-    return getAbsoluteRawGravity(
+    return calculateDistance(
         m_current_value[0],
         m_current_value[1],
         m_current_value[2]
     );
 }
 
-double JoySensor::getAbsoluteRawGravity(
-    float axisXValue, float axisYValue, float axisZValue)
+double JoySensor::calculateDistance(float x, float y, float z) const
 {
-    return sqrt(axisXValue*axisXValue + axisYValue*axisYValue + axisZValue*axisZValue);
+    return sqrt(x*x + y*y + z*z);
 }
 
 /**
@@ -252,7 +285,7 @@ double JoySensor::getAbsoluteRawGravity(
  *   position of controller.
  * @return Pitch (in degrees)
  */
-double JoySensor::calculatePitch()
+double JoySensor::calculatePitch() const
 {
     return calculatePitch(
         m_current_value[0],
@@ -265,16 +298,20 @@ double JoySensor::calculatePitch()
  * @brief Calculate the pitch angle (in degrees) corresponding to the current
  *   passed X, Y and Z axes values associated with the sensor.
  *   position of controller.
+ *   See https://www.nxp.com/files-static/sensors/doc/app_note/AN3461.pdf
+ *   for a description of the used algorithm.
  * @param X axis value
  * @param Y axis value
  * @param Z axis value
  * @return Pitch (in degrees)
  */
-double JoySensor::calculatePitch(
-    float axisXValue, float axisYValue, float axisZValue)
+double JoySensor::calculatePitch(float x, float y, float z) const
 {
-    double rad = getAbsoluteRawGravity();
-    return -asinf(axisYValue / rad);
+    double rad = calculateDistance(x, y, z);
+    double pitch = -atan2(z/rad, y/rad) - M_PI/2;
+    if (pitch < -M_PI)
+        pitch += 2*M_PI;
+    return pitch;
 }
 
 /**
@@ -282,7 +319,7 @@ double JoySensor::calculatePitch(
  *   position of controller.
  * @return Roll (in degrees)
  */
-double JoySensor::calculateRoll()
+double JoySensor::calculateRoll() const
 {
     return calculateRoll(
         m_current_value[0],
@@ -295,17 +332,23 @@ double JoySensor::calculateRoll()
  * @brief Calculate the roll angle (in degrees) corresponding to the current
  *   passed X, Y and Z axes values associated with the sensor.
  *   position of controller.
+ *   See https://www.nxp.com/files-static/sensors/doc/app_note/AN3461.pdf
+ *   for a description of the used algorithm.
  * @param X axis value
  * @param Y axis value
  * @param Z axis value
  * @return Roll (in degrees)
  */
-double JoySensor::calculateRoll(
-    float axisXValue, float axisYValue, float axisZValue)
+double JoySensor::calculateRoll(float x, float y, float z) const
 {
-    double rad = getAbsoluteRawGravity(axisXValue, axisYValue, axisZValue);
-    double pitch = calculatePitch(axisXValue, axisYValue, axisZValue);
-    return asinf(axisXValue / (cos(pitch) * rad));
+    double rad = calculateDistance(x, y, z);
+
+    double xp, yp, zp;
+    xp = x/rad; yp = y/rad; zp = z/rad;
+    double roll = atan2(sqrt(yp*yp+zp*zp),-xp) - M_PI/2;
+    if (roll < -M_PI)
+        roll += 2*M_PI;
+    return roll;
 }
 
 bool JoySensor::isCalibrated() const
@@ -476,6 +519,9 @@ SetJoystick *JoySensor::getParentSet()
 
 void JoySensor::reset()
 {
+    m_active = false;
+    for (size_t i = 0; i < ACTIVE_BUTTON_COUNT; ++i)
+        m_active_button[i] = nullptr;
     m_dead_zone = GlobalVariables::JoySensor::DEFAULTDEADZONE;
     m_max_zone = m_type == ACCELEROMETER
         ? GlobalVariables::JoySensor::ACCEL_MAX
@@ -542,6 +588,75 @@ void JoySensor::setSensorDelay(unsigned int value)
         m_sensor_delay = value;
         emit sensorDelayChanged(value);
         emit propertyUpdated();
+    }
+}
+
+void JoySensor::createDeskEvent(bool safezone, bool ignoresets)
+{
+    JoySensorButton *eventbutton[ACTIVE_BUTTON_COUNT] = {nullptr};
+
+    if (m_type == ACCELEROMETER)
+    {
+        // XXX: only calculate them once
+        // XXX: debounce shock
+        double distance = calculateDistance();
+        double pitch = calculatePitch();
+        double roll = calculateRoll();
+        if (safezone)
+        {
+            if (pitch > M_PI/4)
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
+            else if(pitch < -M_PI/4)
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
+
+            if (roll > M_PI/4)
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
+            else if (roll < -M_PI/4)
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
+
+            if (distance > 20)
+                eventbutton[2] = m_buttons.value(JoySensorDirection::ACCEL_FWD);
+        }
+        // XXX: implement diagonal zone
+    } else
+    {
+        if (safezone)
+        {
+            if (m_current_value[0] > 0)
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+            else
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+
+            if (m_current_value[1] > 0)
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+            else
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+
+            if (m_current_value[2] > 0)
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+            else
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+        }
+    }
+
+    for (size_t i = 0; i < ACTIVE_BUTTON_COUNT; ++i)
+    {
+        // XXX: gyro mouse needs filtering!!!
+        if (m_active_button[i] != nullptr && m_active_button[i] != eventbutton[i])
+        {
+            m_active_button[i]->joyEvent(false, ignoresets);
+            m_active_button[i] = nullptr;
+        }
+
+        if (eventbutton[i] != nullptr && m_active_button[i] == nullptr)
+        {
+            m_active_button[i] = eventbutton[i];
+            m_active_button[i]->joyEvent(true, ignoresets);
+        } else if (eventbutton[i] == nullptr && m_active_button[i] != nullptr)
+        {
+            m_active_button[i]->joyEvent(false, ignoresets);
+            m_active_button[i] = nullptr;
+        }
     }
 }
 

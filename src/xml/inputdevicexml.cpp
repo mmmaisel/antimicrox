@@ -335,11 +335,8 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         float y0 = xml->attributes().value("y0").toString().toFloat();
                         float z0 = xml->attributes().value("z0").toString().toFloat();
                         m_inputDevice->applyGyroscopeCalibration(x0, y0, z0);
-                    } else
-                    {
-                        // If none of the above, skip the element
-                        xml->skipCurrentElement();
                     }
+                    xml->skipCurrentElement();
                     xml->readNextStartElement();
                 }
             } else if ((xml->name() == "keyPressTime") && xml->isStartElement())
