@@ -51,9 +51,9 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
 
     if (m_calibrated)
     {
-        m_current_value[0] += m_calibration_value[0];
-        m_current_value[1] += m_calibration_value[1];
-        m_current_value[2] += m_calibration_value[2];
+        m_current_value[0] -= m_calibration_value[0];
+        m_current_value[1] -= m_calibration_value[1];
+        m_current_value[2] -= m_calibration_value[2];
     }
 
     double distance = calculateDistance();
@@ -92,18 +92,9 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
 void JoySensor::queuePendingEvent(float* values, bool ignoresets)
 {
     m_pending_event = true;
-    if (m_type == ACCELEROMETER)
-    {
-        m_pending_value[0] = values[0];
-        m_pending_value[1] = values[1];
-        m_pending_value[2] = values[2];
-    } else
-    {
-        // SDL uses unintuitive rotation axes.
-        m_pending_value[0] = values[2];
-        m_pending_value[1] = -values[0];
-        m_pending_value[2] = values[1];
-    }
+    m_pending_value[0] = values[0];
+    m_pending_value[1] = values[1];
+    m_pending_value[2] = values[2];
     m_pending_ignore_sets = ignoresets;
 }
 
@@ -263,6 +254,129 @@ double JoySensor::getDistanceFromDeadZone(float x, float y, float z) const
 }
 
 /**
+ * @brief Get current X distance of the sensor past the assigned
+ *   dead zone.
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateXDistanceFromDeadZone(bool interpolate) const
+{
+    return calculateXDistanceFromDeadZone(
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2],
+        interpolate
+    );
+}
+
+/**
+ * @brief Get current X distance of the sensor past the assigned
+ *   dead zone based on the passed X, Y and Z axes values associated
+ *   with the sensor. The algorithm checks if axis parallel line
+ *   through the current sensor position intersects with the dead zone
+ *   sphere and subtracts the line segment within the sphere from the
+ *   distance before normalization.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateXDistanceFromDeadZone(
+    float x, float y, float z, bool interpolate) const
+{
+    double x_abs = abs(x);
+    if(x_abs > m_dead_zone || !interpolate)
+    {
+        return std::max(0.0, x_abs - m_dead_zone) / m_max_zone;
+    } else
+    {
+        double intersection = x-sqrt(m_dead_zone*m_dead_zone-y*y-z*z);
+        return std::max(0.0, x-intersection) / m_max_zone;
+    }
+}
+
+/**
+ * @brief Get current Y distance of the sensor past the assigned
+ *   dead zone.
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateYDistanceFromDeadZone(bool interpolate) const
+{
+    return calculateYDistanceFromDeadZone(
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2],
+        interpolate
+    );
+}
+
+/**
+ * @brief Get current Y distance of the sensor past the assigned
+ *   dead zone based on the passed X, Y and Z axes values associated
+ *   with the sensor. The algorithm checks if axis parallel line
+ *   through the current sensor position intersects with the dead zone
+ *   sphere and subtracts the line segment within the sphere from the
+ *   distance before normalization.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateYDistanceFromDeadZone(
+    float x, float y, float z, bool interpolate) const
+{
+    double y_abs = abs(y);
+    if(y_abs > m_dead_zone || !interpolate)
+    {
+        return std::max(0.0, y_abs - m_dead_zone) / m_max_zone;
+    } else
+    {
+        double intersection = y-sqrt(m_dead_zone*m_dead_zone-x*x-z*z);
+        return std::max(0.0, y-intersection) / m_max_zone;
+    }
+}
+
+/**
+ * @brief Get current Z distance of the sensor past the assigned
+ *   dead zone.
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateZDistanceFromDeadZone(bool interpolate) const
+{
+    return calculateZDistanceFromDeadZone(
+        m_current_value[0],
+        m_current_value[1],
+        m_current_value[2],
+        interpolate
+    );
+}
+
+/**
+ * @brief Get current Z distance of the sensor past the assigned
+ *   dead zone based on the passed X, Y and Z axes values associated
+ *   with the sensor. The algorithm checks if axis parallel line
+ *   through the current sensor position intersects with the dead zone
+ *   sphere and subtracts the line segment within the sphere from the
+ *   distance before normalization.
+ * @param X axis value
+ * @param Y axis value
+ * @param Z axis value
+ * @return Distance percentage in the range of 0.0 - 1.0.
+ */
+double JoySensor::calculateZDistanceFromDeadZone(
+    float x, float y, float z, bool interpolate) const
+{
+    double z_abs = abs(z);
+    if(z_abs > m_dead_zone || !interpolate)
+    {
+        return std::max(0.0, z_abs - m_dead_zone) / m_max_zone;
+    } else
+    {
+        double intersection = z-sqrt(m_dead_zone*m_dead_zone-x*x-y*y);
+        return std::max(0.0, z-intersection) / m_max_zone;
+    }
+}
+
+/**
  * @brief Get the vector length of the sensor.
  * @return Length.
  */
@@ -349,6 +463,38 @@ double JoySensor::calculateRoll(float x, float y, float z) const
     if (roll < -M_PI)
         roll += 2*M_PI;
     return roll;
+}
+
+/**
+ * @brief Used to calculate the distance value that should be used by
+ *   the JoyButton in the given direction.
+ * @param direction
+ * @return Distance factor that should be used by JoyButton
+ */
+double JoySensor::calculateDirectionalDistance(
+    JoySensorDirection direction) const
+{
+    double finalDistance = 0.0;
+
+    switch (direction)
+    {
+    case JoySensorDirection::GYRO_NICK_P:
+    case JoySensorDirection::GYRO_NICK_N:
+        finalDistance = calculateXDistanceFromDeadZone(true);
+        break;
+    case JoySensorDirection::GYRO_ROLL_P:
+    case JoySensorDirection::GYRO_ROLL_N:
+        finalDistance = calculateYDistanceFromDeadZone(true);
+        break;
+    case JoySensorDirection::GYRO_YAW_P:
+    case JoySensorDirection::GYRO_YAW_N:
+        finalDistance = calculateZDistanceFromDeadZone(true);
+        break;
+    default:
+        break;
+    }
+
+    return finalDistance;
 }
 
 bool JoySensor::isCalibrated() const
@@ -623,14 +769,14 @@ void JoySensor::createDeskEvent(bool safezone, bool ignoresets)
         if (safezone)
         {
             if (m_current_value[0] > 0)
-                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
             else
-                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
 
             if (m_current_value[1] > 0)
-                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
             else
-                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
 
             if (m_current_value[2] > 0)
                 eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);

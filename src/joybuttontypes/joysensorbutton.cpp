@@ -68,6 +68,27 @@ QString JoySensorButton::getPartialName(bool forceFullFormat, bool displayNames)
 QString JoySensorButton::getXmlName() { return GlobalVariables::JoySensorButton::xmlName; }
 
 /**
+ * @brief Get the distance that an element is away from its assigned
+ *     dead zone
+ * @return Normalized distance away from dead zone
+ */
+double JoySensorButton::getDistanceFromDeadZone()
+{
+    return m_sensor->calculateDirectionalDistance(
+        static_cast<JoySensorDirection>(m_index));
+}
+
+/**
+ * @brief Get the distance factor that should be used for mouse movement
+ * @return Distance factor that should be used for mouse movement
+ */
+double JoySensorButton::getMouseDistanceFromDeadZone()
+{
+    return m_sensor->calculateDirectionalDistance(
+        static_cast<JoySensorDirection>(m_index));
+}
+
+/**
  * @brief Check if button should be considered a part of a real controller
  *     axis. Needed for some dialogs so the program won't have to resort to
  *     type checking.
