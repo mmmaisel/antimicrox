@@ -153,6 +153,7 @@ void SensorCalibration::resetCalibrationValues()
     m_ui->saveBtn->setEnabled(false);
     m_ui->resetBtn->setEnabled(false);
     m_ui->sensorStatusBoxWidget->update();
+    showGyroCalibrationValues(false, 0, 0, 0);
 
     update();
 }
@@ -164,6 +165,11 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
     m_gyro_center[2] += z;
     ++m_sample_count;
 
+    float calX = m_gyro_center[0] / double(m_sample_count);
+    float calY = m_gyro_center[1] / double(m_sample_count);
+    float calZ = m_gyro_center[2] / double(m_sample_count);
+    showGyroCalibrationValues(true, calX, calY, calZ);
+
     if (m_sample_count > 1000 && QDateTime::currentDateTime() > m_end_time)
     {
         disconnect(m_gyroscope, &JoySensor::moved,
@@ -173,12 +179,6 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
             &SensorCalibration::startCalibration);
         m_ui->steps->setText(tr("Calibration completed."));
         m_ui->startButton->setEnabled(true);
-
-        float calX = m_gyro_center[0] / double(m_sample_count);
-        float calY = m_gyro_center[1] / double(m_sample_count);
-        float calZ = m_gyro_center[2] / double(m_sample_count);
-
-        showGyroCalibrationValues(true, calX, calY, calZ);
         m_ui->saveBtn->setEnabled(true);
         update();
     }
@@ -194,7 +194,9 @@ void SensorCalibration::saveSettings()
     float calY = m_gyro_center[1] / double(m_sample_count);
     float calZ = m_gyro_center[2] / double(m_sample_count);
     m_joystick->applyGyroscopeCalibration(calX, calY, calZ);
+    m_calibrated = true;
     m_ui->saveBtn->setEnabled(false);
+    m_ui->resetBtn->setEnabled(true);
 }
 
 /**
