@@ -25,7 +25,7 @@
 #include "inputdevice.h"
 #include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
-#include "mousedialog/mousecontrolsticksettingsdialog.h"
+#include "mousedialog/mousesensorsettingsdialog.h"
 #include "setjoystick.h"
 
 #include <QDebug>
@@ -219,7 +219,12 @@ void JoySensorEditDialog::selectCurrentPreset()
 
 void JoySensorEditDialog::openMouseSettingsDialog()
 {
-    // XXX: implement
+    m_ui->mouseSettingsPushButton->setEnabled(false);
+
+    MouseSensorSettingsDialog *dialog = new MouseSensorSettingsDialog(m_sensor, this);
+    dialog->show();
+    connect(this, SIGNAL(finished(int)), dialog, SLOT(close()));
+    connect(dialog, SIGNAL(finished(int)), this, SLOT(enableMouseSettingButton()));
 }
 
 void JoySensorEditDialog::enableMouseSettingButton()

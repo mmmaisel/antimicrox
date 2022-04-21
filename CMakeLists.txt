@@ -204,6 +204,7 @@ set(antimicrox_SOURCES
         src/mousedialog/mousebuttonsettingsdialog.cpp
         src/mousedialog/mousecontrolsticksettingsdialog.cpp
         src/mousedialog/mousedpadsettingsdialog.cpp
+        src/mousedialog/mousesensorsettingsdialog.cpp
         src/mousedialog/springmoderegionpreview.cpp
         src/mousedialog/uihelpers/mouseaxissettingsdialoghelper.cpp
         src/mousedialog/uihelpers/mousebuttonsettingsdialoghelper.cpp
@@ -327,6 +328,7 @@ set(antimicrox_HEADERS
         src/mousedialog/mousecontrolsticksettingsdialog.h
         src/mousedialog/mousedpadsettingsdialog.h
         src/mousedialog/springmoderegionpreview.h
+        src/mousedialog/mousesensorsettingsdialog.h
         src/mousedialog/uihelpers/mouseaxissettingsdialoghelper.h
         src/mousedialog/uihelpers/mousebuttonsettingsdialoghelper.h
         src/mousedialog/uihelpers/mousecontrolsticksettingsdialoghelper.h

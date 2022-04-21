@@ -33,6 +33,9 @@ JoySensorButton::JoySensorButton(JoySensor *sensor,
     : JoyGradientButton(index, originset, parentSet, parent),
     m_sensor(sensor)
 {
+    // XXX: these are overwritten by resetAllProperties
+    setEasingDuration(0);
+    setMouseCurve(LinearCurve);
 }
 
 /**

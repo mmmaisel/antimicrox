@@ -2388,7 +2388,7 @@ QList<JoyButtonSlot *> const &JoyButton::getActiveSlots() { return activeSlots; 
 
 void JoyButton::setMouseSpeedX(int speed)
 {
-    if ((speed >= 1) && (speed <= 300))
+    if ((speed >= 1) && (speed <= GlobalVariables::JoyButton::MAXMOUSESPEED))
     {
         mouseSpeedX = speed;
         emit propertyUpdated();
@@ -2399,7 +2399,7 @@ int JoyButton::getMouseSpeedX() { return mouseSpeedX; }
 
 void JoyButton::setMouseSpeedY(int speed)
 {
-    if ((speed >= 1) && (speed <= 300))
+    if ((speed >= 1) && (speed <= GlobalVariables::JoyButton::MAXMOUSESPEED))
     {
         mouseSpeedY = speed;
         emit propertyUpdated();
@@ -3731,9 +3731,7 @@ void JoyButton::moveMouseCursor(int &movedX, int &movedY, int &movedElapsed, QLi
 void JoyButton::distanceForMovingAx(double &finalAx, mouseCursorInfo infoAx)
 {
     if (!qFuzzyIsNull(infoAx.code))
-    {
-        finalAx = (infoAx.code < 0) ? qMin(infoAx.code, finalAx) : qMax(infoAx.code, finalAx);
-    }
+        finalAx += infoAx.code;
 }
 
 void JoyButton::adjustAxForCursor(QList<double> *mouseHistoryList, double &adjustedAx, double &cursorRemainder,
