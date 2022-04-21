@@ -160,17 +160,39 @@ void SensorCalibration::resetCalibrationValues()
 
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
 {
-    m_gyro_center[0] += x;
-    m_gyro_center[1] += y;
-    m_gyro_center[2] += z;
+    // Calculate mean and variance using Welford's algorithm
+    // as well as 3 sigma interval width.
     ++m_sample_count;
+    double dx = x - m_gyro_mean[0];
+    double dy = y - m_gyro_mean[1];
+    double dz = z - m_gyro_mean[2];
 
-    float calX = m_gyro_center[0] / double(m_sample_count);
-    float calY = m_gyro_center[1] / double(m_sample_count);
-    float calZ = m_gyro_center[2] / double(m_sample_count);
-    showGyroCalibrationValues(true, calX, calY, calZ);
+    m_gyro_mean[0] += dx / m_sample_count;
+    m_gyro_mean[1] += dy / m_sample_count;
+    m_gyro_mean[2] += dz / m_sample_count;
 
-    if (m_sample_count > 1000 && QDateTime::currentDateTime() > m_end_time)
+    double dx2 = x - m_gyro_mean[0];
+    double dy2 = y - m_gyro_mean[1];
+    double dz2 = z - m_gyro_mean[2];
+
+    m_gyro_var[0] += dx * dx2;
+    m_gyro_var[1] += dy * dy2;
+    m_gyro_var[2] += dz * dz2;
+
+    double varx = m_gyro_var[0] / (m_sample_count - 1);
+    double vary = m_gyro_var[1] / (m_sample_count - 1);
+    double varz = m_gyro_var[2] / (m_sample_count - 1);
+
+    showGyroCalibrationValues(true, m_gyro_mean[0], m_gyro_mean[1], m_gyro_mean[2]);
+
+    double wx = 9*varx/m_sample_count;
+    double wy = 9*vary/m_sample_count;
+    double wz = 9*varz/m_sample_count;
+
+    // Abort when end time is reached to avoid infinite loop
+    // in case of noisy sensors.
+    if ((wx < 1e-7 && wy < 1e-7 && wz < 1e-7 && m_sample_count > 10) ||
+        (QDateTime::currentDateTime() > m_end_time))
     {
         disconnect(m_gyroscope, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
@@ -178,6 +200,7 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
         connect(m_ui->startButton, &QPushButton::clicked, this,
             &SensorCalibration::startCalibration);
         m_ui->steps->setText(tr("Calibration completed."));
+        m_ui->startButton->setText(tr("Start calibration"));
         m_ui->startButton->setEnabled(true);
         m_ui->saveBtn->setEnabled(true);
         update();
@@ -190,10 +213,8 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
  */
 void SensorCalibration::saveSettings()
 {
-    float calX = m_gyro_center[0] / double(m_sample_count);
-    float calY = m_gyro_center[1] / double(m_sample_count);
-    float calZ = m_gyro_center[2] / double(m_sample_count);
-    m_joystick->applyGyroscopeCalibration(calX, calY, calZ);
+    m_joystick->applyGyroscopeCalibration(
+        m_gyro_mean[0], m_gyro_mean[1], m_gyro_mean[2]);
     m_calibrated = true;
     m_ui->saveBtn->setEnabled(false);
     m_ui->resetBtn->setEnabled(true);
@@ -233,9 +254,12 @@ void SensorCalibration::startCalibration()
 
     if (m_gyroscope != nullptr && confirmed)
     {
-        m_gyro_center[0] = 0;
-        m_gyro_center[1] = 0;
-        m_gyro_center[2] = 0;
+        m_gyro_mean[0] = 0;
+        m_gyro_mean[1] = 0;
+        m_gyro_mean[2] = 0;
+        m_gyro_var[0] = 0;
+        m_gyro_var[1] = 0;
+        m_gyro_var[2] = 0;
         m_sample_count = 0;
 
         m_gyroscope->resetCalibration();

@@ -46,7 +46,8 @@ class SensorCalibration : public QWidget
     JoySensor *m_accelerometer;
     JoySensor *m_gyroscope;
     InputDevice *m_joystick;
-    double m_gyro_center[3];
+    double m_gyro_mean[3];
+    double m_gyro_var[3];
     bool m_calibrated;
     QDateTime m_end_time;
     unsigned int m_sample_count;
