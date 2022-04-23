@@ -248,13 +248,13 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
                 m_gyro_axes[i]->setFormat("%v");
                 if (i == 0) {
                     axisLabel->setText(tr("Gyroscope X"));
-                    m_gyro_axes[i]->setValue(sensor->getXCoordinate());
+                    m_gyro_axes[i]->setValue(sensor->getXCoordinate() * 180 / M_PI);
                 } else if (i == 1) {
                     axisLabel->setText(tr("Gyroscope Y"));
-                    m_gyro_axes[i]->setValue(sensor->getYCoordinate());
+                    m_gyro_axes[i]->setValue(sensor->getYCoordinate() * 180 / M_PI);
                 } else {
                     axisLabel->setText(tr("Gyroscope Z"));
-                    m_gyro_axes[i]->setValue(sensor->getZCoordinate());
+                    m_gyro_axes[i]->setValue(sensor->getZCoordinate() * 180 / M_PI);
                 }
                 hbox->addWidget(axisLabel);
                 hbox->addWidget(m_gyro_axes[i]);

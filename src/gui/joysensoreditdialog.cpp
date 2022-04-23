@@ -48,27 +48,10 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
 
     updateWindowTitleSensorName();
 
-    m_ui->deadZoneSlider->setValue(m_sensor->getDeadZone());
-    m_ui->deadZoneSpinBox->setValue(m_sensor->getDeadZone());
-
-    m_ui->maxZoneSlider->setValue(m_sensor->getMaxZone());
-    m_ui->maxZoneSpinBox->setValue(m_sensor->getMaxZone());
-
-    m_ui->diagonalRangeSlider->setValue(m_sensor->getDiagonalRange());
-    m_ui->diagonalRangeSpinBox->setValue(m_sensor->getDiagonalRange());
-
-    QString xCoorString = QString::number(m_sensor->getXCoordinate());
-    m_ui->xCoordinateValue->setText(xCoorString);
-
-    QString yCoorString = QString::number(m_sensor->getYCoordinate());
-    m_ui->yCoordinateValue->setText(yCoorString);
-
-    QString zCoorString = QString::number(m_sensor->getZCoordinate());
-    m_ui->zCoordinateValue->setText(zCoorString);
-
-    auto min_width = m_ui->xCoordinateLabel->fontMetrics().
+    auto min_width = m_ui->xCoordinateValue->fontMetrics().
         boundingRect(QString("X.XXXXXXX")).width();
-    m_ui->xCoordinateLabel->setMinimumWidth(min_width);
+    m_ui->xCoordinateValue->setMinimumWidth(min_width);
+    m_ui->xCoordinateValue->setAlignment(Qt::AlignLeft);
 
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
@@ -94,6 +77,24 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         m_ui->maxZoneSlider->setMaximum(GlobalVariables::JoySensor::GYRO_MAX);
         m_ui->maxZoneSpinBox->setMaximum(GlobalVariables::JoySensor::GYRO_MAX);
     }
+
+    m_ui->deadZoneSlider->setValue(m_sensor->getDeadZone());
+    m_ui->deadZoneSpinBox->setValue(m_sensor->getDeadZone());
+
+    m_ui->maxZoneSlider->setValue(m_sensor->getMaxZone());
+    m_ui->maxZoneSpinBox->setValue(m_sensor->getMaxZone());
+
+    m_ui->diagonalRangeSlider->setValue(m_sensor->getDiagonalRange());
+    m_ui->diagonalRangeSpinBox->setValue(m_sensor->getDiagonalRange());
+
+    QString xCoorString = QString::number(m_sensor->getXCoordinate());
+    m_ui->xCoordinateValue->setText(xCoorString);
+
+    QString yCoorString = QString::number(m_sensor->getYCoordinate());
+    m_ui->yCoordinateValue->setText(yCoorString);
+
+    QString zCoorString = QString::number(m_sensor->getZCoordinate());
+    m_ui->zCoordinateValue->setText(zCoorString);
 
     m_ui->sensorStatusBoxWidget->setSensor(m_sensor);
 

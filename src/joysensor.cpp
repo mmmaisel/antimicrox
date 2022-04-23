@@ -170,7 +170,10 @@ JoySensor::Type JoySensor::getType() { return m_type; }
  * @brief Get the assigned dead zone value.
  * @return Assigned dead zone value
  */
-float JoySensor::getDeadZone() { return m_dead_zone; }
+float JoySensor::getDeadZone()
+{
+    return m_dead_zone * 180 / M_PI;
+}
 
 /**
  * @brief Get the assigned diagonal range value.
@@ -178,7 +181,10 @@ float JoySensor::getDeadZone() { return m_dead_zone; }
  */
 int JoySensor::getDiagonalRange() { return m_diagonal_range; }
 
-float JoySensor::getMaxZone() { return m_max_zone; }
+float JoySensor::getMaxZone()
+{
+    return m_max_zone * 180 / M_PI;
+}
 
 /**
  * @brief Get the value for the corresponding X axis.
@@ -626,12 +632,12 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
         xml->writeAttribute("type", QString::number(m_type));
 
         if (m_dead_zone != GlobalVariables::JoySensor::DEFAULTDEADZONE)
-            xml->writeTextElement("deadZone", QString::number(m_dead_zone));
+            xml->writeTextElement("deadZone", QString::number(getDeadZone()));
 
         if (m_max_zone != (m_type == ACCELEROMETER
                 ? GlobalVariables::JoySensor::ACCEL_MAX
                 : GlobalVariables::JoySensor::GYRO_MAX))
-            xml->writeTextElement("maxZone", QString::number(m_max_zone));
+            xml->writeTextElement("maxZone", QString::number(getMaxZone()));
 
         if (m_diagonal_range != GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE)
             xml->writeTextElement("diagonalRange", QString::number(m_diagonal_range));
@@ -684,6 +690,7 @@ void JoySensor::reset()
 
 void JoySensor::setDeadZone(float value)
 {
+    value = abs(value / 180 * M_PI);
     // XXX: do not compare floats
     if ((value != m_dead_zone) && (value <= m_max_zone))
     {
@@ -695,10 +702,7 @@ void JoySensor::setDeadZone(float value)
 
 void JoySensor::setMaxZone(float value)
 {
-    value = abs(value);
-
-    // XXX: implement calibration
-
+    value = abs(value / 180 * M_PI);
     // XXX: do not compare floats
     if ((value != m_max_zone) && (value > m_dead_zone))
     {
@@ -750,14 +754,14 @@ void JoySensor::createDeskEvent(bool safezone, bool ignoresets)
         double roll = calculateRoll();
         if (safezone)
         {
-            if (pitch > M_PI/4)
+            if (pitch > m_dead_zone)
                 eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
-            else if(pitch < -M_PI/4)
+            else if(pitch < -m_dead_zone)
                 eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
 
-            if (roll > M_PI/4)
+            if (roll > m_dead_zone)
                 eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
-            else if (roll < -M_PI/4)
+            else if (roll < -m_dead_zone)
                 eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
 
             if (distance > 20)

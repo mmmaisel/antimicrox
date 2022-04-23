@@ -29,6 +29,7 @@
 #include <QList>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QSizePolicy>
 
 JoySensorStatusBox::JoySensorStatusBox(QWidget *parent)
@@ -82,116 +83,152 @@ void JoySensorStatusBox::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
 
     PadderCommon::inputDaemonMutex.lock();
-    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
-        drawSensorBox(GlobalVariables::JoySensor::ACCEL_MAX);
-    else
-        drawSensorBox(GlobalVariables::JoySensor::GYRO_MAX);
+    drawArtificialHorizon();
     PadderCommon::inputDaemonMutex.unlock();
 }
 
-void JoySensorStatusBox::drawSensorBox(float scale)
+void JoySensorStatusBox::drawArtificialHorizon()
 {
     QPainter paint(this);
     paint.setRenderHint(QPainter::Antialiasing, true);
 
-    int side = qMin(width() - 2, height() - 2);
+    int side = qMin(width(), height());
 
+    QPen pen;
     QPixmap pix(side, side);
     pix.fill(Qt::transparent);
     QPainter painter(&pix);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    // Draw box outline
-    QPen pen;
-    pen.setColor(Qt::black);
-    pen.setWidth(1);
-    painter.setPen(pen);
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(0, 0, side - 1, side - 1);
+    // Switch to centric coordinate system
+    painter.translate(side/2.0, side/2.0);
+    painter.scale(side*0.45, -side*0.45);
     painter.save();
 
-    // Switch coordinate system
-    float window_scale = (scale * 2.0 + 1.0);
-    painter.scale(side / window_scale, side / window_scale);
-    painter.translate(window_scale/2.0, window_scale/2.0);
+    // Draw moving instrument parts
+    QPainterPath clippingPath;
+    clippingPath.addEllipse(QPointF(0, 0), 1, 1);
+    painter.setClipPath(clippingPath);
 
-    // Draw max zone and initial inner clear circle
-    float maxzone = m_sensor->getMaxZone();
-    pen.setWidthF(scale/10.0);
+    float pitch, roll, yaw;
+    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
+    {
+        pitch = -m_sensor->calculatePitch();
+        roll = m_sensor->calculateRoll();
+        yaw = 0;
+    } else
+    {
+        pitch = -m_sensor->getXCoordinate();
+        roll = m_sensor->getYCoordinate();
+        yaw = -m_sensor->getZCoordinate();
+    }
+    pitch = qBound(-180.0, pitch * 180 / M_PI, 180.0);
+    roll = qBound(-180.0, roll * 180 / M_PI, 180.0);
+    yaw = qBound(-180.0, yaw * 180 / M_PI, 180.0);
+    painter.translate(yaw / 90, pitch / 90);
+    painter.rotate(roll);
+
+    pen.setColor(Qt::transparent);
     painter.setPen(pen);
-    painter.setOpacity(0.5);
-    painter.setBrush(Qt::darkGreen);
-    painter.drawEllipse(QPointF(0.0, 0.0), scale, scale);
-    painter.setCompositionMode(QPainter::CompositionMode_Clear);
-    painter.setPen(Qt::NoPen);
-    painter.drawEllipse(QPointF(0.0, 0.0), maxzone, maxzone);
+    painter.setBrush(QBrush(QColor(64, 128, 255)));
+    painter.drawRect(QRectF(-10, 0, 20, 10));
+    painter.setBrush(QBrush(Qt::black));
+    painter.drawRect(QRectF(-10, -10, 20, 10));
 
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter.setOpacity(1.0);
+    // Draw dead zone
+    pen.setColor(Qt::red);
+    pen.setWidthF(0.02);
+    painter.setPen(pen);
+    painter.setBrush(QBrush(QColor(255, 0, 0, 128)));
+    float deadZone = m_sensor->getDeadZone();
+    painter.drawEllipse(QPointF(0, 0), deadZone/90, deadZone/90);
+
+    // Draw max zone
+    QPainterPath maxZonePath;
+    float maxZone = m_sensor->getMaxZone();
+    maxZonePath.addEllipse(QPointF(0, 0), 10, 10);
+    maxZonePath.addEllipse(QPointF(0, 0), maxZone/90, maxZone/90);
+    pen.setColor(Qt::darkGreen);
+    pen.setWidthF(0.02);
+    painter.setPen(pen);
+    painter.setBrush(QBrush(QColor(0, 128, 0, 128)));
+    painter.drawPath(maxZonePath);
 
     // Draw diagonal zones
-    pen.setWidth(0);
-    pen.setColor(Qt::black);
+    pen.setColor(Qt::green);
     painter.setPen(pen);
-    painter.setOpacity(0.5);
-    painter.setBrush(QBrush(Qt::green));
+    painter.setBrush(QBrush(QColor(0, 255, 0, 128)));
 
     for(int i = 0; i < 4; ++i)
     {
         painter.drawPie(
-            QRectF(-scale, -scale, scale * 2.0, scale * 2.0),
+            QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
             (45 + 90*i - m_sensor->getDiagonalRange()/2) * 16,
             m_sensor->getDiagonalRange() * 16);
     }
-    painter.setOpacity(1.0);
 
-    // Draw deadzone circle
-    pen.setWidth(0);
+    // Pitch scale: 30deg per line
+    pen.setColor(Qt::white);
+    pen.setWidthF(0.025);
     painter.setPen(pen);
-    painter.setBrush(QBrush(Qt::red));
-    painter.drawEllipse(QPointF(0.0, 0.0),
-        m_sensor->getDeadZone(), m_sensor->getDeadZone());
+    painter.setBrush(QBrush(Qt::transparent));
+    for(int j = -180; j <= 180; j+=30) {
+        painter.drawLine(QPointF(-10, j/90.0), QPointF(10, j/90.0));
+    }
 
-    pen.setWidth(0);
-    painter.setBrush(QBrush(Qt::blue));
-    pen.setColor(Qt::blue);
-    painter.setPen(pen);
+    // Yaw scale: 30deg per line
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    {
+        pen.setColor(Qt::white);
+        pen.setWidthF(0.025);
+        painter.setPen(pen);
+        painter.setBrush(QBrush(Qt::transparent));
+        for(int j = -180; j <= 180; j+=30) {
+            painter.drawLine(QPointF(j/90.0, -10), QPointF(j/90.0, 10));
+        }
+    }
 
-    // Draw raw crosshair
-    float xsens = m_sensor->getXCoordinate();
-    float ysens = m_sensor->getYCoordinate();
-    float zsens = m_sensor->getZCoordinate();
-
-    float xp = xsens + 0.5 * zsens;
-    float yp = ysens - 0.5 * zsens;
-
-    pen.setWidthF(scale/20.0);
-    painter.setPen(pen);
-    painter.drawLine(QPointF(xsens, ysens), QPointF(xp, yp));
-    painter.setPen(Qt::NoPen);
-    painter.drawRect(
-        QRectF(xp-scale/20.0, yp-scale/20.0, scale/10.0, scale/10.0));
-
-    painter.setBrush(QBrush(Qt::darkBlue));
-    pen.setColor(Qt::darkBlue);
-    painter.setPen(pen);
-
-    // Back to window coordinate system.
+    // Draw fixed instrument parts
     painter.restore();
-    pen.setWidth(0);
-    pen.setColor(Qt::black);
+    painter.save();
+    pen.setColor(QColor(80, 80, 80));
+    pen.setWidthF(0.2);
     painter.setPen(pen);
-    painter.scale(side / 2, side / 2);
-    painter.translate(1, 1);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawEllipse(QPointF(0, 0), 1, 1);
+
+    // Draw scale
+    pen.setWidthF(0.05);
+    pen.setColor(Qt::yellow);
+    painter.setPen(pen);
+
+    painter.drawLine(QPointF(0.3, 0), QPointF(0.2, 0));
+    painter.drawLine(QPointF(-0.3, 0), QPointF(-0.2, 0));
+    painter.drawArc(QRectF(-0.2, -0.2, 0.4, 0.4), 0*16, 180*16);
+    painter.drawPoint(QPointF(0, 0));
+
+    pen.setColor(Qt::white);
+    painter.setPen(pen);
+    for (int j = 0; j < 19; ++j) {
+        painter.drawLine(QPointF(1, 0), QPointF(0.9, 0));
+        painter.rotate(10.0);
+    }
+
+    // Draw dead zone
+    painter.restore();
+    pen.setColor(Qt::red);
+    pen.setWidthF(0.1);
     painter.setPen(pen);
     painter.setOpacity(0.5);
-    // Draw Y line
-    painter.drawLine(QPointF(0.0, -1.0), QPointF(0.0, 1.0));
-    // Draw X line
-    painter.drawLine(QPointF(-1.0, 0.0), QPointF(1.0, 0.0));
-    // Draw Z line
-    painter.setOpacity(0.25);
-    painter.drawLine(QPointF(-0.5, 0.5), QPointF(0.5, -0.5));
+    painter.drawArc(QRectF(-1, -1, 2, 2), -16*deadZone, 16*deadZone*2);
+    painter.drawArc(QRectF(-1, -1, 2, 2), 16*(180-deadZone), 16*deadZone*2);
+
+    // Draw max zone
+    pen.setColor(Qt::darkGreen);
+    painter.setPen(pen);
+    float tmpMaxZone = std::min(maxZone, 90.0f);
+    painter.drawArc(QRectF(-1, -1, 2, 2), 16*(90-(90-tmpMaxZone)), 16*(90-tmpMaxZone)*2);
+    painter.drawArc(QRectF(-1, -1, 2, 2), 16*(270-(90-tmpMaxZone)), 16*(90-tmpMaxZone)*2);
 
     // Draw to window
     paint.setCompositionMode(QPainter::CompositionMode_SourceOver);
