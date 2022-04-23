@@ -192,6 +192,7 @@ set(antimicrox_SOURCES
         src/joydpad.cpp
         src/joysensor.cpp
         src/joysensorbuttonpushbutton.cpp
+        src/joysensorcontextmenu.cpp
         src/joysensorpushbutton.cpp
         src/joysensorstatusbox.cpp
         src/joystick.cpp
@@ -225,6 +226,7 @@ set(antimicrox_SOURCES
         src/uihelpers/joyaxiscontextmenuhelper.cpp
         src/uihelpers/joycontrolstickcontextmenuhelper.cpp
         src/uihelpers/joycontrolstickeditdialoghelper.cpp
+        src/uihelpers/joysensorcontextmenuhelper.cpp
         src/uihelpers/joysensoreditdialoghelper.cpp
         src/uihelpers/joytabwidgethelper.cpp
         src/vdpad.cpp
@@ -315,6 +317,7 @@ set(antimicrox_HEADERS
         src/joysensor.h
         src/joysensordirection.h
         src/joysensorbuttonpushbutton.h
+        src/joysensorcontextmenu.h
         src/joysensorpushbutton.h
         src/joysensorstatusbox.h
         src/joystick.h
@@ -349,6 +352,7 @@ set(antimicrox_HEADERS
         src/uihelpers/joycontrolstickcontextmenuhelper.h
         src/uihelpers/joycontrolstickeditdialoghelper.h
         src/uihelpers/joysensoreditdialoghelper.h
+        src/uihelpers/joysensorcontextmenuhelper.h
         src/uihelpers/joytabwidgethelper.h
         src/vdpad.h
         src/xml/inputdevicexml.h

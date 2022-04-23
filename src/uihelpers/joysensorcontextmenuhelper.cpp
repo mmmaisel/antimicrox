@@ -15,24 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "joysensoreditdialoghelper.h"
+#include "joysensorcontextmenuhelper.h"
 
 #include "joybuttonslot.h"
 #include "joybuttontypes/joysensorbutton.h"
 
 #include <QDebug>
+#include <QHashIterator>
 
-JoySensorEditDialogHelper::JoySensorEditDialogHelper(JoySensor *sensor, QObject *parent)
-    : QObject(parent),
-    m_sensor(sensor)
+JoySensorContextMenuHelper::JoySensorContextMenuHelper(JoySensor *sensor, QObject *parent)
+    : QObject(parent)
+    , m_sensor(sensor)
 {
     Q_ASSERT(m_sensor);
 }
 
-void JoySensorEditDialogHelper::setPendingSlots(QHash<JoySensorDirection, JoyButtonSlot *> *tempSlots)
+void JoySensorContextMenuHelper::setPendingSlots(
+    QHash<JoySensorDirection, JoyButtonSlot *> *tempSlots)
 {
     m_pending_slots.clear();
-    for (auto iter = tempSlots->cbegin(); iter != tempSlots->cend(); ++iter)
+    for(auto iter = tempSlots->cbegin(); iter != tempSlots->cend(); ++iter)
     {
         JoyButtonSlot *slot = iter.value();
         JoySensorDirection tempDir = iter.key();
@@ -40,9 +42,9 @@ void JoySensorEditDialogHelper::setPendingSlots(QHash<JoySensorDirection, JoyBut
     }
 }
 
-void JoySensorEditDialogHelper::clearPendingSlots() { m_pending_slots.clear(); }
+void JoySensorContextMenuHelper::clearPendingSlots() { m_pending_slots.clear(); }
 
-void JoySensorEditDialogHelper::setFromPendingSlots()
+void JoySensorContextMenuHelper::setFromPendingSlots()
 {
     if (!m_pending_slots.isEmpty())
     {
@@ -64,7 +66,7 @@ void JoySensorEditDialogHelper::setFromPendingSlots()
     }
 }
 
-void JoySensorEditDialogHelper::clearButtonsSlotsEventReset()
+void JoySensorContextMenuHelper::clearButtonsSlotsEventReset()
 {
     QHash<JoySensorDirection, JoySensorButton *> *buttons = m_sensor->getButtons();
     for (auto iter = buttons->cbegin(); iter != buttons->cend(); ++iter)
@@ -73,11 +75,4 @@ void JoySensorEditDialogHelper::clearButtonsSlotsEventReset()
         if (button)
             button->clearSlotsEventReset();
     }
-}
-
-void JoySensorEditDialogHelper::updateSensorDelay(unsigned int value)
-{
-    unsigned int temp = value * 10;
-    if (m_sensor->getSensorDelay() != temp)
-        m_sensor->setSensorDelay(temp);
 }

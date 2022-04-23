@@ -1,5 +1,5 @@
 /* antimicrox Gamepad to KB+M event mapper
- * Copyright (C) 2022 Max Maisel <max.maisel@posteo.de>
+ * Copyright (C) 2022 Max Maise <max.maisel@posteo.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,18 +20,18 @@
 
 class JoyButtonSlot;
 
-class JoySensorEditDialogHelper : public QObject
+class JoySensorContextMenuHelper : public QObject
 {
     Q_OBJECT
+
   public:
-    explicit JoySensorEditDialogHelper(JoySensor *sensor, QObject *parent = nullptr);
+    explicit JoySensorContextMenuHelper(JoySensor *sensor, QObject *parent = nullptr);
     void setPendingSlots(QHash<JoySensorDirection, JoyButtonSlot *> *tempSlots);
     void clearPendingSlots();
 
   public slots:
     void setFromPendingSlots();
     void clearButtonsSlotsEventReset();
-    void updateSensorDelay(unsigned int value);
 
   private:
     JoySensor *m_sensor;

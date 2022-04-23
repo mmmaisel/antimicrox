@@ -18,7 +18,7 @@
 #include "joysensorpushbutton.h"
 
 #include "joysensor.h"
-//#include "joycontrolstickcontextmenu.h"
+#include "joysensorcontextmenu.h"
 
 #include <QDebug>
 
@@ -78,6 +78,10 @@ void JoySensorPushButton::enableFlashes()
 
 void JoySensorPushButton::showContextMenu(const QPoint &point)
 {
+    QPoint globalPos = mapToGlobal(point);
+    JoySensorContextMenu *contextMenu = new JoySensorContextMenu(m_sensor, this);
+    contextMenu->buildMenu();
+    contextMenu->popup(globalPos);
 }
 
 void JoySensorPushButton::tryFlash()

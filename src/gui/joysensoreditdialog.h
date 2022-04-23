@@ -41,7 +41,6 @@ class JoySensorEditDialog : public QDialog
   private:
     Ui::JoySensorEditDialog *m_ui;
     bool m_keypad_unlocked;
-    JoySensorEditDialogHelper &getHelperLocal();
 
     JoySensor *m_sensor;
     JoySensorEditDialogHelper m_helper;

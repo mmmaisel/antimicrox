@@ -16,24 +16,41 @@
  */
 #pragma once
 
-#include "joysensor.h"
+#include "uihelpers/joysensorcontextmenuhelper.h"
 
-class JoyButtonSlot;
+#include <QMenu>
 
-class JoySensorEditDialogHelper : public QObject
+class JoySensor;
+class QWidget;
+
+class JoySensorContextMenu : public QMenu
 {
     Q_OBJECT
-  public:
-    explicit JoySensorEditDialogHelper(JoySensor *sensor, QObject *parent = nullptr);
-    void setPendingSlots(QHash<JoySensorDirection, JoyButtonSlot *> *tempSlots);
-    void clearPendingSlots();
 
-  public slots:
-    void setFromPendingSlots();
-    void clearButtonsSlotsEventReset();
-    void updateSensorDelay(unsigned int value);
+  public:
+    explicit JoySensorContextMenu(JoySensor *sensor, QWidget *parent = nullptr);
+    void buildMenu();
+
+    enum Preset
+    {
+        PRESET_NONE,
+        PRESET_MOUSE,
+        PRESET_MOUSE_INV_H,
+        PRESET_MOUSE_INV_V,
+        PRESET_MOUSE_INV_HV,
+        PRESET_ARROWS,
+        PRESET_WASD,
+        PRESET_NUMPAD
+    };
+
+  protected:
+    Preset getPresetIndex();
+
+  private slots:
+    void setSensorPreset(QAction *action);
+    void openMouseSettingsDialog();
 
   private:
     JoySensor *m_sensor;
-    QHash<JoySensorDirection, JoyButtonSlot *> m_pending_slots;
+    JoySensorContextMenuHelper m_helper;
 };

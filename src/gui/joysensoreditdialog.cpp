@@ -42,14 +42,14 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
 {
     m_ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
-    getHelperLocal().moveToThread(m_sensor->thread());
+    m_helper.moveToThread(m_sensor->thread());
 
     PadderCommon::inputDaemonMutex.lock();
 
     updateWindowTitleSensorName();
 
     auto min_width = m_ui->xCoordinateValue->fontMetrics().
-        boundingRect(QString("X.XXXXXXX")).width();
+        boundingRect(QString("X.XXXXXXXXX")).width();
     m_ui->xCoordinateValue->setMinimumWidth(min_width);
     m_ui->xCoordinateValue->setAlignment(Qt::AlignLeft);
 
@@ -280,5 +280,3 @@ void JoySensorEditDialog::updateSensorDelaySlider(double value)
     if (m_ui->sensorDelaySlider->value() != temp)
         m_ui->sensorDelaySlider->setValue(temp);
 }
-
-JoySensorEditDialogHelper &JoySensorEditDialog::getHelperLocal() { return m_helper; }
