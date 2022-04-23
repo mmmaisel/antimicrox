@@ -213,11 +213,9 @@ QHash<JoySensorDirection, JoySensorButton *> *JoySensor::getButtons() { return &
  */
 void JoySensor::resetButtons()
 {
-    QHashIterator<JoySensorDirection, JoySensorButton *> iter(m_buttons);
-
-    while (iter.hasNext())
+    for (auto iter = m_buttons.cbegin(); iter != m_buttons.cend(); ++iter)
     {
-        JoyButton *button = iter.next().value();
+        JoyButton *button = iter.value();
 
         if (button != nullptr)
             button->reset();
@@ -645,11 +643,9 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
         if (m_sensor_delay > GlobalVariables::JoySensor::DEFAULTSENSORDELAY)
             xml->writeTextElement("sensorDelay", QString::number(m_sensor_delay));
 
-        QHashIterator<JoySensorDirection, JoySensorButton *> iter(m_buttons);
-
-        while (iter.hasNext())
+        for (auto iter = m_buttons.cbegin(); iter != m_buttons.cend(); ++iter)
         {
-            JoySensorButton *button = iter.next().value();
+            JoySensorButton *button = iter.value();
             JoyButtonXml *joyButtonXml = new JoyButtonXml(button);
             joyButtonXml->writeConfig(xml);
             delete joyButtonXml;
