@@ -17,7 +17,7 @@
 
 #include "joysensorbuttonpushbutton.h"
 
-//#include "joybuttoncontextmenu.h"
+#include "joybuttoncontextmenu.h"
 #include "joybuttontypes/joysensorbutton.h"
 #include "joysensor.h"
 
@@ -97,6 +97,10 @@ QString JoySensorButtonPushButton::generateLabel()
 
 void JoySensorButtonPushButton::showContextMenu(const QPoint &point)
 {
+    QPoint globalPos = mapToGlobal(point);
+    JoyButtonContextMenu *contextMenu = new JoyButtonContextMenu(m_button, this);
+    contextMenu->buildMenu();
+    contextMenu->popup(globalPos);
 }
 
 void JoySensorButtonPushButton::tryFlash()
