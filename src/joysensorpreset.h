@@ -16,25 +16,33 @@
  */
 #pragma once
 
-#include "joysensorpreset.h"
+#include "uihelpers/joysensoriothreadhelper.h"
 
-#include <QMenu>
-
-class JoySensor;
-class QWidget;
-
-class JoySensorContextMenu : public QMenu
+class JoySensorPreset : public QObject
 {
     Q_OBJECT
 
   public:
-    explicit JoySensorContextMenu(JoySensor *sensor, QWidget *parent = nullptr);
-    void buildMenu();
+    enum Preset
+    {
+        PRESET_NONE,
+        PRESET_MOUSE,
+        PRESET_MOUSE_INV_H,
+        PRESET_MOUSE_INV_V,
+        PRESET_MOUSE_INV_HV,
+        PRESET_ARROWS,
+        PRESET_WASD,
+        PRESET_NUMPAD
+    };
 
-  private slots:
-    void openMouseSettingsDialog();
+    explicit JoySensorPreset(JoySensor *sensor, QObject *parent = nullptr);
+
+    QList<Preset> getAvailablePresets();
+    Preset getIndex();
+    QString getPresetName(Preset);
+    void setSensorPreset(Preset);
 
   private:
-    JoySensor *m_sensor;
-    JoySensorPreset m_preset;
+    JoySensor* m_sensor;
+    JoySensorIoThreadHelper m_helper;
 };

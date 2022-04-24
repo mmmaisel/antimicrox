@@ -193,6 +193,7 @@ set(antimicrox_SOURCES
         src/joysensor.cpp
         src/joysensorbuttonpushbutton.cpp
         src/joysensorcontextmenu.cpp
+        src/joysensorpreset.cpp
         src/joysensorpushbutton.cpp
         src/joysensorstatusbox.cpp
         src/joystick.cpp
@@ -317,6 +318,7 @@ set(antimicrox_HEADERS
         src/joysensordirection.h
         src/joysensorbuttonpushbutton.h
         src/joysensorcontextmenu.h
+        src/joysensorpreset.h
         src/joysensorpushbutton.h
         src/joysensorstatusbox.h
         src/joystick.h
