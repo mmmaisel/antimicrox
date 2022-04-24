@@ -226,8 +226,7 @@ set(antimicrox_SOURCES
         src/uihelpers/joyaxiscontextmenuhelper.cpp
         src/uihelpers/joycontrolstickcontextmenuhelper.cpp
         src/uihelpers/joycontrolstickeditdialoghelper.cpp
-        src/uihelpers/joysensorcontextmenuhelper.cpp
-        src/uihelpers/joysensoreditdialoghelper.cpp
+        src/uihelpers/joysensoriothreadhelper.cpp
         src/uihelpers/joytabwidgethelper.cpp
         src/vdpad.cpp
         src/xml/inputdevicexml.cpp
@@ -351,8 +350,7 @@ set(antimicrox_HEADERS
         src/uihelpers/joyaxiscontextmenuhelper.h
         src/uihelpers/joycontrolstickcontextmenuhelper.h
         src/uihelpers/joycontrolstickeditdialoghelper.h
-        src/uihelpers/joysensoreditdialoghelper.h
-        src/uihelpers/joysensorcontextmenuhelper.h
+        src/uihelpers/joysensoriothreadhelper.h
         src/uihelpers/joytabwidgethelper.h
         src/vdpad.h
         src/xml/inputdevicexml.h

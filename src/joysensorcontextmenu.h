@@ -16,7 +16,7 @@
  */
 #pragma once
 
-#include "uihelpers/joysensorcontextmenuhelper.h"
+#include "uihelpers/joysensoriothreadhelper.h"
 
 #include <QMenu>
 
@@ -52,5 +52,5 @@ class JoySensorContextMenu : public QMenu
 
   private:
     JoySensor *m_sensor;
-    JoySensorContextMenuHelper m_helper;
+    JoySensorIoThreadHelper m_helper;
 };

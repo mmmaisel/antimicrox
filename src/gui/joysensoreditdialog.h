@@ -16,7 +16,7 @@
  */
 #pragma once
 
-#include "uihelpers/joysensoreditdialoghelper.h"
+#include "uihelpers/joysensoriothreadhelper.h"
 
 #include <QDialog>
 
@@ -43,7 +43,7 @@ class JoySensorEditDialog : public QDialog
     bool m_keypad_unlocked;
 
     JoySensor *m_sensor;
-    JoySensorEditDialogHelper m_helper;
+    JoySensorIoThreadHelper m_helper;
 
   private slots:
     void implementPresets(int index);

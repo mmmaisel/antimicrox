@@ -124,7 +124,7 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
     connect(m_ui->diagonalRangeSlider, &QSlider::valueChanged,
         m_ui->diagonalRangeSpinBox, &QSpinBox::setValue);
     connect(m_ui->sensorDelaySlider, &QSlider::valueChanged, &m_helper,
-        &JoySensorEditDialogHelper::updateSensorDelay);
+        &JoySensorIoThreadHelper::updateSensorDelay);
 
     connect(m_ui->deadZoneSpinBox,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
