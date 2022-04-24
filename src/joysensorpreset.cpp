@@ -50,7 +50,7 @@ QList<JoySensorPreset::Preset> JoySensorPreset::getAvailablePresets()
     return result;
 }
 
-JoySensorPreset::Preset JoySensorPreset::getIndex()
+JoySensorPreset::Preset JoySensorPreset::currentPreset()
 {
     Preset result = PRESET_NONE;
     QList<JoyButtonSlot *> *upslots, *downslots, *leftslots, *rightslots, *fwdslots, *bwdslots;
@@ -345,4 +345,9 @@ void JoySensorPreset::setSensorPreset(Preset preset)
 
     m_helper.setPendingSlots(&tempHash);
     QMetaObject::invokeMethod(&m_helper, "setFromPendingSlots", Qt::BlockingQueuedConnection);
+}
+
+JoySensorIoThreadHelper &JoySensorPreset::getHelper()
+{
+    return m_helper;
 }

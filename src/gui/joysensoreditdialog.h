@@ -16,7 +16,7 @@
  */
 #pragma once
 
-#include "uihelpers/joysensoriothreadhelper.h"
+#include "joysensorpreset.h"
 
 #include <QDialog>
 
@@ -35,15 +35,12 @@ class JoySensorEditDialog : public QDialog
     explicit JoySensorEditDialog(JoySensor *sensor, QWidget *parent = nullptr);
     ~JoySensorEditDialog();
 
-  protected:
-    void selectCurrentPreset();
-
   private:
     Ui::JoySensorEditDialog *m_ui;
     bool m_keypad_unlocked;
 
     JoySensor *m_sensor;
-    JoySensorIoThreadHelper m_helper;
+    JoySensorPreset m_preset;
 
   private slots:
     void implementPresets(int index);

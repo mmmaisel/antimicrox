@@ -39,7 +39,7 @@ void JoySensorContextMenu::buildMenu()
 {
     QAction *action;
     QActionGroup *presetGroup = new QActionGroup(this);
-    JoySensorPreset::Preset currentPreset = m_preset.getIndex();
+    JoySensorPreset::Preset currentPreset = m_preset.currentPreset();
     QList<JoySensorPreset::Preset> presets = m_preset.getAvailablePresets();
 
     for (auto iter = presets.cbegin(); iter != presets.cend(); ++iter)

@@ -38,9 +38,10 @@ class JoySensorPreset : public QObject
     explicit JoySensorPreset(JoySensor *sensor, QObject *parent = nullptr);
 
     QList<Preset> getAvailablePresets();
-    Preset getIndex();
+    Preset currentPreset();
     QString getPresetName(Preset);
     void setSensorPreset(Preset);
+    JoySensorIoThreadHelper &getHelper();
 
   private:
     JoySensor* m_sensor;

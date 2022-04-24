@@ -161,7 +161,7 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="gravityLabel">
+          <widget class="QLabel" name="accelerationLabel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -169,12 +169,12 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Gravity (m/s^2):</string>
+            <string>Acceleration (m/s^2):</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLabel" name="gravityValue">
+          <widget class="QLabel" name="accelerationValue">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -327,51 +327,6 @@
                <height>0</height>
               </size>
              </property>
-             <item>
-              <property name="text">
-               <string/>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mouse (Normal)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mouse (Inverted Horizontal)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mouse (Inverted Vertical)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Mouse (Inverted Horizontal + Vertical)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Arrows</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Keys: W | A | S | D</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>NumPad</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>None</string>
-              </property>
-             </item>
             </widget>
            </item>
           </layout>

@@ -38,25 +38,36 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
     : QDialog(parent, Qt::Window),
     m_ui(new Ui::JoySensorEditDialog),
     m_sensor(sensor),
-    m_helper(sensor)
+    m_preset(sensor)
 {
     m_ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
-    m_helper.moveToThread(m_sensor->thread());
-
-    PadderCommon::inputDaemonMutex.lock();
-
-    updateWindowTitleSensorName();
 
     auto min_width = m_ui->xCoordinateValue->fontMetrics().
         boundingRect(QString("X.XXXXXXXXX")).width();
     m_ui->xCoordinateValue->setMinimumWidth(min_width);
     m_ui->xCoordinateValue->setAlignment(Qt::AlignLeft);
 
+    int index = 0;
+    int current_preset_index = 0;
+    JoySensorPreset::Preset current_preset = m_preset.currentPreset();
+
+    QList<JoySensorPreset::Preset> presets = m_preset.getAvailablePresets();
+    for(auto iter = presets.cbegin(); iter != presets.cend(); ++iter, ++index)
+    {
+        m_ui->presetsComboBox->insertItem(index, m_preset.getPresetName(*iter), *iter);
+        if (*iter == current_preset)
+            current_preset_index = index;
+    }
+    m_ui->presetsComboBox->setCurrentIndex(current_preset_index);
+
+    PadderCommon::inputDaemonMutex.lock();
+
+    updateWindowTitleSensorName();
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
         float value;
-        m_ui->gravityValue->setText(QString::number(m_sensor->calculateDistance()));
+        m_ui->accelerationValue->setText(QString::number(m_sensor->calculateDistance()));
         value = m_sensor->calculatePitch() * 180.0 / M_PI;
         m_ui->pitchValue->setText(QString::number(value));
         value = m_sensor->calculateRoll() * 180.0 / M_PI;
@@ -68,8 +79,8 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         m_ui->xCoordinateLabel->setText(tr("Roll (°/s)"));
         m_ui->yCoordinateLabel->setText(tr("Pitch (°/s)"));
         m_ui->zCoordinateLabel->setText(tr("Yaw (°/s)"));
-        m_ui->gravityLabel->setVisible(false);
-        m_ui->gravityValue->setVisible(false);
+        m_ui->accelerationLabel->setVisible(false);
+        m_ui->accelerationValue->setVisible(false);
         m_ui->pitchLabel->setVisible(false);
         m_ui->pitchValue->setVisible(false);
         m_ui->rollLabel->setVisible(false);
@@ -98,8 +109,6 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
 
     m_ui->sensorStatusBoxWidget->setSensor(m_sensor);
 
-    selectCurrentPreset();
-
     m_ui->sensorNameLineEdit->setText(m_sensor->getSensorName());
     double validDistance = m_sensor->getDistanceFromDeadZone() * 100.0;
     m_ui->fromSafeZoneValueLabel->setText(QString::number(validDistance));
@@ -123,8 +132,8 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
         m_ui->maxZoneSpinBox, &QDoubleSpinBox::setValue);
     connect(m_ui->diagonalRangeSlider, &QSlider::valueChanged,
         m_ui->diagonalRangeSpinBox, &QSpinBox::setValue);
-    connect(m_ui->sensorDelaySlider, &QSlider::valueChanged, &m_helper,
-        &JoySensorIoThreadHelper::updateSensorDelay);
+    connect(m_ui->sensorDelaySlider, &QSlider::valueChanged, this,
+        [this](unsigned int value) { m_preset.getHelper().updateSensorDelay(value); });
 
     connect(m_ui->deadZoneSpinBox,
         static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -165,7 +174,8 @@ JoySensorEditDialog::~JoySensorEditDialog() { delete m_ui; }
 
 void JoySensorEditDialog::implementPresets(int index)
 {
-    // XXX: implement
+    auto preset = static_cast<JoySensorPreset::Preset>(m_ui->presetsComboBox->itemData(index).toInt());
+    m_preset.setSensorPreset(preset);
 }
 
 void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
@@ -194,7 +204,7 @@ void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
 
     if (m_sensor->getType() == JoySensor::ACCELEROMETER)
     {
-        m_ui->gravityValue->setText(QString::number(m_sensor->calculateDistance()));
+        m_ui->accelerationValue->setText(QString::number(m_sensor->calculateDistance()));
         value = m_sensor->calculatePitch() * 180.0 / M_PI;
         m_ui->pitchValue->setText(QString::number(value));
         value = m_sensor->calculateRoll() * 180.0 / M_PI;
@@ -211,11 +221,6 @@ void JoySensorEditDialog::checkMaxZone(float value)
 {
     if (value > m_ui->deadZoneSpinBox->value())
         QMetaObject::invokeMethod(m_sensor, "setMaxZone", Q_ARG(float, value));
-}
-
-void JoySensorEditDialog::selectCurrentPreset()
-{
-    // XXX: implement
 }
 
 void JoySensorEditDialog::openMouseSettingsDialog()
