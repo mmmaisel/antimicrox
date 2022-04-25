@@ -67,15 +67,12 @@ class JoySensor : public QObject
     bool inDeadZone() const;
     double getDistanceFromDeadZone() const;
     double getDistanceFromDeadZone(float x, float y, float z) const;
-    double calculateXDistanceFromDeadZone(bool interpolate = false) const;
-    double calculateXDistanceFromDeadZone(
-        float x, float y, float z, bool interpolate = false) const;
-    double calculateYDistanceFromDeadZone(bool interpolate = false) const;
-    double calculateYDistanceFromDeadZone(
-        float x, float y, float z, bool interpolate = false) const;
-    double calculateZDistanceFromDeadZone(bool interpolate = false) const;
-    double calculateZDistanceFromDeadZone(
-        float x, float y, float z, bool interpolate = false) const;
+    double calculateXDistanceFromDeadZone() const;
+    double calculateXDistanceFromDeadZone(float x, float y, float z) const;
+    double calculateYDistanceFromDeadZone() const;
+    double calculateYDistanceFromDeadZone(float x, float y, float z) const;
+    double calculateZDistanceFromDeadZone() const;
+    double calculateZDistanceFromDeadZone(float x, float y, float z) const;
     double calculateDistance() const;
     double calculateDistance(float x, float y, float z) const;
     double calculatePitch() const;
