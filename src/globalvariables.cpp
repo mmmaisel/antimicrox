@@ -186,7 +186,6 @@ const int GlobalVariables::JoyControlStick::DEFAULTSTICKDELAY = 0;
 
 const double GlobalVariables::JoySensor::ACCEL_MIN = -90.0;
 const double GlobalVariables::JoySensor::ACCEL_MAX =  90.0;
-const double GlobalVariables::JoySensor::GRAVITY = 9.80665;
 const double GlobalVariables::JoySensor::GYRO_MIN = -360.0;
 const double GlobalVariables::JoySensor::GYRO_MAX =  360.0;
 const double GlobalVariables::JoySensor::DEFAULTDEADZONE = 0.5;

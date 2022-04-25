@@ -822,7 +822,25 @@ void InputDaemon::firstInputPass(QQueue<SDL_Event> *sdlEventQueue)
 
             if (joy != nullptr)
             {
-                // XXX: implement more
+                SetJoystick *set = joy->getActiveSetJoystick();
+                JoySensor::Type sensor_type;
+                if (event.csensor.sensor == SDL_SENSOR_ACCEL)
+                    sensor_type = JoySensor::ACCELEROMETER;
+                else if (event.csensor.sensor == SDL_SENSOR_GYRO)
+                    sensor_type = JoySensor::GYROSCOPE;
+                JoySensor* sensor = set->getSensor(sensor_type);
+
+                if (sensor != nullptr)
+                {
+                    InputDeviceBitArrayStatus *temp = createOrGrabBitStatusEntry(&releaseEventsGenerated, joy, false);
+                    temp->changeSensorStatus(sensor_type, event.csensor.sensor == 0);
+
+                    InputDeviceBitArrayStatus *pending = createOrGrabBitStatusEntry(&pendingEventValues, joy);
+                    pending->changeSensorStatus(sensor_type, !sensor->inDeadZone(event.csensor.data));
+                    sdlEventQueue->append(event);
+                }
+            } else
+            {
                 sdlEventQueue->append(event);
             }
             break;
@@ -966,7 +984,6 @@ void InputDaemon::modifyUnplugEvents(QQueue<SDL_Event> *sdlEventQueue)
                         }
 #if SDL_VERSION_ATLEAST(2,0,14)
                         case SDL_CONTROLLERSENSORUPDATE: {
-                            // XXX: implement more
                             tempQueue.enqueue(event);
                             break;
                         }

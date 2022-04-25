@@ -222,9 +222,9 @@ void JoySensor::resetButtons()
     }
 }
 
-bool JoySensor::inDeadZone() const
+bool JoySensor::inDeadZone(float* values) const
 {
-    return calculateDistance() < m_dead_zone;
+    return calculateDistance(values[0], values[1], values[2]) < m_dead_zone;
 }
 
 /**

@@ -34,7 +34,8 @@ class JoySensor : public QObject
   public:
     enum Type {
         ACCELEROMETER,
-        GYROSCOPE
+        GYROSCOPE,
+        SENSOR_COUNT
     };
 
     explicit JoySensor(Type type, int originset, SetJoystick *parent_set, QObject *parent);
@@ -64,7 +65,7 @@ class JoySensor : public QObject
 
     void resetButtons();
 
-    bool inDeadZone() const;
+    bool inDeadZone(float* values) const;
     double getDistanceFromDeadZone() const;
     double getDistanceFromDeadZone(float x, float y, float z) const;
     double calculateXDistanceFromDeadZone() const;
