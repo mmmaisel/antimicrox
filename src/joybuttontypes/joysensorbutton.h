@@ -40,6 +40,7 @@ class JoySensorButton : public JoyGradientButton
     virtual double getMouseDistanceFromDeadZone();
 
     virtual bool isPartRealAxis();
+    virtual bool isDefault();
 
     JoySensor *getSensor() const;
     QString getDirectionName() const;

@@ -534,8 +534,22 @@ QString JoySensor::getSensorName() { return m_sensor_name; }
 
 bool JoySensor::isDefault()
 {
-    bool value = false;
-    // XXX: implement
+    bool value = true;
+    value = value && (m_dead_zone == GlobalVariables::JoySensor::DEFAULTDEADZONE);
+    if (m_type == ACCELEROMETER)
+        value = value && (m_max_zone == GlobalVariables::JoySensor::ACCEL_MAX);
+    else
+        value = value && (m_max_zone == GlobalVariables::JoySensor::GYRO_MAX);
+
+    value = value && (m_diagonal_range == GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE);
+    value = value && (m_sensor_delay == GlobalVariables::JoySensor::DEFAULTSENSORDELAY);
+
+    for (auto iter = m_buttons.cbegin(); iter != m_buttons.cend(); ++iter)
+    {
+        JoySensorButton *button = iter.value();
+        value = value && (button->isDefault());
+    }
+
     return value;
 }
 void JoySensor::setDefaultSensorName(QString tempname) { m_default_sensor_name = tempname; }
