@@ -119,6 +119,7 @@ class JoySensor : public QObject
     void setDiagonalRange(int value);
     void setSensorName(QString tempName);
     void setSensorDelay(unsigned int value);
+    void establishPropertyUpdatedConnection();
 
   protected:
     void populateButtons();

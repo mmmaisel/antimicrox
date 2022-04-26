@@ -30,6 +30,7 @@
 #include "joyaxiswidget.h"
 #include "joybuttontypes/joycontrolstickbutton.h"
 #include "joybuttontypes/joydpadbutton.h"
+#include "joybuttontypes/joysensorbutton.h"
 #include "joybuttonwidget.h"
 #include "joycontrolstick.h"
 #include "joydpad.h"
@@ -1770,7 +1771,14 @@ void JoyTabWidget::checkStickDisplay()
 
 void JoyTabWidget::checkSensorDisplay()
 {
-    // XXX: implement
+    JoySensorButton *button = qobject_cast<JoySensorButton *>(sender());
+    JoySensor *sensor = button->getSensor();
+    if ((sensor != nullptr) && sensor->hasSlotsAssigned())
+    {
+        SetJoystick *currentSet = m_joystick->getActiveSetJoystick();
+        removeSetButtons(currentSet);
+        fillSetButtons(currentSet);
+    }
 }
 
 void JoyTabWidget::checkDPadButtonDisplay()
@@ -2003,15 +2011,21 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
     int sensorGridColumn = 0;
     int sensorGridRow = 0;
 
-    if (m_joystick->hasSensor(JoySensor::ACCELEROMETER))
+    for (size_t i = 0; i < JoySensor::SENSOR_COUNT; ++i)
     {
-        JoySensor *sensor = currentSet->getSensor(JoySensor::ACCELEROMETER);
+        JoySensor::Type type = static_cast<JoySensor::Type>(i);
+        if (!m_joystick->hasSensor(type))
+            continue;
+
+        JoySensor *sensor = currentSet->getSensor(type);
+        sensor->establishPropertyUpdatedConnection();
+        QHash<JoySensorDirection, JoySensorButton *> *sensorButtons = sensor->getButtons();
+
         if (!hideEmptyButtons || sensor->hasSlotsAssigned())
         {
             if (sensorGroup == nullptr)
-            {
                 sensorGroup = new QGroupBox(tr("Sensors"), this);
-            }
+
             if (sensorGrid == nullptr)
             {
                 sensorGrid = new QGridLayout();
@@ -2043,50 +2057,13 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
             sensorGridColumn++;
         } else
         {
-            // XXX: implement
-        }
-    }
-    if (m_joystick->hasSensor(JoySensor::GYROSCOPE))
-    {
-        JoySensor *sensor = currentSet->getSensor(JoySensor::GYROSCOPE);
-        if (!hideEmptyButtons || sensor->hasSlotsAssigned())
-        {
-            if (sensorGroup == nullptr)
+            for(auto iter = sensorButtons->cbegin(); iter != sensorButtons->cend(); ++iter)
             {
-                sensorGroup = new QGroupBox(tr("Sensors"), this);
+                JoySensorButton *button = iter.value();
+                button->establishPropertyUpdatedConnections();
+                connect(button, &JoySensorButton::slotsChanged, this,
+                    &JoyTabWidget::checkSensorDisplay);
             }
-            if (sensorGrid == nullptr)
-            {
-                sensorGrid = new QGridLayout();
-                sensorGridColumn = 0;
-                sensorGridRow = 0;
-            }
-
-            QWidget *groupContainer = new QWidget(sensorGroup);
-            SensorPushButtonGroup *sensorButtonGroup = new SensorPushButtonGroup(
-                sensor, isKeypadUnlocked(), displayingNames, groupContainer);
-            if (hideEmptyButtons)
-            {
-                connect(sensorButtonGroup,
-                    &SensorPushButtonGroup::buttonSlotChanged, this,
-                    &JoyTabWidget::checkSensorEmptyDisplay);
-            }
-
-            connect(namesPushButton, &QPushButton::clicked, sensorButtonGroup,
-                &SensorPushButtonGroup::toggleNameDisplay);
-
-            if (sensorGridColumn > 1)
-            {
-                sensorGridColumn = 0;
-                sensorGridRow++;
-            }
-
-            groupContainer->setLayout(sensorButtonGroup);
-            sensorGrid->addWidget(groupContainer, sensorGridRow, sensorGridColumn);
-            sensorGridColumn++;
-        } else
-        {
-            // XXX: implement
         }
     }
 

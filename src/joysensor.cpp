@@ -18,6 +18,7 @@
 #include "joysensor.h"
 
 #include "setjoystick.h"
+#include "inputdevice.h"
 #include "joybuttontypes/joysensorbutton.h"
 #include "xml/joybuttonxml.h"
 
@@ -732,6 +733,12 @@ void JoySensor::setSensorDelay(unsigned int value)
         emit sensorDelayChanged(value);
         emit propertyUpdated();
     }
+}
+
+void JoySensor::establishPropertyUpdatedConnection()
+{
+    connect(this, &JoySensor::propertyUpdated, getParentSet()->getInputDevice(),
+        &InputDevice::profileEdited);
 }
 
 void JoySensor::createDeskEvent(bool safezone, bool ignoresets)
