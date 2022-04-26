@@ -108,6 +108,7 @@ class SetJoystick : public SetJoystickXml
     void setAssignmentButtonChanged(int button, int originset, int newset, int mode);           // SetButton class
     void setAssignmentAxisChanged(int button, int axis, int originset, int newset, int mode);   // SetAxis class
     void setAssignmentStickChanged(int button, int stick, int originset, int newset, int mode); // SetStick class
+    void setAssignmentSensorChanged(int button, int sensor, int originset, int newset, int mode);
     void setAssignmentDPadChanged(int button, int dpad, int originset, int newset, int mode);   // SetHat class
     void setAssignmentVDPadChanged(int button, int dpad, int originset, int newset, int mode);  // SetVDPad class
     void setAssignmentAxisThrottleChanged(int axis, int originset);                             // SetAxis class
@@ -119,6 +120,10 @@ class SetJoystick : public SetJoystickXml
     void setAxisReleased(int setindex, int axis, int value);                                    // SetAxis class
     void setStickButtonClick(int setindex, int stick, int button);                              // SetStick class
     void setStickButtonRelease(int setindex, int stick, int button);                            // SetStick class
+    void setSensorActivated(int setindex, int sensor, int value);
+    void setSensorReleased(int setindex, int sensor, int value);
+    void setSensorButtonClick(int setindex, int sensor, int button);
+    void setSensorButtonRelease(int setindex, int sensor, int button);
     void setDPadButtonClick(int setindex, int dpad, int button);                                // SetHat class
     void setDPadButtonRelease(int setindex, int dpad, int button);                              // SetHat class
 
@@ -143,6 +148,7 @@ class SetJoystick : public SetJoystickXml
     void propogateSetButtonAssociation(int button, int newset, int mode);                 // SetButton class
     void propogateSetAxisButtonAssociation(int button, int axis, int newset, int mode);   // SetAxis class
     void propogateSetStickButtonAssociation(int button, int stick, int newset, int mode); // SetStick class
+    void propagateSetSensorButtonAssociation(int button, int stick, int newset, int mode);
     void propogateSetDPadButtonAssociation(int button, int dpad, int newset, int mode);   // SetHat class
     void propogateSetVDPadButtonAssociation(int button, int dpad, int newset, int mode);  // SetVDPad class
     void establishPropertyUpdatedConnection();
@@ -156,19 +162,25 @@ class SetJoystick : public SetJoystickXml
     void propogateSetAxisButtonRelease(int button);  // SetAxis class
     void propogateSetStickButtonClick(int button);   // SetStick class
     void propogateSetStickButtonRelease(int button); // SetStick class
+    void propagateSetSensorButtonClick(int button);
+    void propagateSetSensorButtonRelease(int button);
     void propogateSetDPadButtonClick(int button);    // SetHat class
     void propogateSetDPadButtonRelease(int button);  // SetHat class
     void propogateSetAxisActivated(int value);       // SetAxis class
     void propogateSetAxisReleased(int value);        // SetAxis class
+    void propagateSetSensorActivated(int value);
+    void propagateSetSensorReleased(int value);
 
     void propogateSetButtonNameChange();      // SetButton class
     void propogateSetAxisButtonNameChange();  // SetAxis class
     void propogateSetStickButtonNameChange(); // SetStick class
+    void propagateSetSensorButtonNameChange();
     void propogateSetDPadButtonNameChange();  // SetHat class
     void propogateSetVDPadButtonNameChange(); // SetVDPad class
 
     void propogateSetAxisNameChange();  // SetAxis class
     void propogateSetStickNameChange(); // SetStick class
+    void propagateSetSensorNameChange();
     void propogateSetDPadNameChange();  // SetHat class
     void propogateSetVDPadNameChange(); // SetVDPad class
 
