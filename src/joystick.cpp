@@ -149,12 +149,7 @@ int Joystick::getNumberRawHats()
     return numhats;
 }
 
-bool Joystick::hasRawAccelerometer()
-{
-    return false;
-}
-
-bool Joystick::hasRawGyroscope()
+bool Joystick::hasRawSensor(JoySensor::Type _)
 {
     return false;
 }

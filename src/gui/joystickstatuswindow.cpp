@@ -97,7 +97,8 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     ui->joystickButtonsLabel->setText(QString::number(joystick->getNumberRawButtons()));
     ui->joystickHatsLabel->setText(QString::number(joystick->getNumberRawHats()));
     ui->joystickSensorsLabel->setText(
-            QString::number(joystick->hasRawAccelerometer() + joystick->hasRawGyroscope()));
+        QString::number(joystick->hasRawSensor(JoySensor::ACCELEROMETER) +
+            joystick->hasRawSensor(JoySensor::GYROSCOPE)));
 
     joystick->getActiveSetJoystick()->setIgnoreEventState(true);
     joystick->getActiveSetJoystick()->release();
@@ -194,7 +195,7 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
 
     QVBoxLayout *sensorsBox = new QVBoxLayout();
     sensorsBox->setSpacing(4);
-    if (joystick->hasAccelerometer())
+    if (joystick->hasSensor(JoySensor::ACCELEROMETER))
     {
         JoySensor *sensor =
             joystick->getActiveSetJoystick()->getSensor(JoySensor::ACCELEROMETER);
@@ -230,7 +231,7 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
             &JoystickStatusWindow::updateAccelerometerValues);
     }
 
-    if (joystick->hasGyroscope())
+    if (joystick->hasSensor(JoySensor::GYROSCOPE))
     {
         JoySensor *sensor =
             joystick->getActiveSetJoystick()->getSensor(JoySensor::GYROSCOPE);

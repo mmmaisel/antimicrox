@@ -46,8 +46,7 @@ class Joystick : public InputDevice
     virtual int getNumberRawButtons() override;
     virtual int getNumberRawAxes() override;
     virtual int getNumberRawHats() override;
-    virtual bool hasRawAccelerometer() override;
-    virtual bool hasRawGyroscope() override;
+    virtual bool hasRawSensor(JoySensor::Type type) override;
 
     void setCounterUniques(int counter) override;
 

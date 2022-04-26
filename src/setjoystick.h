@@ -48,8 +48,7 @@ class SetJoystick : public SetJoystickXml
     int getNumberButtons() const;
     int getNumberAxes() const;
     int getNumberHats() const;
-    int hasAccelerometer() const;
-    int hasGyroscope() const;
+    bool hasSensor(JoySensor::Type type) const;
     int getNumberSticks() const;
     int getNumberVDPads() const;
 

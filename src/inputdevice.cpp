@@ -567,9 +567,10 @@ int InputDevice::getNumberAxes() { return getActiveSetJoystick()->getNumberAxes(
 
 int InputDevice::getNumberHats() { return getActiveSetJoystick()->getNumberHats(); }
 
-bool InputDevice::hasAccelerometer() { return getActiveSetJoystick()->hasAccelerometer(); }
-
-bool InputDevice::hasGyroscope() { return getActiveSetJoystick()->hasGyroscope(); }
+bool InputDevice::hasSensor(JoySensor::Type type)
+{
+    return getActiveSetJoystick()->hasSensor(type);
+}
 
 int InputDevice::getNumberSticks() { return getActiveSetJoystick()->getNumberSticks(); }
 

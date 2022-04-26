@@ -20,6 +20,7 @@
 #define INPUTDEVICE_H
 
 #include "setjoystick.h"
+#include "joysensor.h"
 
 #include <SDL2/SDL_joystick.h>
 
@@ -40,8 +41,7 @@ class InputDevice : public QObject
     virtual int getNumberButtons();
     virtual int getNumberAxes();
     virtual int getNumberHats();
-    virtual bool hasAccelerometer();
-    virtual bool hasGyroscope();
+    virtual bool hasSensor(JoySensor::Type);
     virtual int getNumberSticks();
     virtual int getNumberVDPads();
 
@@ -95,8 +95,7 @@ class InputDevice : public QObject
     virtual int getNumberRawButtons() = 0;
     virtual int getNumberRawAxes() = 0;
     virtual int getNumberRawHats() = 0;
-    virtual bool hasRawAccelerometer() = 0;
-    virtual bool hasRawGyroscope() = 0;
+    virtual bool hasRawSensor(JoySensor::Type type) = 0;
 
     int getDeviceKeyPressTime(); // unsigned
 

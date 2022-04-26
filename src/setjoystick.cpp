@@ -117,19 +117,15 @@ void SetJoystick::refreshSensors()
 {
     deleteSensors();
 
-    if (getInputDevice()->hasRawAccelerometer())
+    for (size_t i = 0; i < JoySensor::SENSOR_COUNT; ++i)
     {
-        JoySensor *sensor = new JoySensor(
-            JoySensor::ACCELEROMETER, m_index, this, this);
-        m_sensors.insert(JoySensor::ACCELEROMETER, sensor);
-        enableSensorConnections(sensor);
-    }
+        JoySensor::Type type = static_cast<JoySensor::Type>(i);
 
-    if (getInputDevice()->hasRawGyroscope())
-    {
-        JoySensor *sensor = new JoySensor(
-            JoySensor::GYROSCOPE, m_index, this, this);
-        m_sensors.insert(JoySensor::GYROSCOPE, sensor);
+        if (!getInputDevice()->hasRawSensor(type))
+            continue;
+
+        JoySensor *sensor = new JoySensor(type, m_index, this, this);
+        m_sensors.insert(type, sensor);
         enableSensorConnections(sensor);
     }
 }
@@ -248,9 +244,10 @@ int SetJoystick::getNumberAxes() const { return axes.count(); }
 
 int SetJoystick::getNumberHats() const { return getHats().count(); }
 
-int SetJoystick::hasAccelerometer() const { return getSensors().contains(JoySensor::ACCELEROMETER); }
-
-int SetJoystick::hasGyroscope() const { return getSensors().contains(JoySensor::GYROSCOPE); }
+bool SetJoystick::hasSensor(JoySensor::Type type) const
+{
+    return m_sensors.contains(type);
+}
 
 int SetJoystick::getNumberSticks() const { return getSticks().size(); }
 

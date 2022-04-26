@@ -72,7 +72,7 @@ void GameControllerSet::populateSticksDPad()
     addVDPad(0, controllerDPad);
 
     // Sensor Assignment
-    if (hasAccelerometer())
+    if (hasSensor(JoySensor::ACCELEROMETER))
     {
         JoySensor *sensor =
             new JoySensor(JoySensor::ACCELEROMETER, getIndex(), this, this);
@@ -80,7 +80,7 @@ void GameControllerSet::populateSticksDPad()
         addSensor(JoySensor::ACCELEROMETER, sensor);
     }
 
-    if (hasGyroscope())
+    if (hasSensor(JoySensor::GYROSCOPE))
     {
         JoySensor *sensor =
             new JoySensor(JoySensor::GYROSCOPE, getIndex(), this, this);

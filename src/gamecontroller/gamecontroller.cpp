@@ -172,22 +172,15 @@ int GameController::getNumberRawAxes()
     return SDL_CONTROLLER_AXIS_MAX;
 }
 
-bool GameController::hasRawAccelerometer()
+bool GameController::hasRawSensor(JoySensor::Type type)
 {
 #if SDL_VERSION_ATLEAST(2,0,14)
-    return SDL_GameControllerHasSensor(controller, SDL_SENSOR_ACCEL);
-#else
-    return false;
+    if (type == JoySensor::ACCELEROMETER)
+        return SDL_GameControllerHasSensor(controller, SDL_SENSOR_ACCEL);
+    else if (type == JoySensor::GYROSCOPE)
+        return SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO);
 #endif
-}
-
-bool GameController::hasRawGyroscope()
-{
-#if SDL_VERSION_ATLEAST(2,0,14)
-    return SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO);
-#else
     return false;
-#endif
 }
 
 int GameController::getNumberRawHats() { return 0; }
