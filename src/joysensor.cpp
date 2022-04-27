@@ -118,9 +118,16 @@ void JoySensor::clearPendingEvent()
 
 bool JoySensor::hasSlotsAssigned()
 {
-    bool hasSlots = false;
-    // XXX: implement
-    return hasSlots;
+    for (auto iter = m_buttons.cbegin(); iter != m_buttons.cend(); ++iter)
+    {
+        JoyButton *button = iter.value();
+        if (button != nullptr)
+        {
+            if (button->getAssignedSlots()->count() > 0)
+                return true;
+        }
+    }
+    return false;
 }
 
 QString JoySensor::getName(bool forceFullFormat, bool displayNames)
