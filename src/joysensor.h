@@ -116,13 +116,15 @@ class JoySensor : public QObject
     void reset();
     void setDeadZone(float value);
     void setMaxZone(float value);
-    void setDiagonalRange(int value);
+    void setDiagonalRange(float value);
     void setSensorName(QString tempName);
     void setSensorDelay(unsigned int value);
     void establishPropertyUpdatedConnection();
 
   protected:
     void populateButtons();
+    void determineAccelerometerEvent(JoySensorButton **eventbutton);
+    void determineGyroscopeEvent(JoySensorButton **eventbutton);
     void createDeskEvent(bool safezone, bool ignoresets = false);
     QString sensorTypeName() const;
 

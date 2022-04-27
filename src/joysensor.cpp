@@ -58,12 +58,11 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
     }
 
     double distance = calculateDistance();
-    // XXX: gravity threshold
     if (m_type == ACCELEROMETER) {
-        double pitch = calculatePitch();
-        double roll = calculateRoll();
-        safezone = abs(pitch) > m_dead_zone || abs(roll) > m_dead_zone
-            || distance > 20;
+        double pitch_abs = abs(calculatePitch());
+        double roll_abs = abs(calculateRoll());
+        // XXX: shock threshold
+        safezone = pitch_abs*pitch_abs + roll_abs*roll_abs > m_dead_zone*m_dead_zone;
     }
     else {
         safezone = distance > m_dead_zone;
@@ -741,57 +740,315 @@ void JoySensor::establishPropertyUpdatedConnection()
         &InputDevice::profileEdited);
 }
 
+/**
+ * @brief Find the direction zone of the current sensor position
+ *   and set the corresponding buttons.
+ *
+ *   First, the pitch and roll angles on the unit sphere are calculated.
+ *   Then, the unit sphere is divided into direction zones with the following algorithm:
+ *     - Mark a spherical layer around the X axis at +/- the diagonal zone angle
+ *       divided by two (called "range" in the code)
+ *     - Generate another spherical layers by rotating the first layer around the Y axis.
+ *       A third layer is not necessary because there are only two degrees of freedom.
+ *     - Check if a point is within each layer by comparing the absolute values
+ *       of pitch and roll angles against the "range".
+ *     - If a point is in only one layer, it is in the orthogonal zone of one axis.
+ *     - If a point is in both or no zones, it is diagonal to both axes.
+ *       There are two cases here because the spherical layers overlap if the diagonal
+ *       angle is larger then 45 degree.
+ *
+ *    XXX: shock detection
+ *
+ * @param Pointer to an array of three JoySensorButton pointers in which
+ *   the results are stored.
+ */
+void JoySensor::determineAccelerometerEvent(JoySensorButton **eventbutton)
+{
+    // XXX: only calculate them once
+    // XXX: debounce shock, disable roll/pitch during shock?
+    // XXX: implement shock
+    //double distance = calculateDistance();
+    double pitch = calculatePitch();
+    double roll = calculateRoll();
+    double range = M_PI/4 - m_diagonal_range/2;
+    bool inPitch = abs(pitch) < range;
+    bool inRoll = abs(roll) < range;
+
+    if (inPitch && !inRoll)
+    {
+        if (roll > 0)
+        {
+            eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
+        } else
+        {
+            eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
+        }
+    } else if (!inPitch && inRoll)
+    {
+        if (pitch > 0)
+        {
+            eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
+        } else
+        {
+            eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
+        }
+    } else // in both or in none
+    {
+        if (pitch > 0)
+        {
+            if (roll > 0)
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
+            } else
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
+            }
+        } else
+        {
+            if (roll > 0)
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
+            } else
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
+            }
+        }
+    }
+
+//    if (distance > 20)
+//        eventbutton[2] = m_buttons.value(JoySensorDirection::ACCEL_FWD);
+}
+
+/**
+ * @brief Find the direction zone of the current sensor position
+ *   and set the corresponding buttons.
+ *
+ *   First, the sensor axis values are normalized so they are on the unit sphere.
+ *   Then, the unit sphere is divided into direction zones with the following algorithm:
+ *     - Mark a spherical layer around the X axis at +/- the diagonal zone angle
+ *       divided by two (called "range" in the code)
+ *       Then generate two more spherical layers by rotating the
+ *       first layer around the Y and Z axes.
+ *     - Check if a point is within each layer by comparing the absolute value
+ *       of each coordinate against the "range".
+ *     - If a point is in only one layer, it is in the diagonal zone between two axes.
+ *     - If a point is in two layers, it is in the orthogonal zone of one axis.
+ *     - If a point is in three or zero zones, it is diagonal to all three axes.
+ *       There are two cases here because the spherical layers overlap if the diagonal
+ *       angle is larger then 45 degree.
+ *
+ * @param Pointer to an array of three JoySensorButton pointers in which
+ *   the results are stored.
+ */
+void JoySensor::determineGyroscopeEvent(JoySensorButton **eventbutton)
+{
+    double range = sin(M_PI/4 - m_diagonal_range/2);
+    double distance = calculateDistance();
+    double normX = m_current_value[0] / distance;
+    double normY = m_current_value[1] / distance;
+    double normZ = m_current_value[2] / distance;
+
+    bool inX = abs(normX) < range;
+    bool inY = abs(normY) < range;
+    bool inZ = abs(normZ) < range;
+
+    if (inX && !inY && !inZ)
+    {
+        if (normY > 0)
+        {
+            if (normZ > 0) // +Y+Z
+            {
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+            }
+            else // +Y-Z
+            {
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+            }
+        } else
+        {
+            if (normZ > 0) // -Y+Z
+            {
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+            }
+            else // -Y-Z
+            {
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+            }
+        }
+    } else if (!inX && inY && !inZ)
+    {
+        if (normX > 0)
+        {
+            if (normZ > 0) // +X+Z
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+            }
+            else // +X-Z
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+            }
+        } else
+        {
+            if (normZ > 0) // -X+Z
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+            }
+            else // -X-Z
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+            }
+        }
+    } else if (!inX && !inY && inZ)
+    {
+        if (normX > 0)
+        {
+            if (normY > 0) // +X+Y
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+            }
+            else // +X-Y
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+            }
+        } else
+        {
+            if (normY > 0) // -X+Y
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+            }
+            else // -X-Y
+            {
+                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+            }
+        }
+    } else if (inX && inY && !inZ)
+    {
+        if (normZ > 0) // +Z
+        {
+            eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+        } else // -Z
+        {
+            eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+        }
+    } else if (inX && !inY && inZ)
+    {
+        if (normY > 0) // +Y
+        {
+            eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+        } else // -Y
+        {
+            eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+        }
+    } else if (!inX && inY && inZ)
+    {
+        if (normX > 0) // +X
+        {
+            eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+        } else // -X
+        {
+            eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+        }
+    } else // in all or in none
+    {
+        if (normX > 0)
+        {
+            if (normY > 0)
+            {
+                if (normZ > 0) // +X+Y+Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+                } else // +X+Y-Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+                }
+            } else
+            {
+                if (normZ > 0) // +X-Y+Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+                } else // +X-Y-Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+                }
+            }
+        } else
+        {
+            if (normY > 0)
+            {
+                if (normZ > 0) // -X+Y+Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+                } else // -X+Y-Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+                }
+            } else
+            {
+                if (normZ > 0) // -X-Y+Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
+                } else // -X-Y-Z
+                {
+                    eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
+                    eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
+                    eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @brief Find the position of the three sensor axes, deactivate no longer used
+ *   sensor direction button and then activate direction buttons for new
+ *   direction.
+ * @param Should set changing operations be ignored. Necessary in the middle
+ *   of a set change.
+ */
 void JoySensor::createDeskEvent(bool safezone, bool ignoresets)
 {
     JoySensorButton *eventbutton[ACTIVE_BUTTON_COUNT] = {nullptr};
 
-    if (m_type == ACCELEROMETER)
+    if (safezone)
     {
-        // XXX: only calculate them once
-        // XXX: debounce shock
-        double distance = calculateDistance();
-        double pitch = calculatePitch();
-        double roll = calculateRoll();
-        if (safezone)
-        {
-            if (pitch > m_dead_zone)
-                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_UP);
-            else if(pitch < -m_dead_zone)
-                eventbutton[0] = m_buttons.value(JoySensorDirection::ACCEL_DOWN);
-
-            if (roll > m_dead_zone)
-                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_LEFT);
-            else if (roll < -m_dead_zone)
-                eventbutton[1] = m_buttons.value(JoySensorDirection::ACCEL_RIGHT);
-
-            if (distance > 20)
-                eventbutton[2] = m_buttons.value(JoySensorDirection::ACCEL_FWD);
-        }
-        // XXX: implement diagonal zone
-    } else
-    {
-        if (safezone)
-        {
-            if (m_current_value[0] > m_dead_zone)
-                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_P);
-            else if(m_current_value[0] < -m_dead_zone)
-                eventbutton[0] = m_buttons.value(JoySensorDirection::GYRO_NICK_N);
-
-            if (m_current_value[1] > m_dead_zone)
-                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_N);
-            else if(m_current_value[1] < -m_dead_zone)
-                eventbutton[1] = m_buttons.value(JoySensorDirection::GYRO_ROLL_P);
-
-            if (m_current_value[2] > m_dead_zone)
-                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_P);
-            else if(m_current_value[2] < -m_dead_zone)
-                eventbutton[2] = m_buttons.value(JoySensorDirection::GYRO_YAW_N);
-        }
+        if (m_type == ACCELEROMETER)
+            determineAccelerometerEvent(eventbutton);
+        else
+            determineGyroscopeEvent(eventbutton);
     }
 
     for (size_t i = 0; i < ACTIVE_BUTTON_COUNT; ++i)
     {
-        // XXX: gyro mouse needs filtering!!!
         if (m_active_button[i] != nullptr && m_active_button[i] != eventbutton[i])
         {
             m_active_button[i]->joyEvent(false, ignoresets);

@@ -159,12 +159,25 @@ void JoySensorStatusBox::drawArtificialHorizon()
     painter.setPen(pen);
     painter.setBrush(QBrush(QColor(0, 255, 0, 128)));
 
-    for(int i = 0; i < 4; ++i)
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    {
+        for(int i = 0; i < 4; ++i)
+        {
+            painter.drawPie(
+                QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
+                (45 + 90*i - m_sensor->getDiagonalRange()/2) * 16,
+                m_sensor->getDiagonalRange() * 16);
+        }
+    } else
     {
         painter.drawPie(
             QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
-            (45 + 90*i - m_sensor->getDiagonalRange()/2) * 16,
-            m_sensor->getDiagonalRange() * 16);
+            (135 - m_sensor->getDiagonalRange()/2) * 16,
+            (m_sensor->getDiagonalRange() + 90) * 16);
+        painter.drawPie(
+            QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
+            (-45 - m_sensor->getDiagonalRange()/2) * 16,
+            (m_sensor->getDiagonalRange() + 90) * 16);
     }
 
     // Pitch scale: 30deg per line
