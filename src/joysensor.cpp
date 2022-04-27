@@ -179,7 +179,10 @@ float JoySensor::getDeadZone()
  * @brief Get the assigned diagonal range value.
  * @return Assigned diagonal range.
  */
-int JoySensor::getDiagonalRange() { return m_diagonal_range; }
+float JoySensor::getDiagonalRange()
+{
+    return m_diagonal_range * 180 / M_PI;
+}
 
 float JoySensor::getMaxZone()
 {
@@ -535,13 +538,13 @@ QString JoySensor::getSensorName() { return m_sensor_name; }
 bool JoySensor::isDefault()
 {
     bool value = true;
-    value = value && (m_dead_zone == GlobalVariables::JoySensor::DEFAULTDEADZONE);
+    value = value && qFuzzyCompare(double(getDeadZone()), GlobalVariables::JoySensor::DEFAULTDEADZONE);
     if (m_type == ACCELEROMETER)
-        value = value && (m_max_zone == GlobalVariables::JoySensor::ACCEL_MAX);
+        value = value && qFuzzyCompare(double(getMaxZone()), GlobalVariables::JoySensor::ACCEL_MAX);
     else
-        value = value && (m_max_zone == GlobalVariables::JoySensor::GYRO_MAX);
+        value = value && qFuzzyCompare(double(getMaxZone()), GlobalVariables::JoySensor::GYRO_MAX);
 
-    value = value && (m_diagonal_range == GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE);
+    value = value && qFuzzyCompare(getDiagonalRange(), GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE);
     value = value && (m_sensor_delay == GlobalVariables::JoySensor::DEFAULTSENSORDELAY);
 
     for (auto iter = m_buttons.cbegin(); iter != m_buttons.cend(); ++iter)
@@ -626,16 +629,16 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml)
         xml->writeStartElement("sensor");
         xml->writeAttribute("type", QString::number(m_type));
 
-        if (m_dead_zone != GlobalVariables::JoySensor::DEFAULTDEADZONE)
+        if (!qFuzzyCompare(double(getDeadZone()), GlobalVariables::JoySensor::DEFAULTDEADZONE))
             xml->writeTextElement("deadZone", QString::number(getDeadZone()));
 
-        if (m_max_zone != (m_type == ACCELEROMETER
+        if (!qFuzzyCompare(double(m_max_zone), (m_type == ACCELEROMETER
                 ? GlobalVariables::JoySensor::ACCEL_MAX
-                : GlobalVariables::JoySensor::GYRO_MAX))
+                : GlobalVariables::JoySensor::GYRO_MAX)))
             xml->writeTextElement("maxZone", QString::number(getMaxZone()));
 
-        if (m_diagonal_range != GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE)
-            xml->writeTextElement("diagonalRange", QString::number(m_diagonal_range));
+        if (!qFuzzyCompare(double(m_diagonal_range), GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE))
+            xml->writeTextElement("diagonalRange", QString::number(getDiagonalRange()));
 
         if (m_sensor_delay > GlobalVariables::JoySensor::DEFAULTSENSORDELAY)
             xml->writeTextElement("sensorDelay", QString::number(m_sensor_delay));
@@ -667,11 +670,11 @@ void JoySensor::reset()
     m_active = false;
     for (size_t i = 0; i < ACTIVE_BUTTON_COUNT; ++i)
         m_active_button[i] = nullptr;
-    m_dead_zone = GlobalVariables::JoySensor::DEFAULTDEADZONE;
+    m_dead_zone = GlobalVariables::JoySensor::DEFAULTDEADZONE * M_PI / 180;
     m_max_zone = m_type == ACCELEROMETER
-        ? GlobalVariables::JoySensor::ACCEL_MAX
-        : GlobalVariables::JoySensor::GYRO_MAX;
-    m_diagonal_range = GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE;
+        ? GlobalVariables::JoySensor::ACCEL_MAX * M_PI / 180
+        : GlobalVariables::JoySensor::GYRO_MAX * M_PI / 180;
+    m_diagonal_range = GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE * M_PI / 180;
     m_pending_event = false;
 
     m_current_direction = JoySensorDirection::CENTERED;
@@ -684,8 +687,7 @@ void JoySensor::reset()
 void JoySensor::setDeadZone(float value)
 {
     value = abs(value / 180 * M_PI);
-    // XXX: do not compare floats
-    if ((value != m_dead_zone) && (value <= m_max_zone))
+    if (!qFuzzyCompare(value, m_dead_zone) && (value <= m_max_zone))
     {
         m_dead_zone = value;
         emit deadZoneChanged(value);
@@ -696,8 +698,7 @@ void JoySensor::setDeadZone(float value)
 void JoySensor::setMaxZone(float value)
 {
     value = abs(value / 180 * M_PI);
-    // XXX: do not compare floats
-    if ((value != m_max_zone) && (value > m_dead_zone))
+    if (!qFuzzyCompare(value, m_max_zone) && (value > m_dead_zone))
     {
         m_max_zone = value;
         emit maxZoneChanged(value);
@@ -709,14 +710,15 @@ void JoySensor::setMaxZone(float value)
  * @brief Set the diagonal range value for a sensor.
  * @param Value between 1 - 90.
  */
-void JoySensor::setDiagonalRange(int value)
+void JoySensor::setDiagonalRange(float value)
 {
     if (value < 1)
         value = 1;
     else if (value > 90)
         value = 90;
 
-    if (value != m_diagonal_range)
+    value = value * M_PI / 180;
+    if (!qFuzzyCompare(value, m_diagonal_range))
     {
         m_diagonal_range = value;
         emit diagonalRangeChanged(value);

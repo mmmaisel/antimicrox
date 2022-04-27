@@ -56,7 +56,7 @@ class JoySensor : public QObject
 
     Type getType();
     float getDeadZone();
-    int getDiagonalRange();
+    float getDiagonalRange();
     float getMaxZone();
     float getXCoordinate();
     float getYCoordinate();
@@ -142,7 +142,7 @@ class JoySensor : public QObject
     bool m_pending_event;
     bool m_pending_ignore_sets;
     float m_dead_zone;
-    int m_diagonal_range;
+    float m_diagonal_range;
     float m_max_zone;
     unsigned int m_sensor_delay;
 
