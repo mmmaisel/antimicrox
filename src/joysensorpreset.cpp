@@ -64,9 +64,9 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
         upslots = upButton->getAssignedSlots();
         downButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_NICK_N);
         downslots = downButton->getAssignedSlots();
-        leftButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_P);
+        leftButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_N);
         leftslots = leftButton->getAssignedSlots();
-        rightButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_N);
+        rightButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_P);
         rightslots = rightButton->getAssignedSlots();
         fwdButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_ROLL_P);
         fwdslots = fwdButton->getAssignedSlots();
@@ -330,8 +330,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     {
         tempHash.insert(JoySensorDirection::GYRO_NICK_P, upButtonSlot);
         tempHash.insert(JoySensorDirection::GYRO_NICK_N, downButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_YAW_P, leftButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_YAW_N, rightButtonSlot);
+        tempHash.insert(JoySensorDirection::GYRO_YAW_P, rightButtonSlot);
+        tempHash.insert(JoySensorDirection::GYRO_YAW_N, leftButtonSlot);
         tempHash.insert(JoySensorDirection::GYRO_ROLL_P, fwdButtonSlot);
         tempHash.insert(JoySensorDirection::GYRO_ROLL_N, bwdButtonSlot);
     } else

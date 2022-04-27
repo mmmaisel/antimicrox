@@ -160,7 +160,6 @@ QString JoySensor::getPartialName(bool forceFullFormat, bool displayNames)
     } else
     {
         label.append(sensorTypeName()).append(" ");
-        //label.append(QString::number(getRealJoyIndex()));
     }
 
     return label;
