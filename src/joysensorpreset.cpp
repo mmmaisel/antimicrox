@@ -241,7 +241,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
-        m_sensor->setDiagonalRange(65);
+        m_sensor->setDeadZone(0);
+        m_sensor->setDiagonalRange(90);
 
         PadderCommon::inputDaemonMutex.unlock();
         break;
@@ -252,7 +253,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
-        m_sensor->setDiagonalRange(65);
+        m_sensor->setDeadZone(0);
+        m_sensor->setDiagonalRange(90);
 
         PadderCommon::inputDaemonMutex.unlock();
         break;
@@ -263,7 +265,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
-        m_sensor->setDiagonalRange(65);
+        m_sensor->setDeadZone(0);
+        m_sensor->setDiagonalRange(90);
 
         PadderCommon::inputDaemonMutex.unlock();
         break;
@@ -274,7 +277,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
-        m_sensor->setDiagonalRange(65);
+        m_sensor->setDeadZone(0);
+        m_sensor->setDiagonalRange(90);
 
         PadderCommon::inputDaemonMutex.unlock();
         break;
@@ -289,6 +293,7 @@ void JoySensorPreset::setSensorPreset(Preset preset)
                                            JoyButtonSlot::JoyKeyboard, this);
         rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Right), Qt::Key_Right,
                                             JoyButtonSlot::JoyKeyboard, this);
+        m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
         PadderCommon::inputDaemonMutex.unlock();
@@ -304,6 +309,7 @@ void JoySensorPreset::setSensorPreset(Preset preset)
                                            JoyButtonSlot::JoyKeyboard, this);
         rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_D), Qt::Key_D,
                                             JoyButtonSlot::JoyKeyboard, this);
+        m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
         PadderCommon::inputDaemonMutex.unlock();
@@ -319,6 +325,7 @@ void JoySensorPreset::setSensorPreset(Preset preset)
                                            QtKeyMapperBase::AntKey_KP_4, JoyButtonSlot::JoyKeyboard, this);
         rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_6),
                                             QtKeyMapperBase::AntKey_KP_6, JoyButtonSlot::JoyKeyboard, this);
+        m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
         PadderCommon::inputDaemonMutex.unlock();

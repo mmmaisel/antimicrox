@@ -176,6 +176,15 @@ void JoySensorEditDialog::implementPresets(int index)
 {
     auto preset = static_cast<JoySensorPreset::Preset>(m_ui->presetsComboBox->itemData(index).toInt());
     m_preset.setSensorPreset(preset);
+
+    m_ui->deadZoneSlider->setValue(m_sensor->getDeadZone());
+    m_ui->deadZoneSpinBox->setValue(m_sensor->getDeadZone());
+
+    m_ui->maxZoneSlider->setValue(m_sensor->getMaxZone());
+    m_ui->maxZoneSpinBox->setValue(m_sensor->getMaxZone());
+
+    m_ui->diagonalRangeSlider->setValue(m_sensor->getDiagonalRange());
+    m_ui->diagonalRangeSpinBox->setValue(m_sensor->getDiagonalRange());
 }
 
 void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
