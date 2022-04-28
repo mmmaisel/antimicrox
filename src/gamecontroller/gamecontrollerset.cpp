@@ -75,7 +75,9 @@ void GameControllerSet::populateSticksDPad()
     if (hasSensor(JoySensor::ACCELEROMETER))
     {
         JoySensor *sensor =
-            new JoySensor(JoySensor::ACCELEROMETER, getIndex(), this, this);
+            new JoySensor(JoySensor::ACCELEROMETER,
+                getInputDevice()->getRawSensorRate(JoySensor::ACCELEROMETER),
+                getIndex(), this, this);
         sensor->setDefaultSensorName("Accelerometer");
         addSensor(JoySensor::ACCELEROMETER, sensor);
     }
@@ -83,7 +85,9 @@ void GameControllerSet::populateSticksDPad()
     if (hasSensor(JoySensor::GYROSCOPE))
     {
         JoySensor *sensor =
-            new JoySensor(JoySensor::GYROSCOPE, getIndex(), this, this);
+            new JoySensor(JoySensor::GYROSCOPE,
+                getInputDevice()->getRawSensorRate(JoySensor::GYROSCOPE),
+                getIndex(), this, this);
         sensor->setDefaultSensorName("Gyroscope");
         addSensor(JoySensor::GYROSCOPE, sensor);
     }

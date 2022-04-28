@@ -23,6 +23,7 @@
 #include <QXmlStreamWriter>
 
 #include "joysensordirection.h"
+#include "pt1.h"
 
 class SetJoystick;
 class JoySensorButton;
@@ -38,7 +39,7 @@ class JoySensor : public QObject
         SENSOR_COUNT
     };
 
-    explicit JoySensor(Type type, int originset, SetJoystick *parent_set, QObject *parent);
+    explicit JoySensor(Type type, double rate, int originset, SetJoystick *parent_set, QObject *parent);
     ~JoySensor();
 
     void joyEvent(float* values, bool ignoresets = false);
@@ -122,6 +123,10 @@ class JoySensor : public QObject
     void establishPropertyUpdatedConnection();
 
   protected:
+    static const double SHOCK_DETECT_THRESHOLD;
+    static const double SHOCK_SUPPRESS_FACTOR;
+    static const double SHOCK_TAU;
+
     void populateButtons();
     void determineAccelerometerEvent(JoySensorButton **eventbutton);
     void determineGyroscopeEvent(JoySensorButton **eventbutton);
@@ -134,6 +139,7 @@ class JoySensor : public QObject
     static const size_t ACTIVE_BUTTON_COUNT = 3;
     JoySensorButton *m_active_button[ACTIVE_BUTTON_COUNT];
 
+    double m_rate;
     float m_last_known_raw_value[3];
     float m_current_value[3];
     float m_pending_value[3];
@@ -141,6 +147,8 @@ class JoySensor : public QObject
     float m_calibration_value[3];
     bool m_pending_event;
     bool m_pending_ignore_sets;
+    PT1 m_shock_filter;
+    size_t m_shock_suppress_count;
     float m_dead_zone;
     float m_diagonal_range;
     float m_max_zone;

@@ -26,6 +26,7 @@
 #include "joycontrolstick.h"
 #include "joydpad.h"
 #include "joysensor.h"
+#include "logger.h"
 #include "vdpad.h"
 
 #include <QDebug>
@@ -124,7 +125,9 @@ void SetJoystick::refreshSensors()
         if (!getInputDevice()->hasRawSensor(type))
             continue;
 
-        JoySensor *sensor = new JoySensor(type, m_index, this, this);
+        JoySensor *sensor = new JoySensor(type,
+            getInputDevice()->getRawSensorRate(type),
+            m_index, this, this);
         m_sensors.insert(type, sensor);
         enableSensorConnections(sensor);
     }

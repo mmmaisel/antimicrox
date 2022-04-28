@@ -27,14 +27,20 @@
 #include <QXmlStreamWriter>
 #include <math.h>
 
+const double JoySensor::SHOCK_DETECT_THRESHOLD = 20.0;
+const double JoySensor::SHOCK_SUPPRESS_FACTOR = 0.5;
+const double JoySensor::SHOCK_TAU = 10;
+
 JoySensor::JoySensor(
-    Type type, int originset, SetJoystick *parent_set, QObject *parent)
+    Type type, double rate, int originset, SetJoystick *parent_set, QObject *parent)
     : QObject(parent),
     m_type(type),
     m_originset(originset),
     m_calibrated(false),
+    m_shock_filter(SHOCK_TAU, rate),
     m_parent_set(parent_set)
 {
+    m_rate = qFuzzyIsNull(rate) ? PT1::FALLBACK_RATE : rate;
     reset();
     populateButtons();
 }
@@ -61,8 +67,10 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
     if (m_type == ACCELEROMETER) {
         double pitch_abs = abs(calculatePitch());
         double roll_abs = abs(calculateRoll());
-        // XXX: shock threshold
-        safezone = pitch_abs*pitch_abs + roll_abs*roll_abs > m_dead_zone*m_dead_zone;
+        double shock = m_shock_filter.process(
+            abs(m_current_value[0]) + abs(m_current_value[1]) + abs(m_current_value[2]));
+        safezone = pitch_abs*pitch_abs + roll_abs*roll_abs > m_dead_zone*m_dead_zone
+            || shock > SHOCK_DETECT_THRESHOLD;
     }
     else {
         safezone = distance > m_dead_zone;
@@ -682,6 +690,8 @@ void JoySensor::reset()
         : GlobalVariables::JoySensor::GYRO_MAX * M_PI / 180;
     m_diagonal_range = GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE * M_PI / 180;
     m_pending_event = false;
+    m_shock_filter.reset();
+    m_shock_suppress_count = 0;
 
     m_current_direction = JoySensorDirection::CENTERED;
     m_sensor_name.clear();
@@ -758,24 +768,34 @@ void JoySensor::establishPropertyUpdatedConnection()
  *       divided by two (called "range" in the code)
  *     - Generate another spherical layers by rotating the first layer around the Y axis.
  *       A third layer is not necessary because there are only two degrees of freedom.
- *     - Check if a point is within each layer by comparing the absolute values
- *       of pitch and roll angles against the "range".
- *     - If a point is in only one layer, it is in the orthogonal zone of one axis.
- *     - If a point is in both or no zones, it is diagonal to both axes.
- *       There are two cases here because the spherical layers overlap if the diagonal
- *       angle is larger then 45 degree.
+ *   Check if a point is within each layer by comparing the absolute values
+ *   of pitch and roll angles against the "range".
+ *   If a point is in only one layer, it is in the orthogonal zone of one axis.
+ *   If a point is in both or no zones, it is diagonal to both axes.
+ *   There are two cases here because the spherical layers overlap if the diagonal
+ *   angle is larger then 45 degree.
  *
- *    XXX: shock detection
+ *   Perform shock detection by taking the first order lag filtered absolute sum of
+ *   all axes from "joyEvent" and apply a threshold. Discard some samples after
+ *   the shock is over to avoid spurious pitch/roll events.
  *
  * @param Pointer to an array of three JoySensorButton pointers in which
  *   the results are stored.
  */
 void JoySensor::determineAccelerometerEvent(JoySensorButton **eventbutton)
 {
+    if (m_shock_filter.getValue() > SHOCK_DETECT_THRESHOLD)
+    {
+        m_shock_suppress_count = m_rate * SHOCK_SUPPRESS_FACTOR;
+        eventbutton[2] = m_buttons.value(JoySensorDirection::ACCEL_FWD);
+        return;
+    } else if (m_shock_suppress_count != 0)
+    {
+        --m_shock_suppress_count;
+        return;
+    }
+
     // XXX: only calculate them once
-    // XXX: debounce shock, disable roll/pitch during shock?
-    // XXX: implement shock
-    //double distance = calculateDistance();
     double pitch = calculatePitch();
     double roll = calculateRoll();
     double range = M_PI/4 - m_diagonal_range/2;

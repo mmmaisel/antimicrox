@@ -95,6 +95,7 @@ class InputDevice : public QObject
     virtual int getNumberRawButtons() = 0;
     virtual int getNumberRawAxes() = 0;
     virtual int getNumberRawHats() = 0;
+    virtual double getRawSensorRate(JoySensor::Type type) = 0;
     virtual bool hasRawSensor(JoySensor::Type type) = 0;
 
     int getDeviceKeyPressTime(); // unsigned
