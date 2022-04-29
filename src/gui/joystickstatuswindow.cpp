@@ -195,10 +195,17 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
 
     QVBoxLayout *sensorsBox = new QVBoxLayout();
     sensorsBox->setSpacing(4);
-    if (joystick->hasSensor(JoySensor::ACCELEROMETER))
+
+    for (int i = 0; i < JoySensor::SENSOR_COUNT; ++i)
     {
+        JoySensor::Type type = static_cast<JoySensor::Type>(i);
         JoySensor *sensor =
-            joystick->getActiveSetJoystick()->getSensor(JoySensor::ACCELEROMETER);
+            joystick->getActiveSetJoystick()->getSensor(type);
+        QProgressBar **axes;
+        if (type == JoySensor::ACCELEROMETER)
+            axes = m_accel_axes;
+        else
+            axes = m_gyro_axes;
 
         if (sensor != nullptr)
         {
@@ -207,64 +214,43 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
                 QHBoxLayout *hbox = new QHBoxLayout();
 
                 QLabel *axisLabel = new QLabel();
-                m_accel_axes[i] = new QProgressBar();
-                m_accel_axes[i]->setMinimum(GlobalVariables::JoySensor::ACCEL_MIN * 1000);
-                m_accel_axes[i]->setMaximum(GlobalVariables::JoySensor::ACCEL_MAX * 1000);
-                m_accel_axes[i]->setFormat("%v");
+                axes[i] = new QProgressBar();
+                if (type == JoySensor::ACCELEROMETER)
+                {
+                    axes[i]->setMinimum(GlobalVariables::JoySensor::ACCEL_MIN * 1000);
+                    axes[i]->setMaximum(GlobalVariables::JoySensor::ACCEL_MAX * 1000);
+                } else
+                {
+                    axes[i]->setMinimum(GlobalVariables::JoySensor::GYRO_MIN * 1000);
+                    axes[i]->setMaximum(GlobalVariables::JoySensor::GYRO_MAX * 1000);
+                }
+                axes[i]->setFormat("%v");
                 if (i == 0) {
-                    axisLabel->setText(tr("Accelerometer X"));
-                    m_accel_axes[i]->setValue(sensor->getXCoordinate());
+                    axisLabel->setText(QString("%1 X").arg(sensor->sensorTypeName()));
+                    axes[i]->setValue(sensor->getXCoordinate());
                 } else if (i == 1) {
-                    axisLabel->setText(tr("Accelerometer Y"));
-                    m_accel_axes[i]->setValue(sensor->getYCoordinate());
+                    axisLabel->setText(QString("%1 Y").arg(sensor->sensorTypeName()));
+                    axes[i]->setValue(sensor->getYCoordinate());
                 } else {
-                    axisLabel->setText(tr("Accelerometer Z"));
-                    m_accel_axes[i]->setValue(sensor->getZCoordinate());
+                    axisLabel->setText(QString("%1 Z").arg(sensor->sensorTypeName()));
+                    axes[i]->setValue(sensor->getZCoordinate());
                 }
                 hbox->addWidget(axisLabel);
-                hbox->addWidget(m_accel_axes[i]);
+                hbox->addWidget(axes[i]);
                 hbox->addSpacing(10);
                 sensorsBox->addLayout(hbox);
             }
-        }
-        connect(sensor, &JoySensor::moved, this,
-            &JoystickStatusWindow::updateAccelerometerValues);
-    }
 
-    if (joystick->hasSensor(JoySensor::GYROSCOPE))
-    {
-        JoySensor *sensor =
-            joystick->getActiveSetJoystick()->getSensor(JoySensor::GYROSCOPE);
-
-        if (sensor != nullptr)
-        {
-            for(int i = 0; i < 3; ++i)
+            if (type == JoySensor::ACCELEROMETER)
             {
-                QHBoxLayout *hbox = new QHBoxLayout();
-
-                QLabel *axisLabel = new QLabel();
-                m_gyro_axes[i] = new QProgressBar();
-                m_gyro_axes[i]->setMinimum(GlobalVariables::JoySensor::GYRO_MIN * 1000);
-                m_gyro_axes[i]->setMaximum(GlobalVariables::JoySensor::GYRO_MAX * 1000);
-                m_gyro_axes[i]->setFormat("%v");
-                if (i == 0) {
-                    axisLabel->setText(tr("Gyroscope X"));
-                    m_gyro_axes[i]->setValue(sensor->getXCoordinate() * 180 / M_PI);
-                } else if (i == 1) {
-                    axisLabel->setText(tr("Gyroscope Y"));
-                    m_gyro_axes[i]->setValue(sensor->getYCoordinate() * 180 / M_PI);
-                } else {
-                    axisLabel->setText(tr("Gyroscope Z"));
-                    m_gyro_axes[i]->setValue(sensor->getZCoordinate() * 180 / M_PI);
-                }
-                hbox->addWidget(axisLabel);
-                hbox->addWidget(m_gyro_axes[i]);
-                hbox->addSpacing(10);
-                sensorsBox->addLayout(hbox);
+                connect(sensor, &JoySensor::moved, this,
+                    &JoystickStatusWindow::updateAccelerometerValues);
+            } else
+            {
+                connect(sensor, &JoySensor::moved, this,
+                    &JoystickStatusWindow::updateGyroscopeValues);
             }
         }
-        connect(sensor, &JoySensor::moved, this,
-            &JoystickStatusWindow::updateGyroscopeValues);
     }
 
     sensorsBox->addSpacerItem(new QSpacerItem(20, 20, QSizePolicy::Preferred, QSizePolicy::Fixed));
