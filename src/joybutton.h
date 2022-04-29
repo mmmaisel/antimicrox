@@ -162,7 +162,9 @@ class JoyButton : public QObject
 
     virtual bool isPartRealAxis();
     virtual bool isModifierButton();
-    virtual bool isDefault();
+    bool isDefault();
+
+    virtual JoyMouseCurve getDefaultMouseCurve() const;
 
     virtual int getRealJoyNumber() const;
 

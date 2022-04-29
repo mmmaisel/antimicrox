@@ -35,11 +35,11 @@ class JoySensorButton : public JoyGradientButton
         bool forceFullFormat = false, bool displayNames = false) const;
     virtual QString getXmlName();
 
-    virtual double getDistanceFromDeadZone();
-    virtual double getMouseDistanceFromDeadZone();
+    virtual double getDistanceFromDeadZone() override;
+    virtual double getMouseDistanceFromDeadZone() override;
 
     virtual bool isPartRealAxis();
-    virtual bool isDefault();
+    virtual JoyMouseCurve getDefaultMouseCurve() const override;
 
     JoySensor *getSensor() const;
     virtual QString getDirectionName() const = 0;

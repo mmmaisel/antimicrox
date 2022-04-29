@@ -3476,7 +3476,7 @@ bool JoyButton::isDefault()
     value = value && (setSelectionCondition == DEFAULTSETCONDITION);
     value = value && (getAssignedSlots()->isEmpty());
     value = value && (mouseMode == DEFAULTMOUSEMODE);
-    value = value && (mouseCurve == DEFAULTMOUSECURVE);
+    value = value && (mouseCurve == getDefaultMouseCurve());
     value = value && (springWidth == GlobalVariables::JoyButton::DEFAULTSPRINGWIDTH);
     value = value && (springHeight == GlobalVariables::JoyButton::DEFAULTSPRINGHEIGHT);
     value = value && qFuzzyCompare(sensitivity, GlobalVariables::JoyButton::DEFAULTSENSITIVITY);
@@ -3497,6 +3497,11 @@ bool JoyButton::isDefault()
     value = value && (extraAccelCurve == DEFAULTEXTRAACCELCURVE);
 
     return value;
+}
+
+JoyButton::JoyMouseCurve JoyButton::getDefaultMouseCurve() const
+{
+    return DEFAULTMOUSECURVE;
 }
 
 void JoyButton::setIgnoreEventState(bool ignore) { ignoreEvents = ignore; }
@@ -4335,7 +4340,7 @@ void JoyButton::resetAllProperties()
     wheelSpeedX = GlobalVariables::JoyButton::DEFAULTWHEELX;
     wheelSpeedY = GlobalVariables::JoyButton::DEFAULTWHEELY;
     mouseMode = DEFAULTMOUSEMODE;
-    mouseCurve = DEFAULTMOUSECURVE;
+    mouseCurve = getDefaultMouseCurve();
     springWidth = GlobalVariables::JoyButton::DEFAULTSPRINGWIDTH;
     springHeight = GlobalVariables::JoyButton::DEFAULTSPRINGHEIGHT;
     sensitivity = GlobalVariables::JoyButton::DEFAULTSENSITIVITY;

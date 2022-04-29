@@ -33,9 +33,6 @@ JoySensorButton::JoySensorButton(JoySensor *sensor,
     : JoyGradientButton(index, originset, parentSet, parent),
     m_sensor(sensor)
 {
-    // XXX: these are overwritten by resetAllProperties
-    setEasingDuration(0);
-    setMouseCurve(LinearCurve);
 }
 
 /**
@@ -99,45 +96,9 @@ double JoySensorButton::getMouseDistanceFromDeadZone()
  */
 bool JoySensorButton::isPartRealAxis() { return false; }
 
-/**
- * @brief Check if button properties are at their default values
- * @return Status of possible property edits
- */
-bool JoySensorButton::isDefault()
+JoyButton::JoyMouseCurve JoySensorButton::getDefaultMouseCurve() const
 {
-    bool value = true;
-
-    value = value && (getToggleState() == GlobalVariables::JoyButton::DEFAULTTOGGLE);
-    value = value && (getTurboInterval() == GlobalVariables::JoyButton::DEFAULTTURBOINTERVAL);
-    value = value && (getTurboMode() == NormalTurbo);
-    value = value && (isUsingTurbo() == GlobalVariables::JoyButton::DEFAULTUSETURBO);
-    value = value && (getMouseSpeedX() == GlobalVariables::JoyButton::DEFAULTMOUSESPEEDX);
-    value = value && (getMouseSpeedY() == GlobalVariables::JoyButton::DEFAULTMOUSESPEEDY);
-    value = value && (getSetSelection() == GlobalVariables::JoyButton::DEFAULTSETSELECTION);
-    value = value && (getChangeSetCondition() == DEFAULTSETCONDITION);
-    value = value && (getAssignedSlots()->isEmpty());
-    value = value && (getMouseMode() == MouseCursor);
-    value = value && (getMouseCurve() == LinearCurve);
-    value = value && (getSpringWidth() == GlobalVariables::JoyButton::DEFAULTSPRINGWIDTH);
-    value = value && (getSpringHeight() == GlobalVariables::JoyButton::DEFAULTSPRINGHEIGHT);
-    value = value && qFuzzyCompare(getSensitivity(), GlobalVariables::JoyButton::DEFAULTSENSITIVITY);
-    value = value && (getActionName().isEmpty());
-    value = value && (getWheelSpeedX() == GlobalVariables::JoyButton::DEFAULTWHEELX);
-    value = value && (getWheelSpeedY() == GlobalVariables::JoyButton::DEFAULTWHEELY);
-    value = value && (isCycleResetActive() == GlobalVariables::JoyButton::DEFAULTCYCLERESETACTIVE);
-    value = value && (getCycleResetTime() == GlobalVariables::JoyButton::DEFAULTCYCLERESET);
-    value = value && (isRelativeSpring() == GlobalVariables::JoyButton::DEFAULTRELATIVESPRING);
-    value = value && qFuzzyCompare(getEasingDuration(), GlobalVariables::JoyButton::DEFAULTEASINGDURATION);
-    value = value && !isExtraAccelerationEnabled();
-    value = value && qFuzzyCompare(getExtraAccelerationMultiplier(), GlobalVariables::JoyButton::DEFAULTEXTRACCELVALUE);
-    value = value && qFuzzyCompare(getMinAccelThreshold(), GlobalVariables::JoyButton::DEFAULTMINACCELTHRESHOLD);
-    value = value && qFuzzyCompare(getMaxAccelThreshold(), GlobalVariables::JoyButton::DEFAULTMAXACCELTHRESHOLD);
-    value = value && qFuzzyCompare(getStartAccelMultiplier(), GlobalVariables::JoyButton::DEFAULTSTARTACCELMULTIPLIER);
-    value = value && qFuzzyCompare(getAccelExtraDuration(), GlobalVariables::JoyButton::DEFAULTACCELEASINGDURATION);
-    value = value && (getSpringDeadCircleMultiplier() == GlobalVariables::JoyButton::DEFAULTSPRINGRELEASERADIUS);
-    value = value && (getExtraAccelerationCurve() == DEFAULTEXTRAACCELCURVE);
-
-    return value;
+    return LinearCurve;
 }
 
 JoySensor *JoySensorButton::getSensor() const { return m_sensor; }
