@@ -40,24 +40,14 @@ SensorPushButtonGroup::SensorPushButtonGroup(
 
 void SensorPushButtonGroup::generateButtons()
 {
-    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
-    {
-        m_left_button = generateBtnToGrid(JoySensorDirection::ACCEL_LEFT, 1, 0);
-        m_right_button = generateBtnToGrid(JoySensorDirection::ACCEL_RIGHT, 1, 2);
-        m_up_button = generateBtnToGrid(JoySensorDirection::ACCEL_UP, 0, 1);
-        m_down_button = generateBtnToGrid(JoySensorDirection::ACCEL_DOWN, 2, 1);
-        m_fwd_button = generateBtnToGrid(JoySensorDirection::ACCEL_FWD, 0, 2);
-        m_bwd_button = generateBtnToGrid(JoySensorDirection::ACCEL_BWD, 2, 0);
-    }
-    else
-    {
-        m_left_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_N, 1, 0);
-        m_right_button = generateBtnToGrid(JoySensorDirection::GYRO_YAW_P, 1, 2);
-        m_up_button = generateBtnToGrid(JoySensorDirection::GYRO_NICK_P, 0, 1);
-        m_down_button = generateBtnToGrid(JoySensorDirection::GYRO_NICK_N, 2, 1);
-        m_fwd_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_P, 0, 2);
-        m_bwd_button = generateBtnToGrid(JoySensorDirection::GYRO_ROLL_N, 2, 0);
-    }
+    m_left_button = generateBtnToGrid(SENSOR_LEFT, 1, 0);
+    m_right_button = generateBtnToGrid(SENSOR_RIGHT, 1, 2);
+    m_up_button = generateBtnToGrid(SENSOR_UP, 0, 1);
+    m_down_button = generateBtnToGrid(SENSOR_DOWN, 2, 1);
+    m_fwd_button = generateBtnToGrid(SENSOR_FWD, 0, 2);
+
+    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+        m_bwd_button = generateBtnToGrid(SENSOR_BWD, 2, 0);
 
     m_sensor_widget = new JoySensorPushButton(m_sensor, m_display_names, parentWidget());
     m_sensor_widget->setIcon(

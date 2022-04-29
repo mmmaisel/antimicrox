@@ -63,6 +63,7 @@ class JoySensor : public QObject
     float getYCoordinate();
     float getZCoordinate();
     unsigned int getSensorDelay();
+    QString sensorTypeName() const;
 
     void resetButtons();
 
@@ -122,16 +123,20 @@ class JoySensor : public QObject
     void setSensorDelay(unsigned int value);
     void establishPropertyUpdatedConnection();
 
+  private slots:
+    void delayTimerExpired();
+
   protected:
     static const double SHOCK_DETECT_THRESHOLD;
     static const double SHOCK_SUPPRESS_FACTOR;
     static const double SHOCK_TAU;
 
     void populateButtons();
-    void determineAccelerometerEvent(JoySensorButton **eventbutton);
-    void determineGyroscopeEvent(JoySensorButton **eventbutton);
-    void createDeskEvent(bool safezone, bool ignoresets = false);
-    QString sensorTypeName() const;
+    void determineSensorEvent(JoySensorButton **eventbutton);
+    JoySensorDirection calculateSensorDirection();
+    JoySensorDirection calculateAccelerometerDirection();
+    JoySensorDirection calculateGyroscopeDirection();
+    void createDeskEvent(JoySensorDirection direction, bool ignoresets = false);
 
     Type m_type;
     int m_originset;
@@ -140,7 +145,6 @@ class JoySensor : public QObject
     JoySensorButton *m_active_button[ACTIVE_BUTTON_COUNT];
 
     double m_rate;
-    float m_last_known_raw_value[3];
     float m_current_value[3];
     float m_pending_value[3];
     bool m_calibrated;

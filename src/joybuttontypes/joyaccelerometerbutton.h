@@ -16,38 +16,15 @@
  */
 #pragma once
 
-#include "joybuttontypes/joygradientbutton.h"
-#include "logger.h"
+#include "joybuttontypes/joysensorbutton.h"
 
-class SetJoystick;
-class JoySensor;
-
-class JoySensorButton : public JoyGradientButton
+class JoyAccelerometerButton : public JoySensorButton
 {
     Q_OBJECT
 
   public:
-    explicit JoySensorButton(JoySensor *sensor, int index, int originset,
+    explicit JoyAccelerometerButton(JoySensor *sensor, int index, int originset,
         SetJoystick *parentSet, QObject *parent);
 
-    virtual int getRealJoyNumber() const;
-    virtual QString getPartialName(
-        bool forceFullFormat = false, bool displayNames = false) const;
-    virtual QString getXmlName();
-
-    virtual double getDistanceFromDeadZone();
-    virtual double getMouseDistanceFromDeadZone();
-
-    virtual bool isPartRealAxis();
-    virtual bool isDefault();
-
-    JoySensor *getSensor() const;
-    virtual QString getDirectionName() const = 0;
-
-  signals:
-    void setAssignmentChanged(
-        int current_button, int axis_index, int associated_set, int mode);
-
-  private:
-    JoySensor *m_sensor;
+    virtual QString getDirectionName() const override;
 };

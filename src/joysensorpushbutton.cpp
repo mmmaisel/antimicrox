@@ -86,6 +86,6 @@ void JoySensorPushButton::showContextMenu(const QPoint &point)
 
 void JoySensorPushButton::tryFlash()
 {
-    if (m_sensor->getCurrentDirection() != JoySensorDirection::CENTERED)
+    if (m_sensor->getCurrentDirection() != JoySensorDirection::SENSOR_CENTERED)
         flash();
 }

@@ -53,24 +53,24 @@ QList<JoySensorPreset::Preset> JoySensorPreset::getAvailablePresets()
 JoySensorPreset::Preset JoySensorPreset::currentPreset()
 {
     Preset result = PRESET_NONE;
-    QList<JoyButtonSlot *> *upslots, *downslots, *leftslots, *rightslots, *fwdslots, *bwdslots;
-    JoySensorButton *upButton, *downButton, *leftButton, *rightButton, *fwdButton, *bwdButton;
+    QList<JoyButtonSlot *> *leftslots, *rightslots, *upslots, *downslots, *fwdslots, *bwdslots;
+    JoySensorButton *leftButton, *rightButton, *upButton, *downButton, *fwdButton, *bwdButton;
 
     PadderCommon::inputDaemonMutex.lock();
 
     if (m_sensor->getType() == JoySensor::GYROSCOPE)
     {
-        upButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_NICK_P);
-        upslots = upButton->getAssignedSlots();
-        downButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_NICK_N);
-        downslots = downButton->getAssignedSlots();
-        leftButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_N);
+        leftButton = m_sensor->getDirectionButton(SENSOR_LEFT);
         leftslots = leftButton->getAssignedSlots();
-        rightButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_YAW_P);
+        rightButton = m_sensor->getDirectionButton(SENSOR_RIGHT);
         rightslots = rightButton->getAssignedSlots();
-        fwdButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_ROLL_P);
+        upButton = m_sensor->getDirectionButton(SENSOR_UP);
+        upslots = upButton->getAssignedSlots();
+        downButton = m_sensor->getDirectionButton(SENSOR_DOWN);
+        downslots = downButton->getAssignedSlots();
+        fwdButton = m_sensor->getDirectionButton(SENSOR_FWD);
         fwdslots = fwdButton->getAssignedSlots();
-        bwdButton = m_sensor->getDirectionButton(JoySensorDirection::GYRO_ROLL_N);
+        bwdButton = m_sensor->getDirectionButton(SENSOR_BWD);
         bwdslots = bwdButton->getAssignedSlots();
 
         if (upslots->length() == 1 && downslots->length() == 1 &&
@@ -126,15 +126,15 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
         }
     } else
     {
-        upButton = m_sensor->getDirectionButton(JoySensorDirection::ACCEL_UP);
-        upslots = upButton->getAssignedSlots();
-        downButton = m_sensor->getDirectionButton(JoySensorDirection::ACCEL_DOWN);
-        downslots = downButton->getAssignedSlots();
-        leftButton = m_sensor->getDirectionButton(JoySensorDirection::ACCEL_LEFT);
+        leftButton = m_sensor->getDirectionButton(SENSOR_LEFT);
         leftslots = leftButton->getAssignedSlots();
-        rightButton = m_sensor->getDirectionButton(JoySensorDirection::ACCEL_RIGHT);
+        rightButton = m_sensor->getDirectionButton(SENSOR_RIGHT);
         rightslots = rightButton->getAssignedSlots();
-        fwdButton = m_sensor->getDirectionButton(JoySensorDirection::ACCEL_FWD);
+        upButton = m_sensor->getDirectionButton(SENSOR_UP);
+        upslots = upButton->getAssignedSlots();
+        downButton = m_sensor->getDirectionButton(SENSOR_DOWN);
+        downslots = downButton->getAssignedSlots();
+        fwdButton = m_sensor->getDirectionButton(SENSOR_FWD);
         fwdslots = fwdButton->getAssignedSlots();
 
         if (upslots->length() == 1 && downslots->length() == 1 &&
@@ -221,10 +221,10 @@ QString JoySensorPreset::getPresetName(Preset preset)
 
 void JoySensorPreset::setSensorPreset(Preset preset)
 {
-    JoyButtonSlot *upButtonSlot = nullptr;
-    JoyButtonSlot *downButtonSlot = nullptr;
     JoyButtonSlot *leftButtonSlot = nullptr;
     JoyButtonSlot *rightButtonSlot = nullptr;
+    JoyButtonSlot *upButtonSlot = nullptr;
+    JoyButtonSlot *downButtonSlot = nullptr;
     JoyButtonSlot *fwdButtonSlot = nullptr;
     JoyButtonSlot *bwdButtonSlot = nullptr;
 
@@ -237,10 +237,10 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_MOUSE:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
-        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
+        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
+        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -249,10 +249,10 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_MOUSE_INV_H:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
-        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
+        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
+        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -261,10 +261,10 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_MOUSE_INV_V:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
-        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
+        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
+        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -273,10 +273,10 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_MOUSE_INV_HV:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
-        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         leftButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
+        upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
+        downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -285,14 +285,18 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_ARROWS:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Up), Qt::Key_Up,
-                                         JoyButtonSlot::JoyKeyboard, this);
-        downButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Down), Qt::Key_Down,
-                                           JoyButtonSlot::JoyKeyboard, this);
-        leftButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Left), Qt::Key_Left,
-                                           JoyButtonSlot::JoyKeyboard, this);
-        rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Right), Qt::Key_Right,
-                                            JoyButtonSlot::JoyKeyboard, this);
+        leftButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Left), Qt::Key_Left,
+            JoyButtonSlot::JoyKeyboard, this);
+        rightButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Right), Qt::Key_Right,
+            JoyButtonSlot::JoyKeyboard, this);
+        upButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Up), Qt::Key_Up,
+            JoyButtonSlot::JoyKeyboard, this);
+        downButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_Down), Qt::Key_Down,
+            JoyButtonSlot::JoyKeyboard, this);
         m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
@@ -301,14 +305,18 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_WASD:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_W), Qt::Key_W,
-                                         JoyButtonSlot::JoyKeyboard, this);
-        downButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_S), Qt::Key_S,
-                                           JoyButtonSlot::JoyKeyboard, this);
-        leftButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_A), Qt::Key_A,
-                                           JoyButtonSlot::JoyKeyboard, this);
-        rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_D), Qt::Key_D,
-                                            JoyButtonSlot::JoyKeyboard, this);
+        leftButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_A), Qt::Key_A,
+            JoyButtonSlot::JoyKeyboard, this);
+        rightButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_D), Qt::Key_D,
+            JoyButtonSlot::JoyKeyboard, this);
+        upButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_W), Qt::Key_W,
+            JoyButtonSlot::JoyKeyboard, this);
+        downButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(Qt::Key_S), Qt::Key_S,
+            JoyButtonSlot::JoyKeyboard, this);
         m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
@@ -317,14 +325,18 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     case PRESET_NUMPAD:
         PadderCommon::inputDaemonMutex.lock();
 
-        upButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_8),
-                                         QtKeyMapperBase::AntKey_KP_8, JoyButtonSlot::JoyKeyboard, this);
-        downButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_2),
-                                           QtKeyMapperBase::AntKey_KP_2, JoyButtonSlot::JoyKeyboard, this);
-        leftButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_4),
-                                           QtKeyMapperBase::AntKey_KP_4, JoyButtonSlot::JoyKeyboard, this);
-        rightButtonSlot = new JoyButtonSlot(AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_6),
-                                            QtKeyMapperBase::AntKey_KP_6, JoyButtonSlot::JoyKeyboard, this);
+        leftButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_4),
+            QtKeyMapperBase::AntKey_KP_4, JoyButtonSlot::JoyKeyboard, this);
+        rightButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_6),
+            QtKeyMapperBase::AntKey_KP_6, JoyButtonSlot::JoyKeyboard, this);
+        upButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_8),
+            QtKeyMapperBase::AntKey_KP_8, JoyButtonSlot::JoyKeyboard, this);
+        downButtonSlot = new JoyButtonSlot(
+            AntKeyMapper::getInstance()->returnVirtualKey(QtKeyMapperBase::AntKey_KP_2),
+            QtKeyMapperBase::AntKey_KP_2, JoyButtonSlot::JoyKeyboard, this);
         m_sensor->setDeadZone(15);
         m_sensor->setDiagonalRange(45);
 
@@ -335,19 +347,12 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     QHash<JoySensorDirection, JoyButtonSlot *> tempHash;
     if (m_sensor->getType() == JoySensor::GYROSCOPE)
     {
-        tempHash.insert(JoySensorDirection::GYRO_NICK_P, upButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_NICK_N, downButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_YAW_P, rightButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_YAW_N, leftButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_ROLL_P, fwdButtonSlot);
-        tempHash.insert(JoySensorDirection::GYRO_ROLL_N, bwdButtonSlot);
-    } else
-    {
-        tempHash.insert(JoySensorDirection::ACCEL_UP, upButtonSlot);
-        tempHash.insert(JoySensorDirection::ACCEL_DOWN, downButtonSlot);
-        tempHash.insert(JoySensorDirection::ACCEL_LEFT, leftButtonSlot);
-        tempHash.insert(JoySensorDirection::ACCEL_RIGHT, rightButtonSlot);
-        tempHash.insert(JoySensorDirection::ACCEL_FWD, fwdButtonSlot);
+        tempHash.insert(SENSOR_UP, upButtonSlot);
+        tempHash.insert(SENSOR_DOWN, downButtonSlot);
+        tempHash.insert(SENSOR_LEFT, leftButtonSlot);
+        tempHash.insert(SENSOR_RIGHT, rightButtonSlot);
+        tempHash.insert(SENSOR_FWD, fwdButtonSlot);
+        tempHash.insert(SENSOR_BWD, bwdButtonSlot);
     }
 
     m_helper.setPendingSlots(&tempHash);
