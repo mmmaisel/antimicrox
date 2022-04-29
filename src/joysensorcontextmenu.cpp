@@ -54,7 +54,7 @@ void JoySensorContextMenu::buildMenu()
         presetGroup->addAction(action);
     }
 
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
     {
         addSeparator();
 

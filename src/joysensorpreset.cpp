@@ -20,6 +20,7 @@
 #include "antkeymapper.h"
 #include "common.h"
 #include "joybuttontypes/joysensorbutton.h"
+#include "joysensor.h"
 
 JoySensorPreset::JoySensorPreset(JoySensor *sensor, QObject *parent)
     : QObject(parent),
@@ -34,7 +35,7 @@ QList<JoySensorPreset::Preset> JoySensorPreset::getAvailablePresets()
     QList<Preset> result;
     result.append(PRESET_NONE);
 
-    if(m_sensor->getType() == JoySensor::ACCELEROMETER)
+    if(m_sensor->getType() == ACCELEROMETER)
     {
         result.append(PRESET_ARROWS);
         result.append(PRESET_WASD);
@@ -58,7 +59,7 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
 
     PadderCommon::inputDaemonMutex.lock();
 
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
     {
         leftButton = m_sensor->getDirectionButton(SENSOR_LEFT);
         leftslots = leftButton->getAssignedSlots();
@@ -345,7 +346,7 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     }
 
     QHash<JoySensorDirection, JoyButtonSlot *> tempHash;
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
     {
         tempHash.insert(SENSOR_UP, upButtonSlot);
         tempHash.insert(SENSOR_DOWN, downButtonSlot);

@@ -14,35 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #pragma once
 
-#include "joysensordirection.h"
-
-#include <QHash>
-#include <QObject>
-
-class JoyButtonSlot;
-class JoySensor;
-
-/**
- * @brief Some helper methods which run in the IO thread and are called
- *   from the GUI thread.
- */
-class JoySensorIoThreadHelper : public QObject
-{
-    Q_OBJECT
-
-  public:
-    explicit JoySensorIoThreadHelper(JoySensor *sensor, QObject *parent = nullptr);
-    void setPendingSlots(QHash<JoySensorDirection, JoyButtonSlot *> *tempSlots);
-    void clearPendingSlots();
-
-  public slots:
-    void setFromPendingSlots();
-    void clearButtonsSlotsEventReset();
-    void updateSensorDelay(unsigned int value);
-
-  private:
-    JoySensor *m_sensor;
-    QHash<JoySensorDirection, JoyButtonSlot *> m_pending_slots;
+enum JoySensorType {
+    ACCELEROMETER,
+    GYROSCOPE,
+    SENSOR_COUNT
 };

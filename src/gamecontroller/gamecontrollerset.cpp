@@ -72,24 +72,24 @@ void GameControllerSet::populateSticksDPad()
     addVDPad(0, controllerDPad);
 
     // Sensor Assignment
-    if (hasSensor(JoySensor::ACCELEROMETER))
+    if (hasSensor(ACCELEROMETER))
     {
         JoySensor *sensor =
-            new JoySensor(JoySensor::ACCELEROMETER,
-                getInputDevice()->getRawSensorRate(JoySensor::ACCELEROMETER),
+            new JoySensor(ACCELEROMETER,
+                getInputDevice()->getRawSensorRate(ACCELEROMETER),
                 getIndex(), this, this);
         sensor->setDefaultSensorName("Accelerometer");
-        addSensor(JoySensor::ACCELEROMETER, sensor);
+        addSensor(ACCELEROMETER, sensor);
     }
 
-    if (hasSensor(JoySensor::GYROSCOPE))
+    if (hasSensor(GYROSCOPE))
     {
         JoySensor *sensor =
-            new JoySensor(JoySensor::GYROSCOPE,
-                getInputDevice()->getRawSensorRate(JoySensor::GYROSCOPE),
+            new JoySensor(GYROSCOPE,
+                getInputDevice()->getRawSensorRate(GYROSCOPE),
                 getIndex(), this, this);
         sensor->setDefaultSensorName("Gyroscope");
-        addSensor(JoySensor::GYROSCOPE, sensor);
+        addSensor(GYROSCOPE, sensor);
     }
 
     // Give default names to buttons
@@ -341,7 +341,7 @@ void GameControllerSet::getElemFromXml(QString elemName, QXmlStreamReader *xml)
     } else if (elemName == "sensor")
     {
         int type = xml->attributes().value("type").toString().toInt();
-        JoySensor *sensor = getSensor(static_cast<JoySensor::Type>(type));
+        JoySensor *sensor = getSensor(static_cast<JoySensorType>(type));
         readConf(sensor, xml);
     }
 }

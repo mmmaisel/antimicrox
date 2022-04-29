@@ -97,8 +97,8 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     ui->joystickButtonsLabel->setText(QString::number(joystick->getNumberRawButtons()));
     ui->joystickHatsLabel->setText(QString::number(joystick->getNumberRawHats()));
     ui->joystickSensorsLabel->setText(
-        QString::number(joystick->hasRawSensor(JoySensor::ACCELEROMETER) +
-            joystick->hasRawSensor(JoySensor::GYROSCOPE)));
+        QString::number(joystick->hasRawSensor(ACCELEROMETER) +
+            joystick->hasRawSensor(GYROSCOPE)));
 
     joystick->getActiveSetJoystick()->setIgnoreEventState(true);
     joystick->getActiveSetJoystick()->release();
@@ -196,13 +196,13 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
     QVBoxLayout *sensorsBox = new QVBoxLayout();
     sensorsBox->setSpacing(4);
 
-    for (int i = 0; i < JoySensor::SENSOR_COUNT; ++i)
+    for (int i = 0; i < SENSOR_COUNT; ++i)
     {
-        JoySensor::Type type = static_cast<JoySensor::Type>(i);
+        JoySensorType type = static_cast<JoySensorType>(i);
         JoySensor *sensor =
             joystick->getActiveSetJoystick()->getSensor(type);
         QProgressBar **axes;
-        if (type == JoySensor::ACCELEROMETER)
+        if (type == ACCELEROMETER)
             axes = m_accel_axes;
         else
             axes = m_gyro_axes;
@@ -215,7 +215,7 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
 
                 QLabel *axisLabel = new QLabel();
                 axes[i] = new QProgressBar();
-                if (type == JoySensor::ACCELEROMETER)
+                if (type == ACCELEROMETER)
                 {
                     axes[i]->setMinimum(GlobalVariables::JoySensor::ACCEL_MIN * 1000);
                     axes[i]->setMaximum(GlobalVariables::JoySensor::ACCEL_MAX * 1000);
@@ -241,7 +241,7 @@ JoystickStatusWindow::JoystickStatusWindow(InputDevice *joystick, QWidget *paren
                 sensorsBox->addLayout(hbox);
             }
 
-            if (type == JoySensor::ACCELEROMETER)
+            if (type == ACCELEROMETER)
             {
                 connect(sensor, &JoySensor::moved, this,
                     &JoystickStatusWindow::updateAccelerometerValues);

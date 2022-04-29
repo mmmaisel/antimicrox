@@ -246,7 +246,7 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         QString temp = xml->readElementText();
                         if (!temp.isEmpty())
                             m_inputDevice->setSensorButtonName(
-                                static_cast<JoySensor::Type>(type), buttonIndex, temp);
+                                static_cast<JoySensorType>(type), buttonIndex, temp);
                     } else if ((xml->name() == "dpadbuttonname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();
@@ -295,7 +295,7 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                         QString temp = xml->readElementText();
                         if (!temp.isEmpty())
                             m_inputDevice->setSensorName(
-                                static_cast<JoySensor::Type>(type), temp);
+                                static_cast<JoySensorType>(type), temp);
                     } else if ((xml->name() == "dpadname") && xml->isStartElement())
                     {
                         int index = xml->attributes().value("index").toString().toInt();
@@ -704,8 +704,7 @@ void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
         (m_inputDevice->getDeviceKeyPressTime() != GlobalVariables::InputDevice::DEFAULTKEYPRESSTIME))
         xml->writeTextElement("keyPressTime", QString::number(m_inputDevice->getDeviceKeyPressTime()));
 
-    JoySensor* gyroscope = m_inputDevice->getActiveSetJoystick()->
-        getSensor(JoySensor::GYROSCOPE);
+    JoySensor* gyroscope = m_inputDevice->getActiveSetJoystick()->getSensor(GYROSCOPE);
 
     xml->writeStartElement("calibration"); // <calibration>
     if (gyroscope != nullptr)

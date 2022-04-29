@@ -326,6 +326,7 @@ set(antimicrox_HEADERS
         src/joysensorpreset.h
         src/joysensorpushbutton.h
         src/joysensorstatusbox.h
+        src/joysensortype.h
         src/joystick.h
         src/keyboard/virtualkeyboardmousewidget.h
         src/keyboard/virtualkeypushbutton.h

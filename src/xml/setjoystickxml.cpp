@@ -102,7 +102,7 @@ void SetJoystickXml::readConfig(QXmlStreamReader *xml)
             {
                 int type = xml->attributes().value("type").toString().toInt();
                 JoySensor *sensor = m_setJoystick->getSensor(
-                    static_cast<JoySensor::Type>(type));
+                    static_cast<JoySensorType>(type));
 
                 if (sensor != nullptr)
                     sensor->readConfig(xml);

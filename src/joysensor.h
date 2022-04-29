@@ -24,6 +24,7 @@
 #include <QXmlStreamWriter>
 
 #include "joysensordirection.h"
+#include "joysensortype.h"
 #include "pt1.h"
 
 class SetJoystick;
@@ -34,13 +35,8 @@ class JoySensor : public QObject
     Q_OBJECT
 
   public:
-    enum Type {
-        ACCELEROMETER,
-        GYROSCOPE,
-        SENSOR_COUNT
-    };
-
-    explicit JoySensor(Type type, double rate, int originset, SetJoystick *parent_set, QObject *parent);
+    explicit JoySensor(
+        JoySensorType type, double rate, int originset, SetJoystick *parent_set, QObject *parent);
     ~JoySensor();
 
     void joyEvent(float* values, bool ignoresets = false);
@@ -56,7 +52,7 @@ class JoySensor : public QObject
 
     JoySensorDirection getCurrentDirection();
 
-    Type getType();
+    JoySensorType getType();
     float getDeadZone();
     float getDiagonalRange();
     float getMaxZone();
@@ -139,7 +135,7 @@ class JoySensor : public QObject
     JoySensorDirection calculateGyroscopeDirection();
     void createDeskEvent(JoySensorDirection direction, bool ignoresets = false);
 
-    Type m_type;
+    JoySensorType m_type;
     int m_originset;
     bool m_active;
     static const size_t ACTIVE_BUTTON_COUNT = 3;

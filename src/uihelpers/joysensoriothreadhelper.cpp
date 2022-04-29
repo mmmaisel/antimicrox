@@ -19,6 +19,7 @@
 
 #include "joybuttonslot.h"
 #include "joybuttontypes/joysensorbutton.h"
+#include "joysensor.h"
 
 #include <QDebug>
 

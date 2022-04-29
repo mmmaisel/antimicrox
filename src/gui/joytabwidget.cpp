@@ -2011,9 +2011,9 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
     int sensorGridColumn = 0;
     int sensorGridRow = 0;
 
-    for (size_t i = 0; i < JoySensor::SENSOR_COUNT; ++i)
+    for (size_t i = 0; i < SENSOR_COUNT; ++i)
     {
-        JoySensor::Type type = static_cast<JoySensor::Type>(i);
+        JoySensorType type = static_cast<JoySensorType>(i);
         if (!m_joystick->hasSensor(type))
             continue;
 

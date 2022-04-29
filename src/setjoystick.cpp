@@ -68,7 +68,7 @@ VDPad *SetJoystick::getVDPad(int index) const { return getVdpads().value(index);
 
 JoyControlStick *SetJoystick::getJoyStick(int index) const { return getSticks().value(index); }
 
-JoySensor *SetJoystick::getSensor(JoySensor::Type type) const { return m_sensors.value(type); }
+JoySensor *SetJoystick::getSensor(JoySensorType type) const { return m_sensors.value(type); }
 
 void SetJoystick::refreshButtons()
 {
@@ -118,9 +118,9 @@ void SetJoystick::refreshSensors()
 {
     deleteSensors();
 
-    for (size_t i = 0; i < JoySensor::SENSOR_COUNT; ++i)
+    for (size_t i = 0; i < SENSOR_COUNT; ++i)
     {
-        JoySensor::Type type = static_cast<JoySensor::Type>(i);
+        JoySensorType type = static_cast<JoySensorType>(i);
 
         if (!getInputDevice()->hasRawSensor(type))
             continue;
@@ -225,7 +225,7 @@ void SetJoystick::deleteHats()
 
 void SetJoystick::deleteSensors()
 {
-    QHashIterator<JoySensor::Type, JoySensor *> iter(m_sensors);
+    QHashIterator<JoySensorType, JoySensor *> iter(m_sensors);
 
     while (iter.hasNext())
     {
@@ -247,7 +247,7 @@ int SetJoystick::getNumberAxes() const { return axes.count(); }
 
 int SetJoystick::getNumberHats() const { return getHats().count(); }
 
-bool SetJoystick::hasSensor(JoySensor::Type type) const
+bool SetJoystick::hasSensor(JoySensorType type) const
 {
     return m_sensors.contains(type);
 }
@@ -386,7 +386,7 @@ bool SetJoystick::isSetEmpty()
             result = false;
     }
 
-    QHashIterator<JoySensor::Type, JoySensor *> sensors(getSensors());
+    QHashIterator<JoySensorType, JoySensor *> sensors(getSensors());
 
     while (sensors.hasNext() && result)
     {
@@ -417,7 +417,7 @@ void SetJoystick::propogateSetAxisThrottleSetting(int index)
         emit setAssignmentAxisThrottleChanged(index, axis->getCurrentlyAssignedSet());
 }
 
-void SetJoystick::addSensor(JoySensor::Type type, JoySensor *sensor)
+void SetJoystick::addSensor(JoySensorType type, JoySensor *sensor)
 {
     m_sensors.insert(type, sensor);
     connect(sensor, &JoySensor::sensorNameChanged, this, &SetJoystick::propagateSetSensorNameChange);
@@ -442,7 +442,7 @@ void SetJoystick::addSensor(JoySensor::Type type, JoySensor *sensor)
     }
 }
 
-void SetJoystick::removeSensor(JoySensor::Type type)
+void SetJoystick::removeSensor(JoySensorType type)
 {
     if (m_sensors.contains(type))
     {
@@ -1125,7 +1125,7 @@ QHash<int, JoyButton *> const &SetJoystick::getButtons() const { return m_button
 
 QHash<int, JoyDPad *> const &SetJoystick::getHats() const { return hats; }
 
-QHash<JoySensor::Type, JoySensor *> const &SetJoystick::getSensors() const
+QHash<JoySensorType, JoySensor *> const &SetJoystick::getSensors() const
 {
     return m_sensors;
 }

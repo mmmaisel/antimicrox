@@ -172,13 +172,13 @@ int GameController::getNumberRawAxes()
     return SDL_CONTROLLER_AXIS_MAX;
 }
 
-double GameController::getRawSensorRate(JoySensor::Type type)
+double GameController::getRawSensorRate(JoySensorType type)
 {
     double rate = 0;
 #if SDL_VERSION_ATLEAST(2,0,16)
-    if (type == JoySensor::ACCELEROMETER)
+    if (type == ACCELEROMETER)
         rate = SDL_GameControllerGetSensorDataRate(controller, SDL_SENSOR_ACCEL);
-    else if (type == JoySensor::GYROSCOPE)
+    else if (type == GYROSCOPE)
         rate = SDL_GameControllerGetSensorDataRate(controller, SDL_SENSOR_GYRO);
 #endif
     if (qFuzzyIsNull(rate))
@@ -186,12 +186,12 @@ double GameController::getRawSensorRate(JoySensor::Type type)
     return rate;
 }
 
-bool GameController::hasRawSensor(JoySensor::Type type)
+bool GameController::hasRawSensor(JoySensorType type)
 {
 #if SDL_VERSION_ATLEAST(2,0,14)
-    if (type == JoySensor::ACCELEROMETER)
+    if (type == ACCELEROMETER)
         return SDL_GameControllerHasSensor(controller, SDL_SENSOR_ACCEL);
-    else if (type == JoySensor::GYROSCOPE)
+    else if (type == GYROSCOPE)
         return SDL_GameControllerHasSensor(controller, SDL_SENSOR_GYRO);
 #endif
     return false;

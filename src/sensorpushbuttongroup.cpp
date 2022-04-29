@@ -47,7 +47,7 @@ void SensorPushButtonGroup::generateButtons()
     m_down_button = generateBtnToGrid(SENSOR_DOWN, 2, 1);
     m_fwd_button = generateBtnToGrid(SENSOR_FWD, 0, 2);
 
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
         m_bwd_button = generateBtnToGrid(SENSOR_BWD, 2, 0);
 
     m_sensor_widget = new JoySensorPushButton(m_sensor, m_display_names, parentWidget());

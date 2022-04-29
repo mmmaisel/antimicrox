@@ -823,11 +823,11 @@ void InputDaemon::firstInputPass(QQueue<SDL_Event> *sdlEventQueue)
             if (joy != nullptr)
             {
                 SetJoystick *set = joy->getActiveSetJoystick();
-                JoySensor::Type sensor_type;
+                JoySensorType sensor_type;
                 if (event.csensor.sensor == SDL_SENSOR_ACCEL)
-                    sensor_type = JoySensor::ACCELEROMETER;
+                    sensor_type = ACCELEROMETER;
                 else if (event.csensor.sensor == SDL_SENSOR_GYRO)
-                    sensor_type = JoySensor::GYROSCOPE;
+                    sensor_type = GYROSCOPE;
                 JoySensor* sensor = set->getSensor(sensor_type);
 
                 if (sensor != nullptr)
@@ -1147,9 +1147,9 @@ void InputDaemon::secondInputPass(QQueue<SDL_Event> *sdlEventQueue)
                 SetJoystick *set = joy->getActiveSetJoystick();
                 JoySensor *sensor;
                 if (event.csensor.sensor == SDL_SENSOR_ACCEL)
-                    sensor = set->getSensor(JoySensor::ACCELEROMETER);
+                    sensor = set->getSensor(ACCELEROMETER);
                 else if (event.csensor.sensor == SDL_SENSOR_GYRO)
-                    sensor = set->getSensor(JoySensor::GYROSCOPE);
+                    sensor = set->getSensor(GYROSCOPE);
                 else
                     Q_ASSERT(false);
 

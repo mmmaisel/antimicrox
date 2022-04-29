@@ -149,12 +149,12 @@ int Joystick::getNumberRawHats()
     return numhats;
 }
 
-double Joystick::getRawSensorRate(JoySensor::Type _)
+double Joystick::getRawSensorRate(JoySensorType _)
 {
     return 0;
 }
 
-bool Joystick::hasRawSensor(JoySensor::Type _)
+bool Joystick::hasRawSensor(JoySensorType _)
 {
     return false;
 }

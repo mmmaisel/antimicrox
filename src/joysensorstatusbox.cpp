@@ -111,7 +111,7 @@ void JoySensorStatusBox::drawArtificialHorizon()
     painter.setClipPath(clippingPath);
 
     float pitch, roll, yaw;
-    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
+    if (m_sensor->getType() == ACCELEROMETER)
     {
         pitch = -m_sensor->calculatePitch();
         roll = m_sensor->calculateRoll();
@@ -159,7 +159,7 @@ void JoySensorStatusBox::drawArtificialHorizon()
     painter.setPen(pen);
     painter.setBrush(QBrush(QColor(0, 255, 0, 128)));
 
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
     {
         for(int i = 0; i < 4; ++i)
         {
@@ -190,7 +190,7 @@ void JoySensorStatusBox::drawArtificialHorizon()
     }
 
     // Yaw scale: 30deg per line
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
     {
         pen.setColor(Qt::white);
         pen.setWidthF(0.025);

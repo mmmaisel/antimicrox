@@ -64,7 +64,7 @@ JoySensorEditDialog::JoySensorEditDialog(JoySensor *sensor, QWidget *parent)
     PadderCommon::inputDaemonMutex.lock();
 
     updateWindowTitleSensorName();
-    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
+    if (m_sensor->getType() == ACCELEROMETER)
     {
         float value;
         m_ui->accelerationValue->setText(QString::number(m_sensor->calculateDistance()));
@@ -197,21 +197,21 @@ void JoySensorEditDialog::refreshSensorStats(float x, float y, float z)
     PadderCommon::inputDaemonMutex.lock();
 
     value = m_sensor->getXCoordinate();
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
         value *= 180.0 / M_PI;
     m_ui->xCoordinateValue->setText(QString::number(value));
 
     value = m_sensor->getYCoordinate();
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
         value *= 180.0 / M_PI;
     m_ui->yCoordinateValue->setText(QString::number(value));
 
     value = m_sensor->getZCoordinate();
-    if (m_sensor->getType() == JoySensor::GYROSCOPE)
+    if (m_sensor->getType() == GYROSCOPE)
         value *= 180.0 / M_PI;
     m_ui->zCoordinateValue->setText(QString::number(value));
 
-    if (m_sensor->getType() == JoySensor::ACCELEROMETER)
+    if (m_sensor->getType() == ACCELEROMETER)
     {
         m_ui->accelerationValue->setText(QString::number(m_sensor->calculateDistance()));
         value = m_sensor->calculatePitch() * 180.0 / M_PI;

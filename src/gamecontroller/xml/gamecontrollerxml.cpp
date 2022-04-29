@@ -149,7 +149,7 @@ void GameControllerXml::readJoystickConfig(QXmlStreamReader *xml)
 
                         if ((index >= 0) && !temp.isEmpty())
                             m_gameController->setSensorButtonName(
-                                static_cast<JoySensor::Type>(index), buttonIndex, temp);
+                                static_cast<JoySensorType>(index), buttonIndex, temp);
                     } else if ((xml->name() == "dpadbuttonname") && xml->isStartElement())
                     {
                         assignVariables(xml, index, buttonIndex, temp, false);
@@ -249,7 +249,7 @@ void GameControllerXml::readJoystickConfig(QXmlStreamReader *xml)
 
                         if ((index >= 0) && !temp.isEmpty())
                             m_gameController->setSensorName(
-                                static_cast<JoySensor::Type>(index), temp);
+                                static_cast<JoySensorType>(index), temp);
                     } else if ((xml->name() == "dpadname") && xml->isStartElement())
                     {
                         readJoystickConfigXmlLong(hatButtons, dpadNameExists, vdpadNameExists, xml);
@@ -539,7 +539,7 @@ void GameControllerXml::writeXmlForSticks(SetJoystick *tempSet, QXmlStreamWriter
 
 void GameControllerXml::writeXmlForSensors(SetJoystick *tempSet, QXmlStreamWriter *xml)
 {
-    QHashIterator<JoySensor::Type, JoySensor *> currSensor(tempSet->getSensors());
+    QHashIterator<JoySensorType, JoySensor *> currSensor(tempSet->getSensors());
 
     while (currSensor.hasNext())
     {

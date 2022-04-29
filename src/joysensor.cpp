@@ -33,7 +33,7 @@ const double JoySensor::SHOCK_SUPPRESS_FACTOR = 0.5;
 const double JoySensor::SHOCK_TAU = 10;
 
 JoySensor::JoySensor(
-    Type type, double rate, int originset, SetJoystick *parent_set, QObject *parent)
+    JoySensorType type, double rate, int originset, SetJoystick *parent_set, QObject *parent)
     : QObject(parent),
     m_type(type),
     m_originset(originset),
@@ -206,7 +206,7 @@ JoySensorDirection JoySensor::getCurrentDirection()
     return m_current_direction;
 }
 
-JoySensor::Type JoySensor::getType() { return m_type; }
+JoySensorType JoySensor::getType() { return m_type; }
 
 /**
  * @brief Get the assigned dead zone value.

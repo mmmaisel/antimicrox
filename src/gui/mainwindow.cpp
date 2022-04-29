@@ -1131,9 +1131,9 @@ void MainWindow::openSensorCalibration()
             if (device != nullptr)
             {
                 JoySensor *accelerometer = device->getActiveSetJoystick()->
-                    getSensor(JoySensor::ACCELEROMETER);
+                    getSensor(ACCELEROMETER);
                 JoySensor *gyroscope = device->getActiveSetJoystick()->
-                    getSensor(JoySensor::GYROSCOPE);
+                    getSensor(GYROSCOPE);
                 if (accelerometer != nullptr || gyroscope != nullptr)
                 {
                     QPointer<SensorCalibration> calibration =

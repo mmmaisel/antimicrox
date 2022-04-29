@@ -71,7 +71,7 @@ InputDeviceBitArrayStatus::InputDeviceBitArrayStatus(InputDevice *device, bool r
         }
     }
 
-    m_sensor_status.resize(JoySensor::SENSOR_COUNT);
+    m_sensor_status.resize(SENSOR_COUNT);
     m_sensor_status.fill(0);
 }
 
@@ -133,7 +133,7 @@ QBitArray InputDeviceBitArrayStatus::generateFinalBitArray()
         currentBit++;
     }
 
-    for (int i = 0; i < JoySensor::SENSOR_COUNT; i++)
+    for (int i = 0; i < SENSOR_COUNT; i++)
     {
         aggregateBitArray.setBit(currentBit, m_sensor_status.at(i));
         currentBit++;

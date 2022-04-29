@@ -46,9 +46,9 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
     // XXX: gyro status box?
     // XXX: show targets in accel status box
     m_accelerometer = m_joystick->getActiveSetJoystick()->
-        getSensor(JoySensor::ACCELEROMETER);
+        getSensor(ACCELEROMETER);
     m_gyroscope = m_joystick->getActiveSetJoystick()->
-        getSensor(JoySensor::GYROSCOPE);
+        getSensor(GYROSCOPE);
     m_calibrated = m_accelerometer->isCalibrated() && m_gyroscope->isCalibrated();
 
     if (m_gyroscope->isCalibrated())

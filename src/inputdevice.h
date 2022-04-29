@@ -20,7 +20,6 @@
 #define INPUTDEVICE_H
 
 #include "setjoystick.h"
-#include "joysensor.h"
 
 #include <SDL2/SDL_joystick.h>
 
@@ -41,7 +40,7 @@ class InputDevice : public QObject
     virtual int getNumberButtons();
     virtual int getNumberAxes();
     virtual int getNumberHats();
-    virtual bool hasSensor(JoySensor::Type);
+    virtual bool hasSensor(JoySensorType type);
     virtual int getNumberSticks();
     virtual int getNumberVDPads();
 
@@ -82,21 +81,21 @@ class InputDevice : public QObject
     void setButtonName(int index, QString tempName);                            // InputDeviceXml class
     void setAxisButtonName(int axisIndex, int buttonIndex, QString tempName);   // InputDeviceXml class
     void setStickButtonName(int stickIndex, int buttonIndex, QString tempName); // InputDeviceXml class
-    void setSensorButtonName(JoySensor::Type type, int buttonIndex, QString tempName);
+    void setSensorButtonName(JoySensorType type, int buttonIndex, QString tempName);
     void setDPadButtonName(int dpadIndex, int buttonIndex, QString tempName);   // InputDeviceXml class
     void setVDPadButtonName(int vdpadIndex, int buttonIndex, QString tempName); // InputDeviceXml class
 
     void setAxisName(int axisIndex, QString tempName);   // InputDeviceAxis class
     void setStickName(int stickIndex, QString tempName); // InputDeviceStick class
-    void setSensorName(JoySensor::Type type, QString tempName);
+    void setSensorName(JoySensorType type, QString tempName);
     void setDPadName(int dpadIndex, QString tempName);   // InputDeviceHat class
     void setVDPadName(int vdpadIndex, QString tempName); // InputDeviceVDPad class
 
     virtual int getNumberRawButtons() = 0;
     virtual int getNumberRawAxes() = 0;
     virtual int getNumberRawHats() = 0;
-    virtual double getRawSensorRate(JoySensor::Type type) = 0;
-    virtual bool hasRawSensor(JoySensor::Type type) = 0;
+    virtual double getRawSensorRate(JoySensorType type) = 0;
+    virtual bool hasRawSensor(JoySensorType type) = 0;
 
     int getDeviceKeyPressTime(); // unsigned
 
@@ -222,13 +221,13 @@ class InputDevice : public QObject
     void updateSetButtonNames(int index);                            // InputDeviceButton class
     void updateSetAxisButtonNames(int axisIndex, int buttonIndex);   // InputDeviceAxis class
     void updateSetStickButtonNames(int stickIndex, int buttonIndex); // InputDeviceStick class
-    void updateSetSensorButtonNames(JoySensor::Type type, int buttonIndex);
+    void updateSetSensorButtonNames(JoySensorType type, int buttonIndex);
     void updateSetDPadButtonNames(int dpadIndex, int buttonIndex);   // InputDeviceHat class
     void updateSetVDPadButtonNames(int vdpadIndex, int buttonIndex); // InputDeviceVDPad class
 
     void updateSetAxisNames(int axisIndex);   // InputDeviceAxis class
     void updateSetStickNames(int stickIndex); // InputDeviceStick class
-    void updateSetSensorNames(JoySensor::Type type);
+    void updateSetSensorNames(JoySensorType type);
     void updateSetDPadNames(int dpadIndex);   // InputDeviceHat class
     void updateSetVDPadNames(int vdpadIndex); // InputDeviceVDPad class
 
