@@ -19,6 +19,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QTimer>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -160,6 +161,8 @@ class JoySensor : public QObject
 
     QString m_sensor_name;
     QString m_default_sensor_name;
+
+    QTimer m_delay_timer;
 
   private:
     JoySensorDirection m_current_direction;

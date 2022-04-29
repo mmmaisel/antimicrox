@@ -43,7 +43,10 @@ JoySensor::JoySensor(
 {
     m_rate = qFuzzyIsNull(rate) ? PT1::FALLBACK_RATE : rate;
     reset();
+    m_delay_timer.setSingleShot(true);
     populateButtons();
+
+    connect(&m_delay_timer, &QTimer::timeout, this, &JoySensor::delayTimerExpired);
 }
 
 JoySensor::~JoySensor()
@@ -52,7 +55,6 @@ JoySensor::~JoySensor()
 
 void JoySensor::joyEvent(float* values, bool ignoresets)
 {
-    bool safezone = false;
     m_current_value[0] = values[0];
     m_current_value[1] = values[1];
     m_current_value[2] = values[2];
@@ -64,35 +66,60 @@ void JoySensor::joyEvent(float* values, bool ignoresets)
         m_current_value[2] -= m_calibration_value[2];
     }
 
-    double distance = calculateDistance();
-    if (m_type == ACCELEROMETER) {
-        double pitch_abs = abs(calculatePitch());
-        double roll_abs = abs(calculateRoll());
-        double shock = m_shock_filter.process(
-            abs(m_current_value[0]) + abs(m_current_value[1]) + abs(m_current_value[2]));
-        safezone = pitch_abs*pitch_abs + roll_abs*roll_abs > m_dead_zone*m_dead_zone
-            || shock > SHOCK_DETECT_THRESHOLD;
-    }
-    else {
-        safezone = distance > m_dead_zone;
-    }
+    JoySensorDirection pending_direction = calculateSensorDirection();
 
-    if (safezone && !m_active)
+    if (pending_direction != SENSOR_CENTERED && !m_active)
     {
         m_active = true;
         emit active(m_current_value[0], m_current_value[1], m_current_value[2]);
-        createDeskEvent(safezone, ignoresets);
-        // XXX: implement delay
-    } else if (!safezone && m_active)
+
+        if (ignoresets || (m_sensor_delay == 0))
+        {
+            if (m_delay_timer.isActive())
+                m_delay_timer.stop();
+            createDeskEvent(pending_direction, ignoresets);
+        } else
+        {
+            if (!m_delay_timer.isActive())
+                m_delay_timer.start(m_sensor_delay);
+        }
+    } else if (pending_direction == SENSOR_CENTERED && m_active)
     {
         m_active = false;
         emit released(m_current_value[0], m_current_value[1], m_current_value[2]);
-        createDeskEvent(safezone, ignoresets);
-        // XXX: implement delay
+
+        if (ignoresets || (m_sensor_delay == 0))
+        {
+            if (m_delay_timer.isActive())
+                m_delay_timer.stop();
+            createDeskEvent(pending_direction, ignoresets);
+        } else
+        {
+            if (!m_delay_timer.isActive())
+                m_delay_timer.start(m_sensor_delay);
+        }
     } else if (m_active)
     {
-        createDeskEvent(safezone, ignoresets);
-        // XXX: implement delay
+        if (ignoresets || (m_sensor_delay == 0))
+        {
+            if (m_delay_timer.isActive())
+                m_delay_timer.stop();
+
+            createDeskEvent(pending_direction, ignoresets);
+        } else
+        {
+            if (m_current_direction != pending_direction)
+            {
+                if (!m_delay_timer.isActive())
+                    m_delay_timer.start(m_sensor_delay);
+            } else
+            {
+                if (m_delay_timer.isActive())
+                    m_delay_timer.stop();
+
+                createDeskEvent(pending_direction, ignoresets);
+            }
+        }
     }
 
     emit moved(m_current_value[0], m_current_value[1], m_current_value[2]);
@@ -770,6 +797,15 @@ void JoySensor::establishPropertyUpdatedConnection()
 {
     connect(this, &JoySensor::propertyUpdated, getParentSet()->getInputDevice(),
         &InputDevice::profileEdited);
+}
+
+/**
+ * @brief Slot called when m_delay_timer has timed out. The method will
+ *     call createDeskEvent.
+ */
+void JoySensor::delayTimerExpired()
+{
+    createDeskEvent(calculateSensorDirection());
 }
 
 /**
