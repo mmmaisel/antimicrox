@@ -33,7 +33,8 @@ SensorPushButtonGroup::SensorPushButtonGroup(
     JoySensor *sensor, bool keypadUnlocked, bool displayNames, QWidget *parent)
     : QGridLayout(parent),
     m_sensor(sensor),
-    m_display_names(displayNames)
+    m_display_names(displayNames),
+    m_keypad_unlocked(keypadUnlocked)
 {
     generateButtons();
 }
@@ -86,10 +87,9 @@ JoySensor *SensorPushButtonGroup::getSensor() const { return m_sensor; }
 
 void SensorPushButtonGroup::openSensorButtonDialog(JoySensorButtonPushButton *pushbutton)
 {
-    // XXX: implement
     ButtonEditDialog *dialog = new ButtonEditDialog(
         pushbutton->getButton(), m_sensor->getParentSet()->getInputDevice(),
-        /*m_keypad_unlocked*/true, parentWidget());
+        m_keypad_unlocked, parentWidget());
     dialog->show();
 }
 
@@ -117,39 +117,4 @@ void SensorPushButtonGroup::toggleNameDisplay()
 bool SensorPushButtonGroup::ifDisplayNames() const
 {
     return m_display_names;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getUpButton() const
-{
-    return m_up_button;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getDownButton() const
-{
-    return m_down_button;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getLeftButton() const
-{
-    return m_left_button;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getRightButton() const
-{
-    return m_right_button;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getFwdButton() const
-{
-    return m_fwd_button;
-}
-
-JoySensorButtonPushButton *SensorPushButtonGroup::getBwdButton() const
-{
-    return m_bwd_button;
-}
-
-JoySensorPushButton *SensorPushButtonGroup::getSensorWidget() const
-{
-    return m_sensor_widget;
 }

@@ -36,15 +36,6 @@ class SensorPushButtonGroup : public QGridLayout
 
     bool ifDisplayNames() const;
 
-    JoySensorButtonPushButton *getUpButton() const;
-    JoySensorButtonPushButton *getDownButton() const;
-    JoySensorButtonPushButton *getLeftButton() const;
-    JoySensorButtonPushButton *getRightButton() const;
-    JoySensorButtonPushButton *getFwdButton() const;
-    JoySensorButtonPushButton *getBwdButton() const;
-
-    JoySensorPushButton *getSensorWidget() const;
-
   protected:
     void generateButtons();
 
@@ -62,7 +53,7 @@ class SensorPushButtonGroup : public QGridLayout
   private:
     JoySensor *m_sensor;
     bool m_display_names;
-    //bool m_keypadUnlocked;
+    bool m_keypad_unlocked;
 
     JoySensorButtonPushButton *m_up_button;
     JoySensorButtonPushButton *m_down_button;
