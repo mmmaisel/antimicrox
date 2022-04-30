@@ -143,7 +143,7 @@ class InputDevice : public QObject
     QHash<int, SetJoystick *> &getJoystick_sets();
     SDL_Joystick *getJoyHandle() const;
 
-    void applyGyroscopeCalibration(float x0, float y0, float z0);
+    void applyGyroscopeCalibration(double x0, double y0, double z0);
   protected:
     void enableSetConnections(SetJoystick *setstick);
 

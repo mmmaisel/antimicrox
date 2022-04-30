@@ -53,7 +53,7 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
 
     if (m_gyroscope->isCalibrated())
     {
-        float data[3];
+        double data[3];
         m_gyroscope->getCalibration(data);
         showGyroCalibrationValues(true, data[0], data[1], data[2]);
     } else
@@ -119,7 +119,7 @@ void SensorCalibration::resetSettings(bool silentReset, bool)
 }
 
 void SensorCalibration::showGyroCalibrationValues(
-    bool is_calibrated, float x, float y, float z)
+    bool is_calibrated, double x, double y, double z)
 {
     if (is_calibrated)
     {

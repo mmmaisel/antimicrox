@@ -1697,12 +1697,11 @@ QList<int> &InputDevice::getDpadstatesLocal() { return dpadstates; }
 
 SDL_Joystick *InputDevice::getJoyHandle() const { return m_joyhandle; }
 
-void InputDevice::applyGyroscopeCalibration(float x0, float y0, float z0)
+void InputDevice::applyGyroscopeCalibration(double x0, double y0, double z0)
 {
-    QHashIterator<int, SetJoystick *> iter(joystick_sets);
-    while (iter.hasNext())
+    for (auto iter = joystick_sets.begin(); iter != joystick_sets.end(); ++iter)
     {
-        SetJoystick *set = iter.next().value();
+        SetJoystick *set = iter.value();
         JoySensor* gyroscope = set->getSensor(GYROSCOPE);
         if (gyroscope != nullptr)
             gyroscope->setCalibration(x0, y0, z0);

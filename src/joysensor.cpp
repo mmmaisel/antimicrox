@@ -206,27 +206,31 @@ JoySensorDirection JoySensor::getCurrentDirection()
     return m_current_direction;
 }
 
-JoySensorType JoySensor::getType() { return m_type; }
+JoySensorType JoySensor::getType() const { return m_type; }
 
 /**
  * @brief Get the assigned dead zone value.
- * @return Assigned dead zone value
+ * @return Assigned dead zone value in degree.
  */
-float JoySensor::getDeadZone()
+double JoySensor::getDeadZone() const
 {
     return m_dead_zone * 180 / M_PI;
 }
 
 /**
  * @brief Get the assigned diagonal range value.
- * @return Assigned diagonal range.
+ * @return Assigned diagonal range in degree.
  */
-float JoySensor::getDiagonalRange()
+double JoySensor::getDiagonalRange() const
 {
     return m_diagonal_range * 180 / M_PI;
 }
 
-float JoySensor::getMaxZone()
+/**
+ * @brief Get the assigned max zone value.
+ * @return Assigned max zone value in degree.
+ */
+double JoySensor::getMaxZone() const
 {
     return m_max_zone * 180 / M_PI;
 }
@@ -235,21 +239,21 @@ float JoySensor::getMaxZone()
  * @brief Get the value for the corresponding X axis.
  * @return X axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-float JoySensor::getXCoordinate() { return m_current_value[0]; }
+float JoySensor::getXCoordinate() const { return m_current_value[0]; }
 
 /**
  * @brief Get the value for the corresponding Y axis.
  * @return X axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-float JoySensor::getYCoordinate() { return m_current_value[1]; }
+float JoySensor::getYCoordinate() const { return m_current_value[1]; }
 
 /**
  * @brief Get the value for the corresponding Z axis.
  * @return Z axis value in m/s^2 for accelerometer or rad/s for gyroscope.
  */
-float JoySensor::getZCoordinate() { return m_current_value[2]; }
+float JoySensor::getZCoordinate() const { return m_current_value[2]; }
 
-unsigned int JoySensor::getSensorDelay() { return m_sensor_delay; }
+unsigned int JoySensor::getSensorDelay() const { return m_sensor_delay; }
 
 QString JoySensor::sensorTypeName() const {
     if (m_type == ACCELEROMETER)
@@ -302,7 +306,7 @@ double JoySensor::getDistanceFromDeadZone() const
 double JoySensor::getDistanceFromDeadZone(float x, float y, float z) const
 {
     double distance = calculateDistance(x, y, z);
-    return qBound(0.0, distance - m_dead_zone, double(m_max_zone));
+    return qBound(0.0, distance - m_dead_zone, m_max_zone);
 }
 
 /**
@@ -336,9 +340,9 @@ double JoySensor::calculateXDistanceFromDeadZone(
 {
     double discriminant = m_dead_zone*m_dead_zone - y*y - z*z;
     if(discriminant <= 0)
-        return std::min(abs(x), m_max_zone);
+        return std::min(double(abs(x)), m_max_zone);
     else
-        return std::min(abs(x)-sqrt(discriminant), double(m_max_zone));
+        return std::min(double(abs(x))-sqrt(discriminant), m_max_zone);
 }
 
 /**
@@ -372,9 +376,9 @@ double JoySensor::calculateYDistanceFromDeadZone(
 {
     double discriminant = m_dead_zone*m_dead_zone - x*x - z*z;
     if(discriminant <= 0)
-        return std::min(abs(y), m_max_zone);
+        return std::min(double(abs(y)), m_max_zone);
     else
-        return std::min(abs(y)-sqrt(discriminant), double(m_max_zone));
+        return std::min(double(abs(y))-sqrt(discriminant), m_max_zone);
 }
 
 /**
@@ -408,9 +412,9 @@ double JoySensor::calculateZDistanceFromDeadZone(
 {
     double discriminant = m_dead_zone*m_dead_zone - x*x - y*y;
     if(discriminant <= 0)
-        return std::min(abs(z), m_max_zone);
+        return std::min(double(abs(z)), m_max_zone);
     else
-        return std::min(abs(z)-sqrt(discriminant), double(m_max_zone));
+        return std::min(double(abs(z))-sqrt(discriminant), m_max_zone);
 }
 
 /**
@@ -547,14 +551,14 @@ void JoySensor::resetCalibration()
     m_calibrated = false;
 }
 
-void JoySensor::getCalibration(float* data)
+void JoySensor::getCalibration(double* data) const
 {
     data[0] = m_calibration_value[0];
     data[1] = m_calibration_value[1];
     data[2] = m_calibration_value[2];
 }
 
-void JoySensor::setCalibration(float x0, float y0, float z0)
+void JoySensor::setCalibration(double x0, double y0, double z0)
 {
     m_calibration_value[0] = x0;
     m_calibration_value[1] = y0;
@@ -588,16 +592,16 @@ void JoySensor::setSensorName(QString tempName)
     }
 }
 
-QString JoySensor::getSensorName() { return m_sensor_name; }
+QString JoySensor::getSensorName() const { return m_sensor_name; }
 
-bool JoySensor::isDefault()
+bool JoySensor::isDefault() const
 {
     bool value = true;
-    value = value && qFuzzyCompare(double(getDeadZone()), GlobalVariables::JoySensor::DEFAULTDEADZONE);
+    value = value && qFuzzyCompare(getDeadZone(), GlobalVariables::JoySensor::DEFAULTDEADZONE);
     if (m_type == ACCELEROMETER)
-        value = value && qFuzzyCompare(double(getMaxZone()), GlobalVariables::JoySensor::ACCEL_MAX);
+        value = value && qFuzzyCompare(getMaxZone(), GlobalVariables::JoySensor::ACCEL_MAX);
     else
-        value = value && qFuzzyCompare(double(getMaxZone()), GlobalVariables::JoySensor::GYRO_MAX);
+        value = value && qFuzzyCompare(getMaxZone(), GlobalVariables::JoySensor::GYRO_MAX);
 
     value = value && qFuzzyCompare(getDiagonalRange(), GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE);
     value = value && (m_sensor_delay == GlobalVariables::JoySensor::DEFAULTSENSORDELAY);
@@ -612,7 +616,7 @@ bool JoySensor::isDefault()
 }
 void JoySensor::setDefaultSensorName(QString tempname) { m_default_sensor_name = tempname; }
 
-QString JoySensor::getDefaultSensorName() { return m_default_sensor_name; }
+QString JoySensor::getDefaultSensorName() const { return m_default_sensor_name; }
 
 /**
  * @brief Take a XML stream and set the sensor and direction button properties
@@ -677,22 +681,22 @@ void JoySensor::readConfig(QXmlStreamReader *xml)
  *     to an XML stream.
  * @param QXmlStreamWriter instance that will be used to write a profile.
  */
-void JoySensor::writeConfig(QXmlStreamWriter *xml)
+void JoySensor::writeConfig(QXmlStreamWriter *xml) const
 {
     if (!isDefault())
     {
         xml->writeStartElement("sensor");
         xml->writeAttribute("type", QString::number(m_type));
 
-        if (!qFuzzyCompare(double(getDeadZone()), GlobalVariables::JoySensor::DEFAULTDEADZONE))
+        if (!qFuzzyCompare(getDeadZone(), GlobalVariables::JoySensor::DEFAULTDEADZONE))
             xml->writeTextElement("deadZone", QString::number(getDeadZone()));
 
-        if (!qFuzzyCompare(double(m_max_zone), (m_type == ACCELEROMETER
+        if (!qFuzzyCompare(m_max_zone, (m_type == ACCELEROMETER
                 ? GlobalVariables::JoySensor::ACCEL_MAX
                 : GlobalVariables::JoySensor::GYRO_MAX)))
             xml->writeTextElement("maxZone", QString::number(getMaxZone()));
 
-        if (!qFuzzyCompare(double(m_diagonal_range), GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE))
+        if (!qFuzzyCompare(m_diagonal_range, GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE))
             xml->writeTextElement("diagonalRange", QString::number(getDiagonalRange()));
 
         if (m_sensor_delay > GlobalVariables::JoySensor::DEFAULTSENSORDELAY)
@@ -741,7 +745,7 @@ void JoySensor::reset()
     resetButtons();
 }
 
-void JoySensor::setDeadZone(float value)
+void JoySensor::setDeadZone(double value)
 {
     value = abs(value / 180 * M_PI);
     if (!qFuzzyCompare(value, m_dead_zone) && (value <= m_max_zone))
@@ -752,7 +756,7 @@ void JoySensor::setDeadZone(float value)
     }
 }
 
-void JoySensor::setMaxZone(float value)
+void JoySensor::setMaxZone(double value)
 {
     value = abs(value / 180 * M_PI);
     if (!qFuzzyCompare(value, m_max_zone) && (value > m_dead_zone))
@@ -767,7 +771,7 @@ void JoySensor::setMaxZone(float value)
  * @brief Set the diagonal range value for a sensor.
  * @param Value between 1 - 90.
  */
-void JoySensor::setDiagonalRange(float value)
+void JoySensor::setDiagonalRange(double value)
 {
     if (value < 1)
         value = 1;
@@ -814,7 +818,7 @@ void JoySensor::delayTimerExpired()
  * @param Pointer to an array of three JoySensorButton pointers in which
  *   the results are stored.
  */
-void JoySensor::determineSensorEvent(JoySensorButton **eventbutton)
+void JoySensor::determineSensorEvent(JoySensorButton **eventbutton) const
 {
     if (m_current_direction & SENSOR_LEFT)
         eventbutton[0] = m_buttons.value(SENSOR_LEFT);
@@ -930,7 +934,7 @@ JoySensorDirection JoySensor::calculateAccelerometerDirection()
  *   There are two cases here because the spherical layers overlap if the diagonal
  *   angle is larger then 45 degree.
  */
-JoySensorDirection JoySensor::calculateGyroscopeDirection()
+JoySensorDirection JoySensor::calculateGyroscopeDirection() const
 {
     double distance = calculateDistance();
     if (distance < m_dead_zone)

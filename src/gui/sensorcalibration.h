@@ -39,7 +39,7 @@ class SensorCalibration : public QWidget
 
   protected:
     void resetCalibrationValues();
-    void showGyroCalibrationValues(bool is_calibrated, float x, float y, float z);
+    void showGyroCalibrationValues(bool is_calibrated, double x, double y, double z);
 
   private:
     Ui::SensorCalibration *m_ui;

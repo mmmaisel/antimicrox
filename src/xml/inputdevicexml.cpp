@@ -331,9 +331,9 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                 {
                     if ((xml->name() == "gyroscope"))
                     {
-                        float x0 = xml->attributes().value("x0").toString().toFloat();
-                        float y0 = xml->attributes().value("y0").toString().toFloat();
-                        float z0 = xml->attributes().value("z0").toString().toFloat();
+                        double x0 = xml->attributes().value("x0").toString().toDouble();
+                        double y0 = xml->attributes().value("y0").toString().toDouble();
+                        double z0 = xml->attributes().value("z0").toString().toDouble();
                         m_inputDevice->applyGyroscopeCalibration(x0, y0, z0);
                     }
                     xml->skipCurrentElement();
@@ -709,7 +709,7 @@ void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
     xml->writeStartElement("calibration"); // <calibration>
     if (gyroscope != nullptr)
     {
-        float data[3];
+        double data[3];
         gyroscope->getCalibration(data);
         xml->writeStartElement("gyroscope");
         xml->writeAttribute("x0", QString::number(data[0]));

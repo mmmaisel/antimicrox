@@ -52,14 +52,14 @@ class JoySensor : public QObject
 
     JoySensorDirection getCurrentDirection();
 
-    JoySensorType getType();
-    float getDeadZone();
-    float getDiagonalRange();
-    float getMaxZone();
-    float getXCoordinate();
-    float getYCoordinate();
-    float getZCoordinate();
-    unsigned int getSensorDelay();
+    JoySensorType getType() const;
+    double getDeadZone() const;
+    double getDiagonalRange() const;
+    double getMaxZone() const;
+    float getXCoordinate() const;
+    float getYCoordinate() const;
+    float getZCoordinate() const;
+    unsigned int getSensorDelay() const;
     QString sensorTypeName() const;
 
     void resetButtons();
@@ -83,19 +83,19 @@ class JoySensor : public QObject
 
     bool isCalibrated() const;
     void resetCalibration();
-    void getCalibration(float* data);
-    void setCalibration(float x0, float y0, float z0);
+    void getCalibration(double* data) const;
+    void setCalibration(double x0, double y0, double z0);
 
     QHash<JoySensorDirection, JoySensorButton *> *getButtons();
     JoySensorButton *getDirectionButton(JoySensorDirection direction);
 
-    QString getSensorName();
+    QString getSensorName() const;
 
-    bool isDefault();
+    bool isDefault() const;
     virtual void setDefaultSensorName(QString tempname);
-    virtual QString getDefaultSensorName();
+    virtual QString getDefaultSensorName() const;
     void readConfig(QXmlStreamReader *xml);
-    void writeConfig(QXmlStreamWriter *xml);
+    void writeConfig(QXmlStreamWriter *xml) const;
 
     SetJoystick *getParentSet();
 
@@ -103,19 +103,18 @@ class JoySensor : public QObject
     void moved(float xaxis, float yaxis, float zaxis);
     void active(float xaxis, float yaxis, float zaxis);
     void released(float xaxis, float yaxis, float zaxis);
-    void deadZoneChanged(float value);
-    void diagonalRangeChanged(int value);
-    void maxZoneChanged(float value);
+    void deadZoneChanged(double value);
+    void diagonalRangeChanged(double value);
+    void maxZoneChanged(double value);
     void sensorDelayChanged(int value);
     void sensorNameChanged();
-    void joyModeChanged();
     void propertyUpdated();
 
   public slots:
     void reset();
-    void setDeadZone(float value);
-    void setMaxZone(float value);
-    void setDiagonalRange(float value);
+    void setDeadZone(double value);
+    void setMaxZone(double value);
+    void setDiagonalRange(double value);
     void setSensorName(QString tempName);
     void setSensorDelay(unsigned int value);
     void establishPropertyUpdatedConnection();
@@ -129,10 +128,10 @@ class JoySensor : public QObject
     static const double SHOCK_TAU;
 
     void populateButtons();
-    void determineSensorEvent(JoySensorButton **eventbutton);
+    void determineSensorEvent(JoySensorButton **eventbutton) const;
     JoySensorDirection calculateSensorDirection();
     JoySensorDirection calculateAccelerometerDirection();
-    JoySensorDirection calculateGyroscopeDirection();
+    JoySensorDirection calculateGyroscopeDirection() const;
     void createDeskEvent(JoySensorDirection direction, bool ignoresets = false);
 
     JoySensorType m_type;
@@ -145,14 +144,14 @@ class JoySensor : public QObject
     float m_current_value[3];
     float m_pending_value[3];
     bool m_calibrated;
-    float m_calibration_value[3];
+    double m_calibration_value[3];
     bool m_pending_event;
     bool m_pending_ignore_sets;
     PT1 m_shock_filter;
     size_t m_shock_suppress_count;
-    float m_dead_zone;
-    float m_diagonal_range;
-    float m_max_zone;
+    double m_dead_zone;
+    double m_diagonal_range;
+    double m_max_zone;
     unsigned int m_sensor_delay;
 
     QString m_sensor_name;
