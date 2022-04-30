@@ -2040,7 +2040,7 @@ void JoyTabWidget::fillSetButtons(SetJoystick *set)
             {
                 connect(sensorButtonGroup,
                     &SensorPushButtonGroup::buttonSlotChanged, this,
-                    &JoyTabWidget::checkStickEmptyDisplay);
+                    &JoyTabWidget::checkSensorEmptyDisplay);
             }
 
             connect(namesPushButton, &QPushButton::clicked, sensorButtonGroup,

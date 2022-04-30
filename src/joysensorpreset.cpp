@@ -233,7 +233,7 @@ void JoySensorPreset::setSensorPreset(Preset preset)
     {
     case PRESET_NONE:
         QMetaObject::invokeMethod(&m_helper, "clearButtonsSlotsEventReset");
-        QMetaObject::invokeMethod(m_sensor, "setDiagonalRange", Q_ARG(int, 45));
+        QMetaObject::invokeMethod(m_sensor, "setDiagonalRange", Q_ARG(float, 45));
         break;
     case PRESET_MOUSE:
         PadderCommon::inputDaemonMutex.lock();

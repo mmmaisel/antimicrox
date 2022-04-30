@@ -49,6 +49,8 @@ void SensorPushButtonGroup::generateButtons()
 
     if (m_sensor->getType() == GYROSCOPE)
         m_bwd_button = generateBtnToGrid(SENSOR_BWD, 2, 0);
+    else
+        m_bwd_button = nullptr;
 
     m_sensor_widget = new JoySensorPushButton(m_sensor, m_display_names, parentWidget());
     m_sensor_widget->setIcon(
@@ -75,13 +77,15 @@ SensorPushButtonGroup::generateBtnToGrid(
 
     button->establishPropertyUpdatedConnections();
     connect(button, &JoySensorButton::slotsChanged, this,
-        &SensorPushButtonGroup::propogateSlotsChanged);
+        &SensorPushButtonGroup::propagateSlotsChanged);
 
     addWidget(pushbutton, gridRow, gridCol);
     return pushbutton;
 }
 
-void SensorPushButtonGroup::propogateSlotsChanged() { emit buttonSlotChanged(); }
+void SensorPushButtonGroup::propagateSlotsChanged() {
+    emit buttonSlotChanged();
+}
 
 JoySensor *SensorPushButtonGroup::getSensor() const { return m_sensor; }
 
@@ -109,7 +113,8 @@ void SensorPushButtonGroup::toggleNameDisplay()
     m_left_button->toggleNameDisplay();
     m_right_button->toggleNameDisplay();
     m_fwd_button->toggleNameDisplay();
-    m_bwd_button->toggleNameDisplay();
+    if (m_bwd_button != nullptr)
+        m_bwd_button->toggleNameDisplay();
 
     m_sensor_widget->toggleNameDisplay();
 }

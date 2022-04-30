@@ -46,7 +46,7 @@ class SensorPushButtonGroup : public QGridLayout
     void toggleNameDisplay();
 
   private slots:
-    void propogateSlotsChanged();
+    void propagateSlotsChanged();
     void openSensorButtonDialog(JoySensorButtonPushButton *pushbutton);
     void showSensorDialog();
 
