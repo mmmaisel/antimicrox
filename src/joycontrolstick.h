@@ -66,6 +66,7 @@ class JoyControlStick : public QObject, public JoyStickDirectionsType
     bool isRelativeSpring();
     bool hasPendingEvent(); // JoyControlStickEvent class
     bool wasCalibrated();
+    bool isCalibrated();
 
     int getDeadZone();
     int getDiagonalRange();

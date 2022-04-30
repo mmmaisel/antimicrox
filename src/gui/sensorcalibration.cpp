@@ -20,18 +20,11 @@
 
 #include "globalvariables.h"
 #include "inputdevice.h"
+#include "joycontrolstick.h"
 #include "joysensor.h"
-#include "joytabwidget.h"
-
-#include <SDL2/SDL_joystick.h>
 
 #include <QDebug>
-#include <QFuture>
-#include <QLayoutItem>
 #include <QMessageBox>
-#include <QPointer>
-#include <QTabWidget>
-#include <QtConcurrent>
 
 SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
     : QWidget(parent)
@@ -54,9 +47,17 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
 
     int device_count = 0;
 
+    QHash<int, JoyControlStick *> sticks = m_joystick->getActiveSetJoystick()->getSticks();
+    for (auto iter = sticks.cbegin(); iter != sticks.cend(); ++iter)
+    {
+        m_ui->deviceComboBox->addItem(iter.value()->getPartialName(),
+            QVariant(int(CAL_STICK | (iter.key() << CAL_INDEX_POS))));
+        ++device_count;
+    }
+
     if (m_joystick->getActiveSetJoystick()->hasSensor(GYROSCOPE))
     {
-        m_ui->deviceComboBox->addItem(tr("Gyroscope"), QVariant(CAL_GYROSCOPE));
+        m_ui->deviceComboBox->addItem(tr("Gyroscope"), QVariant(int(CAL_GYROSCOPE)));
         ++device_count;
     }
 
@@ -77,8 +78,8 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
     } else
     {
         int index = m_ui->deviceComboBox->currentIndex();
-        auto type = static_cast<CalibrationType>(m_ui->deviceComboBox->itemData(index).toInt());
-        selectType(type);
+        unsigned int data = m_ui->deviceComboBox->itemData(index).toInt();
+        selectTypeIndex(data);
     }
 
     showCalibrationValues(true, 0, 0, 0);
@@ -146,14 +147,18 @@ void SensorCalibration::showCalibrationValues(
     }
 }
 
-void SensorCalibration::selectType(SensorCalibration::CalibrationType type)
+void SensorCalibration::selectTypeIndex(unsigned int type_index)
 {
-    if (m_type == type)
+    CalibrationType type = static_cast<CalibrationType>(type_index & CAL_TYPE_MASK);
+    unsigned int index = (type_index & CAL_INDEX_MASK) >> CAL_INDEX_POS;
+
+    if (m_type == type && m_index == index)
         return;
 
     disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
     disconnect(m_ui->resetBtn, &QPushButton::clicked, this, nullptr);
     m_type = type;
+    m_index = index;
 
     if (m_type == CAL_GYROSCOPE)
     {
@@ -185,6 +190,36 @@ void SensorCalibration::selectType(SensorCalibration::CalibrationType type)
             [this](bool clicked) { resetSettings(false, clicked); });
         m_ui->startBtn->setEnabled(true);
         m_ui->resetBtn->setEnabled(true);
+    } else if (m_type == CAL_STICK)
+    {
+        m_ui->statusStack->setCurrentIndex(1);
+        m_stick = m_joystick->getActiveSetJoystick()->getSticks().value(m_index);
+        m_calibrated = m_stick->isCalibrated();
+
+        if (m_calibrated)
+        {
+            float data[3] = {0};
+            //m_stick->getCalibration(data);
+            // XXX: get cal data
+            showCalibrationValues(true, data[0], data[1], data[2]);
+        } else
+        {
+            showCalibrationValues(false, 0.0, 0.0, 0.0);
+        }
+
+        m_ui->resetBtn->setEnabled(m_calibrated);
+        m_ui->saveBtn->setEnabled(false);
+
+        m_ui->stickStatusBoxWidget->setFocus();
+        m_ui->stickStatusBoxWidget->setStick(m_stick);
+        m_ui->stickStatusBoxWidget->update();
+
+        connect(m_ui->startBtn, &QPushButton::clicked,
+            this, &SensorCalibration::startStickCalibration);
+        connect(m_ui->resetBtn, &QPushButton::clicked,
+            [this](bool clicked) { resetSettings(false, clicked); });
+        m_ui->startBtn->setEnabled(true);
+        m_ui->resetBtn->setEnabled(true);
     }
 }
 
@@ -199,15 +234,25 @@ void SensorCalibration::resetCalibrationValues()
         m_ui->resetBtn->setEnabled(false);
         m_ui->sensorStatusBoxWidget->update();
         showCalibrationValues(false, 0, 0, 0);
+    } else if (m_type == CAL_STICK && m_stick != nullptr)
+    {
+        // XXX
+        //m_stick->resetCalibration();
+        m_calibrated = false;
 
-        update();
+        m_ui->saveBtn->setEnabled(false);
+        m_ui->resetBtn->setEnabled(false);
+        m_ui->stickStatusBoxWidget->update();
+        showCalibrationValues(false, 0, 0, 0);
+
     }
+    update();
 }
 
 void SensorCalibration::deviceSelectionChanged(int index)
 {
-    auto type = static_cast<CalibrationType>(m_ui->deviceComboBox->itemData(index).toInt());
-    selectType(type);
+    int data = m_ui->deviceComboBox->itemData(index).toInt();
+    selectTypeIndex(data);
 }
 
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
@@ -258,6 +303,10 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
         m_ui->deviceComboBox->setEnabled(true);
         update();
     }
+}
+
+void SensorCalibration::onStickData(int x, int y)
+{
 }
 
 /**
@@ -352,4 +401,16 @@ void SensorCalibration::startGyroscopeCenterCalibration()
         m_ui->startBtn->setEnabled(false);
         disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
     }
+}
+
+void SensorCalibration::startStickCalibration()
+{
+}
+
+void SensorCalibration::startStickCenterCalibration()
+{
+}
+
+void SensorCalibration::startStickGainCalibration()
+{
 }

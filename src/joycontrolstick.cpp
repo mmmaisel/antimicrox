@@ -879,6 +879,7 @@ void JoyControlStick::setMaxZone(int value)
 }
 
 bool JoyControlStick::wasCalibrated() { return calibrated; }
+bool JoyControlStick::isCalibrated() { return calibrated; }
 
 void JoyControlStick::setCalibrationFlag(bool flag) { calibrated = flag; }
 

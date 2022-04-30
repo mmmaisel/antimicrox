@@ -37,7 +37,12 @@ class SensorCalibration : public QWidget
     enum CalibrationType
     {
         CAL_NONE,
-        CAL_GYROSCOPE
+        CAL_GYROSCOPE,
+        CAL_STICK,
+
+        CAL_TYPE_MASK = 0x0000FFFF,
+        CAL_INDEX_MASK = 0xFFFF0000,
+        CAL_INDEX_POS = 16
     };
 
     explicit SensorCalibration(InputDevice *joystick, QWidget *parent = 0);
@@ -46,12 +51,14 @@ class SensorCalibration : public QWidget
   protected:
     void resetCalibrationValues();
     void showCalibrationValues(bool is_calibrated, double x, double y, double z);
-    void selectType(CalibrationType type);
+    void selectTypeIndex(unsigned int type_index);
 
   private:
     Ui::SensorCalibration *m_ui;
     CalibrationType m_type;
+    unsigned int m_index;
     JoySensor *m_sensor;
+    JoyControlStick *m_stick;
     InputDevice *m_joystick;
     double m_mean[3];
     double m_var[3];
@@ -63,11 +70,15 @@ class SensorCalibration : public QWidget
     void saveSettings();
     void startGyroscopeCalibration();
     void startGyroscopeCenterCalibration();
+    void startStickCalibration();
+    void startStickCenterCalibration();
+    void startStickGainCalibration();
 
   protected slots:
     void resetSettings(bool silentReset, bool clicked = false);
     void deviceSelectionChanged(int index);
     void onGyroscopeData(float x, float y, float z);
+    void onStickData(int x, int y);
 
   signals:
     void propertyUpdated();

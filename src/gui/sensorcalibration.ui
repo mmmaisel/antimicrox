@@ -57,9 +57,10 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="JoySensorStatusBox" name="sensorStatusBoxWidget"/>
+         <widget class="JoyControlStickStatusBox" name="stickStatusBoxWidget"/>
         </widget>
        </item>
        <item>
@@ -289,6 +290,11 @@
    <class>JoySensorStatusBox</class>
    <extends>QWidget</extends>
    <header>joysensorstatusbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>JoyControlStickStatusBox</class>
+   <extends>QWidget</extends>
+   <header>joycontrolstickstatusbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
