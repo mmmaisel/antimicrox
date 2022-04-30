@@ -1125,28 +1125,16 @@ void MainWindow::openSensorCalibration()
         int index = ui->tabWidget->currentIndex();
         if (index >= 0)
         {
-            JoyTabWidget *joyTab = qobject_cast<JoyTabWidget *>(ui->tabWidget->widget(index)); // static_cast
+            JoyTabWidget *joyTab = qobject_cast<JoyTabWidget *>(ui->tabWidget->widget(index));
             InputDevice *device = joyTab->getJoystick();
 
             if (device != nullptr)
             {
-                JoySensor *accelerometer = device->getActiveSetJoystick()->
-                    getSensor(ACCELEROMETER);
-                JoySensor *gyroscope = device->getActiveSetJoystick()->
-                    getSensor(GYROSCOPE);
-                if (accelerometer != nullptr || gyroscope != nullptr)
-                {
-                    QPointer<SensorCalibration> calibration =
-                        new SensorCalibration(device);
-                    calibration.data()->show();
+                QPointer<SensorCalibration> calibration = new SensorCalibration(device);
+                calibration.data()->show();
 
-                    if (calibration.isNull())
-                        calibration.clear();
-                } else
-                {
-                    QMessageBox::information(this, tr("Calibration is not available."),
-                        tr("Selected device doesn't have any sensors to calibrate."));
-                }
+                if (calibration.isNull())
+                    calibration.clear();
             }
         }
     }

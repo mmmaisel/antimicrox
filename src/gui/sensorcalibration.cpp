@@ -36,38 +36,29 @@
 SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
     : QWidget(parent)
     , m_ui(new Ui::SensorCalibration)
+    , m_type(CAL_NONE)
     , m_joystick(joystick)
+    , m_calibrated(false)
 {
     m_ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
     setWindowTitle(tr("Calibration"));
 
-    // XXX: handle no sensor case
-    // XXX: gyro status box?
-    // XXX: show targets in accel status box
-    m_accelerometer = m_joystick->getActiveSetJoystick()->
-        getSensor(ACCELEROMETER);
-    m_gyroscope = m_joystick->getActiveSetJoystick()->
-        getSensor(GYROSCOPE);
-    m_calibrated = m_accelerometer->isCalibrated() && m_gyroscope->isCalibrated();
+    m_ui->gainXLabel->setVisible(false);
+    m_ui->gainYLabel->setVisible(false);
+    m_ui->gainZLabel->setVisible(false);
+    m_ui->gainXValue->setVisible(false);
+    m_ui->gainYValue->setVisible(false);
+    m_ui->gainZValue->setVisible(false);
+    m_ui->steps->clear();
 
-    if (m_gyroscope->isCalibrated())
+    int device_count = 0;
+
+    if (m_joystick->getActiveSetJoystick()->hasSensor(GYROSCOPE))
     {
-        double data[3];
-        m_gyroscope->getCalibration(data);
-        showGyroCalibrationValues(true, data[0], data[1], data[2]);
-    } else
-    {
-        showGyroCalibrationValues(false, 0.0, 0.0, 0.0);
+        m_ui->deviceComboBox->addItem(tr("Gyroscope"), QVariant(CAL_GYROSCOPE));
+        ++device_count;
     }
-
-    m_ui->resetBtn->setEnabled(m_calibrated);
-    m_ui->saveBtn->setEnabled(false);
-
-    m_ui->sensorStatusBoxWidget->setFocus();
-    // XXX: sensorStatusBox must not receive a nullptr
-    m_ui->sensorStatusBoxWidget->setSensor(m_accelerometer);
-    m_ui->sensorStatusBoxWidget->update();
 
     connect(m_joystick, &InputDevice::destroyed,
         this, &SensorCalibration::close);
@@ -75,11 +66,22 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
         this, &SensorCalibration::saveSettings);
     connect(m_ui->cancelBtn, &QPushButton::clicked,
         this, &SensorCalibration::close);
-    connect(m_ui->startButton, &QPushButton::clicked,
-        this, &SensorCalibration::startCalibration);
-    connect(m_ui->resetBtn, &QPushButton::clicked,
-        [this](bool clicked) { resetSettings(false, clicked); });
+    connect(m_ui->deviceComboBox,
+        static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+        this, &SensorCalibration::deviceSelectionChanged);
 
+    if (device_count == 0)
+    {
+        m_ui->steps->setText(tr(
+            "Selected device doesn't have any inputs to calibrate."));
+    } else
+    {
+        int index = m_ui->deviceComboBox->currentIndex();
+        auto type = static_cast<CalibrationType>(m_ui->deviceComboBox->itemData(index).toInt());
+        selectType(type);
+    }
+
+    showCalibrationValues(true, 0, 0, 0);
     update();
 }
 
@@ -118,44 +120,94 @@ void SensorCalibration::resetSettings(bool silentReset, bool)
     }
 }
 
-void SensorCalibration::showGyroCalibrationValues(
+void SensorCalibration::showCalibrationValues(
     bool is_calibrated, double x, double y, double z)
 {
     if (is_calibrated)
     {
-        QPalette palette = m_ui->labelGyroX0->palette();
-        palette.setColor(m_ui->labelGyroX0->foregroundRole(), Qt::black);
-        m_ui->labelGyroX0->setPalette(palette);
-        m_ui->labelGyroY0->setPalette(palette);
-        m_ui->labelGyroZ0->setPalette(palette);
-        m_ui->labelGyroX0->setText(QString::number(x * 180 / M_PI));
-        m_ui->labelGyroY0->setText(QString::number(y * 180 / M_PI));
-        m_ui->labelGyroZ0->setText(QString::number(z * 180 / M_PI));
+        QPalette palette = m_ui->centerXValue->palette();
+        palette.setColor(m_ui->centerXValue->foregroundRole(), Qt::black);
+        m_ui->centerXValue->setPalette(palette);
+        m_ui->centerYValue->setPalette(palette);
+        m_ui->centerZValue->setPalette(palette);
+        m_ui->centerXValue->setText(QString::number(x * 180 / M_PI));
+        m_ui->centerYValue->setText(QString::number(y * 180 / M_PI));
+        m_ui->centerZValue->setText(QString::number(z * 180 / M_PI));
     } else
     {
-        QPalette palette = m_ui->labelGyroX0->palette();
-        palette.setColor(m_ui->labelGyroX0->foregroundRole(), Qt::red);
-        m_ui->labelGyroX0->setPalette(palette);
-        m_ui->labelGyroY0->setPalette(palette);
-        m_ui->labelGyroZ0->setPalette(palette);
-        m_ui->labelGyroX0->setText(QString::number(0.0));
-        m_ui->labelGyroY0->setText(QString::number(0.0));
-        m_ui->labelGyroZ0->setText(QString::number(0.0));
+        QPalette palette = m_ui->centerXValue->palette();
+        palette.setColor(m_ui->centerXValue->foregroundRole(), Qt::red);
+        m_ui->centerXValue->setPalette(palette);
+        m_ui->centerYValue->setPalette(palette);
+        m_ui->centerZValue->setPalette(palette);
+        m_ui->centerXValue->setText(QString::number(0.0));
+        m_ui->centerYValue->setText(QString::number(0.0));
+        m_ui->centerZValue->setText(QString::number(0.0));
+    }
+}
+
+void SensorCalibration::selectType(SensorCalibration::CalibrationType type)
+{
+    if (m_type == type)
+        return;
+
+    disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
+    disconnect(m_ui->resetBtn, &QPushButton::clicked, this, nullptr);
+    m_type = type;
+
+    if (m_type == CAL_GYROSCOPE)
+    {
+        m_ui->statusStack->setCurrentIndex(0);
+        m_sensor = m_joystick->getActiveSetJoystick()->
+            getSensor(GYROSCOPE);
+        m_calibrated = m_sensor->isCalibrated();
+
+        if (m_calibrated)
+        {
+            double data[3];
+            m_sensor->getCalibration(data);
+            showCalibrationValues(true, data[0], data[1], data[2]);
+        } else
+        {
+            showCalibrationValues(false, 0.0, 0.0, 0.0);
+        }
+
+        m_ui->resetBtn->setEnabled(m_calibrated);
+        m_ui->saveBtn->setEnabled(false);
+
+        m_ui->sensorStatusBoxWidget->setFocus();
+        m_ui->sensorStatusBoxWidget->setSensor(m_sensor);
+        m_ui->sensorStatusBoxWidget->update();
+
+        connect(m_ui->startBtn, &QPushButton::clicked,
+            this, &SensorCalibration::startGyroscopeCalibration);
+        connect(m_ui->resetBtn, &QPushButton::clicked,
+            [this](bool clicked) { resetSettings(false, clicked); });
+        m_ui->startBtn->setEnabled(true);
+        m_ui->resetBtn->setEnabled(true);
     }
 }
 
 void SensorCalibration::resetCalibrationValues()
 {
-    m_accelerometer->resetCalibration();
-    m_gyroscope->resetCalibration();
-    m_calibrated = false;
+    if (m_type == CAL_GYROSCOPE && m_sensor != nullptr)
+    {
+        m_sensor->resetCalibration();
+        m_calibrated = false;
 
-    m_ui->saveBtn->setEnabled(false);
-    m_ui->resetBtn->setEnabled(false);
-    m_ui->sensorStatusBoxWidget->update();
-    showGyroCalibrationValues(false, 0, 0, 0);
+        m_ui->saveBtn->setEnabled(false);
+        m_ui->resetBtn->setEnabled(false);
+        m_ui->sensorStatusBoxWidget->update();
+        showCalibrationValues(false, 0, 0, 0);
 
-    update();
+        update();
+    }
+}
+
+void SensorCalibration::deviceSelectionChanged(int index)
+{
+    auto type = static_cast<CalibrationType>(m_ui->deviceComboBox->itemData(index).toInt());
+    selectType(type);
 }
 
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
@@ -163,27 +215,27 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
     // Calculate mean and variance using Welford's algorithm
     // as well as 3 sigma interval width.
     ++m_sample_count;
-    double dx = x - m_gyro_mean[0];
-    double dy = y - m_gyro_mean[1];
-    double dz = z - m_gyro_mean[2];
+    double dx = x - m_mean[0];
+    double dy = y - m_mean[1];
+    double dz = z - m_mean[2];
 
-    m_gyro_mean[0] += dx / m_sample_count;
-    m_gyro_mean[1] += dy / m_sample_count;
-    m_gyro_mean[2] += dz / m_sample_count;
+    m_mean[0] += dx / m_sample_count;
+    m_mean[1] += dy / m_sample_count;
+    m_mean[2] += dz / m_sample_count;
 
-    double dx2 = x - m_gyro_mean[0];
-    double dy2 = y - m_gyro_mean[1];
-    double dz2 = z - m_gyro_mean[2];
+    double dx2 = x - m_mean[0];
+    double dy2 = y - m_mean[1];
+    double dz2 = z - m_mean[2];
 
-    m_gyro_var[0] += dx * dx2;
-    m_gyro_var[1] += dy * dy2;
-    m_gyro_var[2] += dz * dz2;
+    m_var[0] += dx * dx2;
+    m_var[1] += dy * dy2;
+    m_var[2] += dz * dz2;
 
-    double varx = m_gyro_var[0] / (m_sample_count - 1);
-    double vary = m_gyro_var[1] / (m_sample_count - 1);
-    double varz = m_gyro_var[2] / (m_sample_count - 1);
+    double varx = m_var[0] / (m_sample_count - 1);
+    double vary = m_var[1] / (m_sample_count - 1);
+    double varz = m_var[2] / (m_sample_count - 1);
 
-    showGyroCalibrationValues(true, m_gyro_mean[0], m_gyro_mean[1], m_gyro_mean[2]);
+    showCalibrationValues(true, m_mean[0], m_mean[1], m_mean[2]);
 
     double wx = 9*varx/m_sample_count;
     double wy = 9*vary/m_sample_count;
@@ -194,15 +246,16 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
     if ((wx < 1e-7 && wy < 1e-7 && wz < 1e-7 && m_sample_count > 10) ||
         (QDateTime::currentDateTime() > m_end_time))
     {
-        disconnect(m_gyroscope, &JoySensor::moved,
+        disconnect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
-        disconnect(m_ui->startButton, &QPushButton::clicked, this, nullptr);
-        connect(m_ui->startButton, &QPushButton::clicked, this,
-            &SensorCalibration::startCalibration);
+        disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
+        connect(m_ui->startBtn, &QPushButton::clicked, this,
+            &SensorCalibration::startGyroscopeCalibration);
         m_ui->steps->setText(tr("Calibration completed."));
-        m_ui->startButton->setText(tr("Start calibration"));
-        m_ui->startButton->setEnabled(true);
+        m_ui->startBtn->setText(tr("Start calibration"));
+        m_ui->startBtn->setEnabled(true);
         m_ui->saveBtn->setEnabled(true);
+        m_ui->deviceComboBox->setEnabled(true);
         update();
     }
 }
@@ -213,22 +266,25 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
  */
 void SensorCalibration::saveSettings()
 {
-    m_joystick->applyGyroscopeCalibration(
-        m_gyro_mean[0], m_gyro_mean[1], m_gyro_mean[2]);
-    m_calibrated = true;
-    m_ui->saveBtn->setEnabled(false);
-    m_ui->resetBtn->setEnabled(true);
+    if (m_type == CAL_GYROSCOPE)
+    {
+        m_joystick->applyGyroscopeCalibration(
+            m_mean[0], m_mean[1], m_mean[2]);
+        m_calibrated = true;
+        m_ui->saveBtn->setEnabled(false);
+        m_ui->resetBtn->setEnabled(true);
+    }
 }
 
 /**
  * @brief Prepares first step of calibration - gyroscope center
  * @return nothing
  */
-void SensorCalibration::startCalibration()
+void SensorCalibration::startGyroscopeCalibration()
 {
     bool confirmed = true;
 
-    if (m_gyroscope->isCalibrated() || m_accelerometer->isCalibrated())
+    if (m_calibrated)
     {
         QMessageBox msgBox;
         msgBox.setText(tr(
@@ -252,29 +308,29 @@ void SensorCalibration::startCalibration()
         }
     }
 
-    if (m_gyroscope != nullptr && confirmed)
+    if (m_sensor != nullptr && confirmed)
     {
-        m_gyro_mean[0] = 0;
-        m_gyro_mean[1] = 0;
-        m_gyro_mean[2] = 0;
-        m_gyro_var[0] = 0;
-        m_gyro_var[1] = 0;
-        m_gyro_var[2] = 0;
+        m_mean[0] = 0;
+        m_mean[1] = 0;
+        m_mean[2] = 0;
+        m_var[0] = 0;
+        m_var[1] = 0;
+        m_var[2] = 0;
         m_sample_count = 0;
 
-        m_gyroscope->resetCalibration();
+        m_sensor->resetCalibration();
         m_calibrated = false;
 
         m_ui->steps->setText(tr(
             "Place the controller at rest, e.g. put it on the desk, "
             "and press continue."));
         setWindowTitle(tr("Calibrating gyroscope"));
-        // XXX: implement second step for accelerometer.
-        m_ui->startButton->setText(tr("Continue calibration"));
+        m_ui->startBtn->setText(tr("Continue calibration"));
         update();
 
-        disconnect(m_ui->startButton, &QPushButton::clicked, this, nullptr);
-        connect(m_ui->startButton, &QPushButton::clicked, this,
+        m_ui->deviceComboBox->setEnabled(false);
+        disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
+        connect(m_ui->startBtn, &QPushButton::clicked, this,
             &SensorCalibration::startGyroscopeCenterCalibration);
     }
 }
@@ -285,17 +341,15 @@ void SensorCalibration::startCalibration()
  */
 void SensorCalibration::startGyroscopeCenterCalibration()
 {
-    if (m_gyroscope != nullptr)
+    if (m_sensor != nullptr)
     {
         m_end_time = QDateTime::currentDateTime().addSecs(3);
         m_ui->steps->setText(tr("Collecting gyroscope data..."));
-        connect(m_gyroscope, &JoySensor::moved,
+        connect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
         update();
 
-        m_ui->startButton->setEnabled(false);
-        disconnect(m_ui->startButton, &QPushButton::clicked, this, nullptr);
-        connect(m_ui->startButton, &QPushButton::clicked, this,
-            &SensorCalibration::startCalibration);
+        m_ui->startBtn->setEnabled(false);
+        disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
     }
 }

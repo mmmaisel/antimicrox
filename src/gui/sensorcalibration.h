@@ -34,31 +34,39 @@ class SensorCalibration : public QWidget
     Q_OBJECT
 
   public:
+    enum CalibrationType
+    {
+        CAL_NONE,
+        CAL_GYROSCOPE
+    };
+
     explicit SensorCalibration(InputDevice *joystick, QWidget *parent = 0);
     ~SensorCalibration();
 
   protected:
     void resetCalibrationValues();
-    void showGyroCalibrationValues(bool is_calibrated, double x, double y, double z);
+    void showCalibrationValues(bool is_calibrated, double x, double y, double z);
+    void selectType(CalibrationType type);
 
   private:
     Ui::SensorCalibration *m_ui;
-    JoySensor *m_accelerometer;
-    JoySensor *m_gyroscope;
+    CalibrationType m_type;
+    JoySensor *m_sensor;
     InputDevice *m_joystick;
-    double m_gyro_mean[3];
-    double m_gyro_var[3];
+    double m_mean[3];
+    double m_var[3];
     bool m_calibrated;
     QDateTime m_end_time;
     unsigned int m_sample_count;
 
   public slots:
     void saveSettings();
-    void startCalibration();
+    void startGyroscopeCalibration();
     void startGyroscopeCenterCalibration();
 
   protected slots:
     void resetSettings(bool silentReset, bool clicked = false);
+    void deviceSelectionChanged(int index);
     void onGyroscopeData(float x, float y, float z);
 
   signals:

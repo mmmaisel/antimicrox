@@ -23,9 +23,9 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1">
        <item>
-        <widget class="JoySensorStatusBox" name="sensorStatusBoxWidget" native="true">
+        <widget class="QStackedWidget" name="statusStack">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -56,188 +56,156 @@
            <height>200</height>
           </size>
          </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="JoySensorStatusBox" name="sensorStatusBoxWidget"/>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="steps">
-         <property name="text">
-          <string>Steps</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
+         <item>
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Input to calibrate:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="deviceComboBox"/>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="steps">
+           <property name="text">
+            <string>Steps</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="3">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Zmax</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Gyro X</string>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="zAxisLabel">
          <property name="text">
-          <string>Accel Z</string>
+          <string>Z</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Xmax</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Gyro Y</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>center</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="labelAccelXmin">
+       <item row="3" column="2">
+        <widget class="QLabel" name="centerZValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
-        <widget class="QLabel" name="label_8">
+       <item row="1" column="0">
+        <widget class="QLabel" name="xAxisLabel">
          <property name="text">
-          <string>Ymax</string>
+          <string>X</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="label_10">
+       <item row="2" column="2">
+        <widget class="QLabel" name="centerYValue">
          <property name="text">
-          <string>min</string>
+          <string>TextLabel</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_12">
+       <item row="1" column="3">
+        <widget class="QLabel" name="gainXLabel">
          <property name="text">
-          <string>Gyro Z</string>
+          <string>gain</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="label_7">
+       <item row="1" column="2">
+        <widget class="QLabel" name="centerXValue">
          <property name="text">
-          <string>min</string>
+          <string>TextLabel</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>min</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLabel" name="label_14">
-         <property name="text">
-          <string>center</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLabel" name="label_15">
+       <item row="1" column="1">
+        <widget class="QLabel" name="centerXLabel">
          <property name="text">
           <string>center</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="yAxisLabel">
          <property name="text">
-          <string>Accel Y</string>
+          <string>Y</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="3" column="1">
+        <widget class="QLabel" name="centerZLabel">
          <property name="text">
-          <string>Accel X</string>
+          <string>center</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
-        <widget class="QLabel" name="labelAccelXmax">
+       <item row="2" column="1">
+        <widget class="QLabel" name="centerYLabel">
+         <property name="text">
+          <string>center</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLabel" name="gainXValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="labelAccelYmin">
+       <item row="2" column="3">
+        <widget class="QLabel" name="gainYLabel">
          <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QLabel" name="labelAccelZmin">
-         <property name="text">
-          <string>TextLabel</string>
+          <string>gain</string>
          </property>
         </widget>
        </item>
        <item row="2" column="4">
-        <widget class="QLabel" name="labelAccelYmax">
+        <widget class="QLabel" name="gainYValue">
          <property name="text">
           <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLabel" name="gainZLabel">
+         <property name="text">
+          <string>gain</string>
          </property>
         </widget>
        </item>
        <item row="3" column="4">
-        <widget class="QLabel" name="labelAccelZmax">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QLabel" name="labelGyroX0">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
-        <widget class="QLabel" name="labelGyroY0">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="2">
-        <widget class="QLabel" name="labelGyroZ0">
+        <widget class="QLabel" name="gainZValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -262,13 +230,19 @@
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QPushButton" name="resetBtn">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Reset settings</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="startButton">
+        <widget class="QPushButton" name="startBtn">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Start calibration</string>
          </property>
@@ -289,6 +263,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="saveBtn">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Save</string>
          </property>
