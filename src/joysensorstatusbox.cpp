@@ -40,15 +40,9 @@ JoySensorStatusBox::JoySensorStatusBox(QWidget *parent)
 
 JoySensorStatusBox::JoySensorStatusBox(JoySensor *sensor, QWidget *parent)
     : QWidget(parent),
-    m_sensor(sensor)
+    m_sensor(nullptr)
 {
-
-    connect(m_sensor, SIGNAL(deadZoneChanged(float)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(moved(float, float, float)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(diagonalRangeChanged(int)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(maxZoneChanged(float)), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(joyModeChanged()), this, SLOT(update()));
-    connect(m_sensor, SIGNAL(circleAdjustChange(double)), this, SLOT(update()));
+    setSensor(sensor);
 }
 
 void JoySensorStatusBox::setSensor(JoySensor *sensor)
@@ -107,19 +101,31 @@ void JoySensorStatusBox::drawArtificialHorizon()
     QPainterPath clippingPath;
     clippingPath.addEllipse(QPointF(0, 0), 1, 1);
     painter.setClipPath(clippingPath);
+    JoySensorType type;
 
     float pitch, roll, yaw;
-    if (m_sensor->getType() == ACCELEROMETER)
+    if (m_sensor != nullptr)
     {
-        pitch = -m_sensor->calculatePitch();
-        roll = m_sensor->calculateRoll();
-        yaw = 0;
+        type = m_sensor->getType();
+        if (type == ACCELEROMETER)
+        {
+            pitch = -m_sensor->calculatePitch();
+            roll = m_sensor->calculateRoll();
+            yaw = 0;
+        } else
+        {
+            pitch = -m_sensor->getXCoordinate();
+            roll = m_sensor->getYCoordinate();
+            yaw = -m_sensor->getZCoordinate();
+        }
     } else
     {
-        pitch = -m_sensor->getXCoordinate();
-        roll = m_sensor->getYCoordinate();
-        yaw = -m_sensor->getZCoordinate();
+        type = ACCELEROMETER;
+        pitch = 0;
+        roll = 0;
+        yaw = 0;
     }
+
     pitch = qBound(-180.0, pitch * 180 / M_PI, 180.0);
     roll = qBound(-180.0, roll * 180 / M_PI, 180.0);
     yaw = qBound(-180.0, yaw * 180 / M_PI, 180.0);
@@ -138,12 +144,12 @@ void JoySensorStatusBox::drawArtificialHorizon()
     pen.setWidthF(0.02);
     painter.setPen(pen);
     painter.setBrush(QBrush(QColor(255, 0, 0, 128)));
-    double deadZone = m_sensor->getDeadZone();
+    double deadZone = m_sensor != nullptr ? m_sensor->getDeadZone() : 0.0;
     painter.drawEllipse(QPointF(0, 0), deadZone/90, deadZone/90);
 
     // Draw max zone
     QPainterPath maxZonePath;
-    double maxZone = m_sensor->getMaxZone();
+    double maxZone = m_sensor != nullptr ? m_sensor->getMaxZone() : 0.0;
     maxZonePath.addEllipse(QPointF(0, 0), 10, 10);
     maxZonePath.addEllipse(QPointF(0, 0), maxZone/90, maxZone/90);
     pen.setColor(Qt::darkGreen);
@@ -157,25 +163,23 @@ void JoySensorStatusBox::drawArtificialHorizon()
     painter.setPen(pen);
     painter.setBrush(QBrush(QColor(0, 255, 0, 128)));
 
-    if (m_sensor->getType() == GYROSCOPE)
+    double diagonalRange = m_sensor != nullptr ? m_sensor->getDiagonalRange() : 0.0;
+    if (type == GYROSCOPE)
     {
         for(int i = 0; i < 4; ++i)
         {
             painter.drawPie(
                 QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
-                (45 + 90*i - m_sensor->getDiagonalRange()/2) * 16,
-                m_sensor->getDiagonalRange() * 16);
+                (45 + 90*i - diagonalRange/2) * 16, diagonalRange * 16);
         }
     } else
     {
         painter.drawPie(
             QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
-            (135 - m_sensor->getDiagonalRange()/2) * 16,
-            (m_sensor->getDiagonalRange() + 90) * 16);
+            (135 - diagonalRange/2) * 16, (diagonalRange + 90) * 16);
         painter.drawPie(
             QRectF(-maxZone/90, -maxZone/90, 2*maxZone/90, 2*maxZone/90),
-            (-45 - m_sensor->getDiagonalRange()/2) * 16,
-            (m_sensor->getDiagonalRange() + 90) * 16);
+            (-45 - diagonalRange/2) * 16, (diagonalRange + 90) * 16);
     }
 
     // Pitch scale: 30deg per line
@@ -188,7 +192,7 @@ void JoySensorStatusBox::drawArtificialHorizon()
     }
 
     // Yaw scale: 30deg per line
-    if (m_sensor->getType() == GYROSCOPE)
+    if (type == GYROSCOPE)
     {
         pen.setColor(Qt::white);
         pen.setWidthF(0.025);
