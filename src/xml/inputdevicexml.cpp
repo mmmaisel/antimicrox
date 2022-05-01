@@ -329,7 +329,15 @@ void InputDeviceXml::readConfig(QXmlStreamReader *xml)
                 xml->readNextStartElement();
                 while (!xml->atEnd() && (!xml->isEndElement() && (xml->name() != "calibration")))
                 {
-                    if ((xml->name() == "gyroscope"))
+                    if ((xml->name() == "stick"))
+                    {
+                        int index = xml->attributes().value("index").toString().toInt();
+                        double offsetX = xml->attributes().value("offsetx").toString().toDouble();
+                        double gainX = xml->attributes().value("gainx").toString().toDouble();
+                        double offsetY = xml->attributes().value("offsety").toString().toDouble();
+                        double gainY = xml->attributes().value("gainy").toString().toDouble();
+                        m_inputDevice->applyStickCalibration(index, offsetX, gainX, offsetY, gainY);
+                    } else if ((xml->name() == "gyroscope"))
                     {
                         double x0 = xml->attributes().value("x0").toString().toDouble();
                         double y0 = xml->attributes().value("y0").toString().toDouble();
@@ -704,10 +712,27 @@ void InputDeviceXml::writeConfig(QXmlStreamWriter *xml)
         (m_inputDevice->getDeviceKeyPressTime() != GlobalVariables::InputDevice::DEFAULTKEYPRESSTIME))
         xml->writeTextElement("keyPressTime", QString::number(m_inputDevice->getDeviceKeyPressTime()));
 
-    JoySensor* gyroscope = m_inputDevice->getActiveSetJoystick()->getSensor(GYROSCOPE);
 
     xml->writeStartElement("calibration"); // <calibration>
-    if (gyroscope != nullptr)
+    QHash<int, JoyControlStick*> sticks = m_inputDevice->getActiveSetJoystick()->getSticks();
+    for (auto iter = sticks.cbegin(); iter != sticks.cend(); ++iter)
+    {
+        double data[4];
+        if (!iter.value()->isCalibrated())
+            continue;
+
+        iter.value()->getCalibration(data);
+        xml->writeStartElement("stick");
+        xml->writeAttribute("index", QString::number(iter.key()));
+        xml->writeAttribute("offsetx", QString::number(data[0]));
+        xml->writeAttribute("gainx", QString::number(data[1]));
+        xml->writeAttribute("offsety", QString::number(data[2]));
+        xml->writeAttribute("gainy", QString::number(data[3]));
+        xml->writeEndElement();
+    }
+
+    JoySensor* gyroscope = m_inputDevice->getActiveSetJoystick()->getSensor(GYROSCOPE);
+    if (gyroscope != nullptr && gyroscope->isCalibrated())
     {
         double data[3];
         gyroscope->getCalibration(data);

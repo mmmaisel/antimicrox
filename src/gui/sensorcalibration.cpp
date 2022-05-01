@@ -319,10 +319,14 @@ void SensorCalibration::saveSettings()
     {
         m_joystick->applyGyroscopeCalibration(
             m_mean[0], m_mean[1], m_mean[2]);
-        m_calibrated = true;
-        m_ui->saveBtn->setEnabled(false);
-        m_ui->resetBtn->setEnabled(true);
+    } else if (m_type == CAL_STICK)
+    {
+        m_joystick->applyStickCalibration(m_index,
+            0.0, 0.0, 0.0, 0.0);
     }
+    m_calibrated = true;
+    m_ui->saveBtn->setEnabled(false);
+    m_ui->resetBtn->setEnabled(true);
 }
 
 /**

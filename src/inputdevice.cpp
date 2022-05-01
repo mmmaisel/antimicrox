@@ -1697,6 +1697,17 @@ QList<int> &InputDevice::getDpadstatesLocal() { return dpadstates; }
 
 SDL_Joystick *InputDevice::getJoyHandle() const { return m_joyhandle; }
 
+void InputDevice::applyStickCalibration(int index, double offsetX, double gainX, double offsetY, double gainY)
+{
+    for (auto iter = joystick_sets.begin(); iter != joystick_sets.end(); ++iter)
+    {
+        SetJoystick *set = iter.value();
+        JoyControlStick* stick = set->getSticks().value(index);
+        if (stick != nullptr)
+            stick->setCalibration(offsetX, gainX, offsetY, gainY);
+    }
+}
+
 void InputDevice::applyGyroscopeCalibration(double x0, double y0, double z0)
 {
     for (auto iter = joystick_sets.begin(); iter != joystick_sets.end(); ++iter)
