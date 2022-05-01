@@ -220,6 +220,7 @@ set(antimicrox_SOURCES
         src/sensorpushbuttongroup.cpp
         src/setjoystick.cpp
         src/simplekeygrabberbutton.cpp
+        src/statisticsprocessor.cpp
         src/stickpushbuttongroup.cpp
         src/uihelpers/advancebuttondialoghelper.cpp
         src/uihelpers/buttoneditdialoghelper.cpp
@@ -348,6 +349,7 @@ set(antimicrox_HEADERS
         src/sensorpushbuttongroup.h
         src/setjoystick.h
         src/simplekeygrabberbutton.h
+        src/statisticsprocessor.h
         src/stickpushbuttongroup.h
         src/uihelpers/advancebuttondialoghelper.h
         src/uihelpers/buttoneditdialoghelper.h

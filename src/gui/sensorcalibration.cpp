@@ -328,39 +328,19 @@ void SensorCalibration::deviceSelectionChanged(int index)
 
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
 {
-    // Calculate mean and variance using Welford's algorithm
-    // as well as 3 sigma interval width.
-    ++m_sample_count;
-    double dx = x - m_mean[0];
-    double dy = y - m_mean[1];
-    double dz = z - m_mean[2];
+    m_stats[0].process(x);
+    m_stats[1].process(y);
+    m_stats[2].process(z);
 
-    m_mean[0] += dx / m_sample_count;
-    m_mean[1] += dy / m_sample_count;
-    m_mean[2] += dz / m_sample_count;
-
-    double dx2 = x - m_mean[0];
-    double dy2 = y - m_mean[1];
-    double dz2 = z - m_mean[2];
-
-    m_var[0] += dx * dx2;
-    m_var[1] += dy * dy2;
-    m_var[2] += dz * dz2;
-
-    double varx = m_var[0] / (m_sample_count - 1);
-    double vary = m_var[1] / (m_sample_count - 1);
-    double varz = m_var[2] / (m_sample_count - 1);
-
-    showGyroCalibrationValues(true, m_mean[0], m_mean[1], m_mean[2]);
-
-    double wx = 9*varx/m_sample_count;
-    double wy = 9*vary/m_sample_count;
-    double wz = 9*varz/m_sample_count;
+    showGyroCalibrationValues(
+        true, m_stats[0].getMean(), m_stats[1].getMean(), m_stats[2].getMean());
 
     // Abort when end time is reached to avoid infinite loop
     // in case of noisy sensors.
-    if ((wx < 1e-7 && wy < 1e-7 && wz < 1e-7 && m_sample_count > 10) ||
-        (QDateTime::currentDateTime() > m_end_time))
+    if ((m_stats[0].getRelativeErrorSq() < 1e-6
+        && m_stats[1].getRelativeErrorSq() < 1e-6
+        && m_stats[2].getRelativeErrorSq() < 1e-6 && m_stats[0].getCount() > 10)
+        || (QDateTime::currentDateTime() > m_end_time))
     {
         disconnect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
@@ -401,11 +381,11 @@ void SensorCalibration::saveSettings()
     if (m_type == CAL_GYROSCOPE)
     {
         m_joystick->applyGyroscopeCalibration(
-            m_mean[0], m_mean[1], m_mean[2]);
+            m_stats[0].getMean(), m_stats[1].getMean(), m_stats[2].getMean());
     } else if (m_type == CAL_STICK)
     {
         m_joystick->applyStickCalibration(m_index,
-            m_mean[0], m_mean[1], m_mean[2], m_mean[3]);
+            m_stats[0].getMean(), m_stats[1].getMean(), m_stats[2].getMean(), m_stats[3].getMean());
     }
     m_calibrated = true;
     m_ui->saveBtn->setEnabled(false);
@@ -423,13 +403,9 @@ void SensorCalibration::startGyroscopeCalibration()
 
     if (askConfirmation())
     {
-        m_mean[0] = 0;
-        m_mean[1] = 0;
-        m_mean[2] = 0;
-        m_var[0] = 0;
-        m_var[1] = 0;
-        m_var[2] = 0;
-        m_sample_count = 0;
+        m_stats[0].reset();
+        m_stats[1].reset();
+        m_stats[2].reset();
 
         m_sensor->resetCalibration();
         m_calibrated = false;
@@ -474,11 +450,8 @@ void SensorCalibration::startStickCenterCalibration()
 
     if (askConfirmation())
     {
-        m_mean[0] = 0;
-        m_mean[2] = 0;
-        m_var[0] = 0;
-        m_var[2] = 0;
-        m_sample_count = 0;
+        m_stats[0].reset();
+        m_stats[2].reset();
 
         m_stick->resetCalibration();
         m_calibrated = false;
@@ -506,11 +479,8 @@ void SensorCalibration::startStickGainCalibration()
 
     if (askConfirmation())
     {
-        m_mean[1] = 0;
-        m_mean[3] = 0;
-        m_var[1] = 0;
-        m_var[3] = 0;
-        m_sample_count = 0;
+        m_stats[1].reset();
+        m_stats[3].reset();
 
         m_ui->steps->setText(tr(
             "Now move the stick slowly in full circly for several times."));

@@ -62,15 +62,14 @@ class SensorCalibration : public QWidget
     Ui::SensorCalibration *m_ui;
     CalibrationType m_type;
     unsigned int m_index;
+    bool m_calibrated;
     JoySensor *m_sensor;
     JoyControlStick *m_stick;
     InputDevice *m_joystick;
-    double m_mean[4];
-    double m_var[4];
-    bool m_calibrated;
+
+    StatisticsProcessor m_stats[4];
     QDateTime m_end_time;
     QTimer m_rate_timer;
-    unsigned int m_sample_count;
 
   public slots:
     void saveSettings();
