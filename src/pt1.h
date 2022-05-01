@@ -23,7 +23,7 @@
 class PT1
 {
     public:
-        PT1(double tau, double rate);
+        PT1(double tau = 1, double rate = 1);
 
         double process(double value);
         inline double getValue() const { return m_value; }

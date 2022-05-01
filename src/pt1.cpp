@@ -23,7 +23,7 @@ const double PT1::FALLBACK_RATE = 200;
 PT1::PT1(double tau, double rate)
 {
     m_period = qFuzzyIsNull(rate) ? 1/FALLBACK_RATE : 1/rate;
-    m_tau = tau * m_period;
+    m_tau = tau;
     reset();
 }
 

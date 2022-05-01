@@ -30,7 +30,7 @@
 
 const double JoySensor::SHOCK_DETECT_THRESHOLD = 20.0;
 const double JoySensor::SHOCK_SUPPRESS_FACTOR = 0.5;
-const double JoySensor::SHOCK_TAU = 10;
+const double JoySensor::SHOCK_TAU = 0.05;
 
 JoySensor::JoySensor(
     JoySensorType type, double rate, int originset, SetJoystick *parent_set, QObject *parent)
@@ -866,7 +866,8 @@ JoySensorDirection JoySensor::calculateSensorDirection()
  */
 JoySensorDirection JoySensor::calculateAccelerometerDirection()
 {
-    if (m_shock_filter.getValue() > SHOCK_DETECT_THRESHOLD)
+    double abs_sum = abs(m_current_value[0]) + abs(m_current_value[1]) + abs(m_current_value[2]);
+    if (m_shock_filter.process(abs_sum) > SHOCK_DETECT_THRESHOLD)
     {
         m_shock_suppress_count = m_rate * SHOCK_SUPPRESS_FACTOR;
         return SENSOR_FWD;
