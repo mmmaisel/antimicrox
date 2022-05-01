@@ -226,7 +226,6 @@ QStackedWidget#stackedWidget{
     <addaction name="actionProperties"/>
     <addaction name="actionKeyValue"/>
     <addaction name="actionGameController_Mapping"/>
-    <addaction name="actionCalibration"/>
     <addaction name="actionSensorCalibration"/>
     <addaction name="actionStick_Pad_Assign"/>
     <addaction name="actionOptions"/>
@@ -414,7 +413,7 @@ QStackedWidget#stackedWidget{
     <string>Ctrl+I</string>
    </property>
   </action>
-  <action name="actionCalibration">
+  <action name="actionSensorCalibration">
    <property name="icon">
     <iconset theme="calibration" resource="../resources.qrc">
      <normaloff>:/images/actions/calibration.png</normaloff>:/images/actions/calibration.png</iconset>
@@ -426,15 +425,6 @@ QStackedWidget#stackedWidget{
     <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="actionSensorCalibration">
-   <property name="icon">
-    <iconset theme="calibration" resource="../resources.qrc">
-     <normaloff>:/images/actions/calibration.png</normaloff>:/images/actions/calibration.png</iconset>
-    </property>
-    <property name="text">
-     <string>&amp;Sensor Calibration</string>
-    </property>
-   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

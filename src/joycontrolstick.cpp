@@ -45,7 +45,6 @@ JoyControlStick::JoyControlStick(JoyAxis *axis1, JoyAxis *axis2, int index, int 
     this->axisY = axis2;
     this->axisY->setControlStick(this);
 
-    this->calibrated = false;
     this->index = index;
     this->originset = originset;
     this->modifierButton = nullptr;
@@ -850,10 +849,7 @@ void JoyControlStick::reset()
 
 void JoyControlStick::setDeadZone(int value)
 {
-    value = abs(value);
-
-    if (value > getAxisX()->getAxisMaxCal())
-        value = getAxisX()->getAxisMaxCal();
+    value = std::min(abs(value), GlobalVariables::JoyAxis::AXISMAX);
 
     if ((value != deadZone) && (value <= maxZone))
     {
@@ -865,10 +861,7 @@ void JoyControlStick::setDeadZone(int value)
 
 void JoyControlStick::setMaxZone(int value)
 {
-    value = abs(value);
-
-    if (value >= getAxisX()->getAxisMaxCal())
-        value = getAxisX()->getAxisMaxCal();
+    value = std::min(abs(value), GlobalVariables::JoyAxis::AXISMAX);
 
     if ((value != maxZone) && (value > deadZone))
     {
@@ -878,14 +871,28 @@ void JoyControlStick::setMaxZone(int value)
     }
 }
 
-bool JoyControlStick::wasCalibrated() { return calibrated; }
-bool JoyControlStick::isCalibrated() { return calibrated; }
+bool JoyControlStick::isCalibrated() const
+{
+    return axisX->isCalibrated() && axisY->isCalibrated();
+}
 
-void JoyControlStick::setCalibrationFlag(bool flag) { calibrated = flag; }
+void JoyControlStick::resetCalibration()
+{
+    axisX->resetCalibration();
+    axisY->resetCalibration();
+}
 
-QString JoyControlStick::getCalibrationSummary() { return calibrationSummary; }
+void JoyControlStick::getCalibration(double* data) const
+{
+    axisX->getCalibration(data);
+    axisY->getCalibration(data + 2);
+}
 
-void JoyControlStick::setCalibrationSummary(QString text) { calibrationSummary = text; }
+void JoyControlStick::setCalibration(double offsetX, double gainX, double offsetY, double gainY)
+{
+    axisX->setCalibration(offsetX, gainX);
+    axisY->setCalibration(offsetY, gainY);
+}
 
 /**
  * @brief Set the diagonal range value for a stick.
@@ -967,15 +974,6 @@ void JoyControlStick::readConfig(QXmlStreamReader *xml)
                 QString temptext = xml->readElementText();
                 int tempchoice = temptext.toInt();
                 this->setMaxZone(tempchoice);
-            } else if ((xml->name() == "calibrated") && xml->isStartElement())
-            {
-                QString temptext = xml->readElementText();
-                bool tempchoice = (temptext == "true") ? true : false;
-                this->setCalibrationFlag(tempchoice);
-            } else if ((xml->name() == "summary") && xml->isStartElement())
-            {
-                QString temptext = xml->readElementText();
-                this->setCalibrationSummary(temptext);
             } else if ((xml->name() == "diagonalRange") && xml->isStartElement())
             {
                 QString temptext = xml->readElementText();
@@ -1050,9 +1048,6 @@ void JoyControlStick::writeConfig(QXmlStreamWriter *xml)
 
         if (maxZone != GlobalVariables::JoyControlStick::DEFAULTMAXZONE)
             xml->writeTextElement("maxZone", QString::number(maxZone));
-
-        xml->writeTextElement("calibrated", (calibrated ? "true" : "false"));
-        xml->writeTextElement("summary", (getCalibrationSummary().isEmpty() ? "" : calibrationSummary));
 
         if ((currentMode == StandardMode || currentMode == EightWayMode) &&
             (diagonalRange != GlobalVariables::JoyControlStick::DEFAULTDIAGONALRANGE))

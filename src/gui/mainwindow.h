@@ -131,7 +131,6 @@ class MainWindow : public QMainWindow
     void openGitHubPage();
     void openIssuesPage();
     void openWikiPage();
-    void openCalibration();
     void openSensorCalibration();
     void propogateNameDisplayStatus(JoyTabWidget *tabwidget, bool displayNames);
     void changeLanguage(QString language); // MainConfiguration class

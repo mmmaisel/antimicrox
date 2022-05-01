@@ -106,10 +106,10 @@ void AxisValueBox::setValue(JoyAxis *axis, int value)
     qDebug() << "Value for axis from value box at start is: " << value;
     qDebug() << "throttle variable has value: " << m_throttle;
 
-    if ((value >= axis->getAxisMinCal()) && (value <= axis->getAxisMaxCal()))
+    if ((value >= GlobalVariables::JoyAxis::AXISMIN) && (value <= GlobalVariables::JoyAxis::AXISMAX))
     {
-        qDebug() << "Value for axis from value box is between : " << axis->getAxisMinCal() << " and "
-                 << axis->getAxisMaxCal();
+        qDebug() << "Value for axis from value box is between : " << GlobalVariables::JoyAxis::AXISMIN << " and "
+                 << GlobalVariables::JoyAxis::AXISMAX;
 
         switch (m_throttle)
         {
@@ -118,7 +118,7 @@ void AxisValueBox::setValue(JoyAxis *axis, int value)
             break;
 
         case -1:
-            this->joyValue = ((value + axis->getAxisMinCal()) / 2);
+            this->joyValue = ((value + GlobalVariables::JoyAxis::AXISMIN) / 2);
             break;
 
         case 0:
@@ -126,7 +126,7 @@ void AxisValueBox::setValue(JoyAxis *axis, int value)
             break;
 
         case 1:
-            this->joyValue = (value + axis->getAxisMaxCal()) / 2;
+            this->joyValue = (value + GlobalVariables::JoyAxis::AXISMAX) / 2;
             break;
 
         case 2:
@@ -152,7 +152,7 @@ void AxisValueBox::setDeadZone(JoyAxis *axis, int deadZone)
 {
     m_axis = axis;
 
-    if ((deadZone >= axis->getAxisMinCal()) && (deadZone <= axis->getAxisMaxCal()))
+    if ((deadZone >= GlobalVariables::JoyAxis::AXISMIN) && (deadZone <= GlobalVariables::JoyAxis::AXISMAX))
     {
         m_deadZone = deadZone;
     }
@@ -176,7 +176,7 @@ void AxisValueBox::setMaxZone(JoyAxis *axis, int maxZone)
 {
     m_axis = axis;
 
-    if ((maxZone >= axis->getAxisMinCal()) && (maxZone <= axis->getAxisMaxCal()))
+    if ((maxZone >= GlobalVariables::JoyAxis::AXISMIN) && (maxZone <= GlobalVariables::JoyAxis::AXISMAX))
     {
         m_maxZone = maxZone;
     }
@@ -291,7 +291,7 @@ int AxisValueBox::getMaxAxValue()
     if (m_axis != nullptr)
         axisDefined = true;
 
-    return (axisDefined && (m_axis->getAxisMaxCal() != -1)) ? m_axis->getAxisMaxCal() : GlobalVariables::JoyAxis::AXISMAX;
+    return (axisDefined && (GlobalVariables::JoyAxis::AXISMAX != -1)) ? GlobalVariables::JoyAxis::AXISMAX : GlobalVariables::JoyAxis::AXISMAX;
 }
 
 int AxisValueBox::getMinAxValue()
@@ -300,5 +300,5 @@ int AxisValueBox::getMinAxValue()
     if (m_axis != nullptr)
         axisDefined = true;
 
-    return (axisDefined && (m_axis->getAxisMinCal() != -1)) ? m_axis->getAxisMinCal() : GlobalVariables::JoyAxis::AXISMIN;
+    return (axisDefined && (GlobalVariables::JoyAxis::AXISMIN != -1)) ? GlobalVariables::JoyAxis::AXISMIN : GlobalVariables::JoyAxis::AXISMIN;
 }

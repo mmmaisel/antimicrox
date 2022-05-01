@@ -145,7 +145,6 @@ set(antimicrox_SOURCES
         src/gui/advancestickassignmentdialog.cpp
         src/gui/axiseditdialog.cpp
         src/gui/buttoneditdialog.cpp
-        src/gui/calibration.cpp
         src/gui/dpadeditdialog.cpp
         src/gui/editalldefaultautoprofiledialog.cpp
         src/gui/extraprofilesettingsdialog.cpp
@@ -272,7 +271,6 @@ set(antimicrox_HEADERS
         src/gui/advancestickassignmentdialog.h
         src/gui/axiseditdialog.h
         src/gui/buttoneditdialog.h
-        src/gui/calibration.h
         src/gui/dpadeditdialog.h
         src/gui/editalldefaultautoprofiledialog.h
         src/gui/extraprofilesettingsdialog.h
@@ -390,7 +388,6 @@ set(antimicrox_FORMS
         src/gui/advancestickassignmentdialog.ui
         src/gui/axiseditdialog.ui
         src/gui/buttoneditdialog.ui
-        src/gui/calibration.ui
         src/gui/capturedwindowinfodialog.ui
         src/gui/dpadeditdialog.ui
         src/gui/editalldefaultautoprofiledialog.ui
