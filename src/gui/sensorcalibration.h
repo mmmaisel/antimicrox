@@ -21,6 +21,7 @@
 #include <SDL2/SDL_joystick.h>
 
 #include <QDateTime>
+#include <QTimer>
 
 class JoyControlStick;
 class InputDevice;
@@ -50,7 +51,11 @@ class SensorCalibration : public QWidget
 
   protected:
     void resetCalibrationValues();
-    void showCalibrationValues(bool is_calibrated, double x, double y, double z);
+    bool askConfirmation();
+    void showGyroCalibrationValues(bool is_calibrated, double x, double y, double z);
+    void showStickCalibrationValues(bool is_calibrated,
+        double offsetX, double gainX, double offsetY, double gainY);
+    void hideCalibrationData();
     void selectTypeIndex(unsigned int type_index);
 
   private:
@@ -60,17 +65,17 @@ class SensorCalibration : public QWidget
     JoySensor *m_sensor;
     JoyControlStick *m_stick;
     InputDevice *m_joystick;
-    double m_mean[3];
-    double m_var[3];
+    double m_mean[4];
+    double m_var[4];
     bool m_calibrated;
     QDateTime m_end_time;
+    QTimer m_rate_timer;
     unsigned int m_sample_count;
 
   public slots:
     void saveSettings();
     void startGyroscopeCalibration();
     void startGyroscopeCenterCalibration();
-    void startStickCalibration();
     void startStickCenterCalibration();
     void startStickGainCalibration();
 
@@ -78,7 +83,8 @@ class SensorCalibration : public QWidget
     void resetSettings(bool silentReset, bool clicked = false);
     void deviceSelectionChanged(int index);
     void onGyroscopeData(float x, float y, float z);
-    void onStickData(int x, int y);
+    void onStickCenterData(int x, int y);
+    void onStickGainData(int x, int y);
 
   signals:
     void propertyUpdated();
