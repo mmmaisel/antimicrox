@@ -17,11 +17,11 @@
 #pragma once
 
 #include "joysensoreditdialog.h"
-
-#include <SDL2/SDL_joystick.h>
+#include "pt1.h"
+#include "statisticsprocessor.h"
 
 #include <QDateTime>
-#include <QTimer>
+#include <QElapsedTimer>
 
 class JoyControlStick;
 class InputDevice;
@@ -53,7 +53,7 @@ class SensorCalibration : public QWidget
     void resetCalibrationValues();
     bool askConfirmation();
     void showGyroCalibrationValues(bool is_calibrated, double x, double y, double z);
-    void showStickCalibrationValues(bool is_calibrated,
+    void showStickCalibrationValues(bool offsetCalibrated, bool gainCalibrated,
         double offsetX, double gainX, double offsetY, double gainY);
     void hideCalibrationData();
     void selectTypeIndex(unsigned int type_index);
@@ -68,8 +68,16 @@ class SensorCalibration : public QWidget
     InputDevice *m_joystick;
 
     StatisticsProcessor m_stats[4];
+    PT1 m_stick_filter[2];
+    double m_last_slope[2];
     QDateTime m_end_time;
-    QTimer m_rate_timer;
+    QElapsedTimer m_rate_timer;
+    int m_sample_count;
+    int m_phase;
+
+    static const double STICK_CAL_TAU;
+    static const int STICK_RATE_SAMPLES;
+    static const int STICK_THRESHOLD;
 
   public slots:
     void saveSettings();

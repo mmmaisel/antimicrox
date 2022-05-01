@@ -73,6 +73,8 @@ void JoyControlStick::joyEvent(bool ignoresets)
 {
     safezone = !inDeadZone();
 
+//    qCritical() << axisX->getCurrentRawValue() << " " << axisY->getCurrentRawValue();
+
     if (safezone && !isActive)
     {
         isActive = true;
