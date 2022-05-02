@@ -52,11 +52,12 @@ class SensorCalibration : public QWidget
   protected:
     void resetCalibrationValues();
     bool askConfirmation();
-    void showGyroCalibrationValues(bool is_calibrated, double x, double y, double z);
-    void showStickCalibrationValues(bool offsetCalibrated, bool gainCalibrated,
-        double offsetX, double gainX, double offsetY, double gainY);
+    void showGyroCalibrationValues(bool xvalid, double x, bool yvalid, double y, bool zvalid, double z);
+    void showStickCalibrationValues(bool offsetXvalid, double offsetX, bool gainXvalid, double gainX,
+        bool offsetYvalid, double offsetY, bool gainYvalid, double gainY);
     void hideCalibrationData();
     void selectTypeIndex(unsigned int type_index);
+    static void stickRegression(double* offset, double* gain, double xoffset, double xmin, double xmax);
 
   private:
     Ui::SensorCalibration *m_ui;
@@ -67,7 +68,9 @@ class SensorCalibration : public QWidget
     JoyControlStick *m_stick;
     InputDevice *m_joystick;
 
-    StatisticsProcessor m_stats[4];
+    StatisticsProcessor m_offset[3];
+    StatisticsProcessor m_min[2];
+    StatisticsProcessor m_max[2];
     PT1 m_stick_filter[2];
     double m_last_slope[2];
     QDateTime m_end_time;
@@ -75,22 +78,23 @@ class SensorCalibration : public QWidget
     int m_sample_count;
     int m_phase;
 
+    static const double CAL_ACCURACY_SQ;
     static const double STICK_CAL_TAU;
     static const int STICK_RATE_SAMPLES;
-    static const int STICK_THRESHOLD;
+    static const int CAL_TIMEOUT;
 
   public slots:
     void saveSettings();
     void startGyroscopeCalibration();
-    void startGyroscopeCenterCalibration();
-    void startStickCenterCalibration();
+    void startGyroscopeOffsetCalibration();
+    void startStickOffsetCalibration();
     void startStickGainCalibration();
 
   protected slots:
     void resetSettings(bool silentReset, bool clicked = false);
     void deviceSelectionChanged(int index);
     void onGyroscopeData(float x, float y, float z);
-    void onStickCenterData(int x, int y);
+    void onStickOffsetData(int x, int y);
     void onStickGainData(int x, int y);
 
   signals:

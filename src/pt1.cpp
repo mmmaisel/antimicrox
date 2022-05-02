@@ -22,14 +22,14 @@ const double PT1::FALLBACK_RATE = 200;
 
 PT1::PT1(double tau, double rate)
 {
-    m_period = qFuzzyIsNull(rate) ? 1/FALLBACK_RATE : 1/rate;
-    m_tau = tau;
+    double period = qFuzzyIsNull(rate) ? 1/FALLBACK_RATE : 1/rate;
+    m_dt_tau = period / tau;
     reset();
 }
 
 double PT1::process(double value)
 {
-    m_value = m_value + m_period / m_tau * (value - m_value);
+    m_value = m_value + m_dt_tau * (value - m_value);
     return m_value;
 };
 

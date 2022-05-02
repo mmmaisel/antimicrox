@@ -26,9 +26,10 @@
 #include <QDebug>
 #include <QMessageBox>
 
+const double SensorCalibration::CAL_ACCURACY_SQ = 1e-4;
 const double SensorCalibration::STICK_CAL_TAU = 0.045;
 const int SensorCalibration::STICK_RATE_SAMPLES = 100;
-const int SensorCalibration::STICK_THRESHOLD = 5000;
+const int SensorCalibration::CAL_TIMEOUT = 30;
 
 SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
     : QWidget(parent)
@@ -44,11 +45,16 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
 
     int device_count = 0;
 
+    QMap<QString, int> dropdown_sticks;
     QHash<int, JoyControlStick *> sticks = m_joystick->getActiveSetJoystick()->getSticks();
     for (auto iter = sticks.cbegin(); iter != sticks.cend(); ++iter)
     {
-        m_ui->deviceComboBox->addItem(iter.value()->getPartialName(),
-            QVariant(int(CAL_STICK | (iter.key() << CAL_INDEX_POS))));
+        dropdown_sticks.insert(iter.value()->getPartialName(), CAL_STICK | (iter.key() << CAL_INDEX_POS));
+    }
+
+    for (auto iter = dropdown_sticks.cbegin(); iter != dropdown_sticks.cend(); ++iter)
+    {
+        m_ui->deviceComboBox->addItem(iter.key(), QVariant(int(iter.value())));
         ++device_count;
     }
 
@@ -118,47 +124,39 @@ void SensorCalibration::resetSettings(bool silentReset, bool)
 }
 
 void SensorCalibration::showGyroCalibrationValues(
-    bool is_calibrated, double x, double y, double z)
+    bool xvalid, double x, bool yvalid, double y, bool zvalid, double z)
 {
-    QPalette palette = m_ui->centerXValue->palette();
-    if (is_calibrated)
-        palette.setColor(m_ui->centerXValue->foregroundRole(), Qt::black);
-    else
-        palette.setColor(m_ui->centerXValue->foregroundRole(), Qt::red);
-    m_ui->centerXValue->setPalette(palette);
-    m_ui->centerYValue->setPalette(palette);
-    m_ui->centerZValue->setPalette(palette);
+    QPalette paletteBlack = m_ui->offsetXValue->palette();
+    paletteBlack.setColor(m_ui->offsetXValue->foregroundRole(), Qt::black);
+    QPalette paletteRed = m_ui->offsetXValue->palette();
+    paletteRed.setColor(m_ui->offsetXValue->foregroundRole(), Qt::red);
 
-    m_ui->centerXValue->setText(QString::number(x * 180 / M_PI));
-    m_ui->centerYValue->setText(QString::number(y * 180 / M_PI));
-    m_ui->centerZValue->setText(QString::number(z * 180 / M_PI));
+    m_ui->offsetXValue->setPalette(xvalid ? paletteBlack: paletteRed);
+    m_ui->offsetYValue->setPalette(yvalid ? paletteBlack: paletteRed);
+    m_ui->offsetZValue->setPalette(zvalid ? paletteBlack: paletteRed);
+
+    m_ui->offsetXValue->setText(QString::number(x * 180 / M_PI));
+    m_ui->offsetYValue->setText(QString::number(y * 180 / M_PI));
+    m_ui->offsetZValue->setText(QString::number(z * 180 / M_PI));
 }
 
 void SensorCalibration::showStickCalibrationValues(
-    bool offsetCalibrated, bool gainCalibrated,
-    double offsetX, double gainX, double offsetY, double gainY)
+    bool offsetXvalid, double offsetX, bool gainXvalid, double gainX,
+    bool offsetYvalid, double offsetY, bool gainYvalid, double gainY)
 {
-    QPalette paletteCenter = m_ui->centerXValue->palette();
-    QPalette paletteGain = m_ui->centerXValue->palette();
+    QPalette paletteBlack = m_ui->offsetXValue->palette();
+    paletteBlack.setColor(m_ui->offsetXValue->foregroundRole(), Qt::black);
+    QPalette paletteRed = m_ui->offsetXValue->palette();
+    paletteRed.setColor(m_ui->offsetXValue->foregroundRole(), Qt::red);
 
-    if (offsetCalibrated)
-        paletteCenter.setColor(m_ui->centerXValue->foregroundRole(), Qt::black);
-    else
-        paletteCenter.setColor(m_ui->centerXValue->foregroundRole(), Qt::red);
+    m_ui->offsetXValue->setPalette(offsetXvalid ? paletteBlack : paletteRed);
+    m_ui->gainXValue->setPalette(gainXvalid ? paletteBlack : paletteRed);
+    m_ui->offsetYValue->setPalette(offsetYvalid ? paletteBlack : paletteRed);
+    m_ui->gainYValue->setPalette(gainYvalid ? paletteBlack : paletteRed);
 
-    if (gainCalibrated)
-        paletteGain.setColor(m_ui->centerXValue->foregroundRole(), Qt::black);
-    else
-        paletteGain.setColor(m_ui->centerXValue->foregroundRole(), Qt::red);
-
-    m_ui->centerXValue->setPalette(paletteCenter);
-    m_ui->gainXValue->setPalette(paletteGain);
-    m_ui->centerYValue->setPalette(paletteCenter);
-    m_ui->gainYValue->setPalette(paletteGain);
-
-    m_ui->centerXValue->setText(QString::number(offsetX));
+    m_ui->offsetXValue->setText(QString::number(offsetX));
     m_ui->gainXValue->setText(QString::number(gainX));
-    m_ui->centerYValue->setText(QString::number(offsetY));
+    m_ui->offsetYValue->setText(QString::number(offsetY));
     m_ui->gainYValue->setText(QString::number(gainY));
 }
 
@@ -167,12 +165,12 @@ void SensorCalibration::hideCalibrationData()
     m_ui->xAxisLabel->setVisible(false);
     m_ui->yAxisLabel->setVisible(false);
     m_ui->zAxisLabel->setVisible(false);
-    m_ui->centerXLabel->setVisible(false);
-    m_ui->centerYLabel->setVisible(false);
-    m_ui->centerZLabel->setVisible(false);
-    m_ui->centerXValue->setVisible(false);
-    m_ui->centerYValue->setVisible(false);
-    m_ui->centerZValue->setVisible(false);
+    m_ui->offsetXLabel->setVisible(false);
+    m_ui->offsetYLabel->setVisible(false);
+    m_ui->offsetZLabel->setVisible(false);
+    m_ui->offsetXValue->setVisible(false);
+    m_ui->offsetYValue->setVisible(false);
+    m_ui->offsetZValue->setVisible(false);
     m_ui->gainXLabel->setVisible(false);
     m_ui->gainYLabel->setVisible(false);
     m_ui->gainZLabel->setVisible(false);
@@ -207,21 +205,21 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
         {
             double data[3];
             m_sensor->getCalibration(data);
-            showGyroCalibrationValues(true, data[0], data[1], data[2]);
+            showGyroCalibrationValues(true, data[0], true, data[1], true, data[2]);
         } else
         {
-            showGyroCalibrationValues(false, 0.0, 0.0, 0.0);
+            showGyroCalibrationValues(false, 0.0, false, 0.0, false, 0.0);
         }
 
         m_ui->xAxisLabel->setVisible(true);
         m_ui->yAxisLabel->setVisible(true);
         m_ui->zAxisLabel->setVisible(true);
-        m_ui->centerXLabel->setVisible(true);
-        m_ui->centerYLabel->setVisible(true);
-        m_ui->centerZLabel->setVisible(true);
-        m_ui->centerXValue->setVisible(true);
-        m_ui->centerYValue->setVisible(true);
-        m_ui->centerZValue->setVisible(true);
+        m_ui->offsetXLabel->setVisible(true);
+        m_ui->offsetYLabel->setVisible(true);
+        m_ui->offsetZLabel->setVisible(true);
+        m_ui->offsetXValue->setVisible(true);
+        m_ui->offsetYValue->setVisible(true);
+        m_ui->offsetZValue->setVisible(true);
 
         m_ui->resetBtn->setEnabled(m_calibrated);
         m_ui->saveBtn->setEnabled(false);
@@ -246,18 +244,18 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
         {
             double data[4] = {0};
             m_stick->getCalibration(data);
-            showStickCalibrationValues(true, true, data[0], data[1], data[2], data[3]);
+            showStickCalibrationValues(true, data[0], true, data[1], true, data[2], true, data[3]);
         } else
         {
-            showStickCalibrationValues(false, false, 0.0, 1.0, 0.0, 1.0);
+            showStickCalibrationValues(false, 0.0, false, 1.0, false, 0.0, false, 1.0);
         }
 
         m_ui->xAxisLabel->setVisible(true);
         m_ui->yAxisLabel->setVisible(true);
-        m_ui->centerXLabel->setVisible(true);
-        m_ui->centerYLabel->setVisible(true);
-        m_ui->centerXValue->setVisible(true);
-        m_ui->centerYValue->setVisible(true);
+        m_ui->offsetXLabel->setVisible(true);
+        m_ui->offsetYLabel->setVisible(true);
+        m_ui->offsetXValue->setVisible(true);
+        m_ui->offsetYValue->setVisible(true);
         m_ui->gainXLabel->setVisible(true);
         m_ui->gainYLabel->setVisible(true);
         m_ui->gainXValue->setVisible(true);
@@ -271,12 +269,25 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
         m_ui->stickStatusBoxWidget->update();
 
         connect(m_ui->startBtn, &QPushButton::clicked,
-            this, &SensorCalibration::startStickCenterCalibration);
+            this, &SensorCalibration::startStickOffsetCalibration);
         connect(m_ui->resetBtn, &QPushButton::clicked,
             [this](bool clicked) { resetSettings(false, clicked); });
         m_ui->startBtn->setEnabled(true);
         m_ui->resetBtn->setEnabled(true);
     }
+}
+
+void SensorCalibration::stickRegression(double* offset, double* gain, double xoffset, double xmin, double xmax)
+{
+    double ymin = GlobalVariables::JoyAxis::AXISMIN;
+    double ymax = GlobalVariables::JoyAxis::AXISMAX;
+
+    double sum_X = xoffset + xmin + xmax;
+    double sum_X2 = xoffset*xoffset + xmin*xmin + xmax*xmax;
+    double sum_XY = xmin*ymin + xmax*ymax;
+
+    *offset = (-sum_X*sum_XY)/(3*sum_X2-sum_X*sum_X);
+    *gain = 3*sum_XY/(3*sum_X2-sum_X*sum_X);
 }
 
 void SensorCalibration::resetCalibrationValues()
@@ -289,7 +300,7 @@ void SensorCalibration::resetCalibrationValues()
         m_ui->saveBtn->setEnabled(false);
         m_ui->resetBtn->setEnabled(false);
         m_ui->sensorStatusBoxWidget->update();
-        showGyroCalibrationValues(false, 0, 0, 0);
+        showGyroCalibrationValues(false, 0, false, 0, false, 0);
     } else if (m_type == CAL_STICK && m_stick != nullptr)
     {
         m_stick->resetCalibration();
@@ -298,7 +309,7 @@ void SensorCalibration::resetCalibrationValues()
         m_ui->saveBtn->setEnabled(false);
         m_ui->resetBtn->setEnabled(false);
         m_ui->stickStatusBoxWidget->update();
-        showStickCalibrationValues(false, false, 0, 0, 0, 0);
+        showStickCalibrationValues(false, 0, false, 0, false, 0, false, 0);
 
     }
     update();
@@ -341,19 +352,24 @@ void SensorCalibration::deviceSelectionChanged(int index)
 
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
 {
-    m_stats[0].process(x);
-    m_stats[1].process(y);
-    m_stats[2].process(z);
+    m_offset[0].process(x);
+    m_offset[1].process(y);
+    m_offset[2].process(z);
+
+    bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > 10;
+    bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > 10;
+    bool zvalid = m_offset[2].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[2].getCount() > 10;
 
     showGyroCalibrationValues(
-        true, m_stats[0].getMean(), m_stats[1].getMean(), m_stats[2].getMean());
+        xvalid, m_offset[0].getMean(),
+        yvalid, m_offset[1].getMean(),
+        zvalid, m_offset[2].getMean()
+    );
 
     // Abort when end time is reached to avoid infinite loop
     // in case of noisy sensors.
-    if ((m_stats[0].getRelativeErrorSq() < 1e-6
-        && m_stats[1].getRelativeErrorSq() < 1e-6
-        && m_stats[2].getRelativeErrorSq() < 1e-6 && m_stats[0].getCount() > 10)
-        || (QDateTime::currentDateTime() > m_end_time))
+
+    if ((xvalid && yvalid && zvalid) || (QDateTime::currentDateTime() > m_end_time))
     {
         disconnect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
@@ -370,7 +386,7 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
 }
 
 // XXX: describe calibration algorithm
-void SensorCalibration::onStickCenterData(int x, int y)
+void SensorCalibration::onStickOffsetData(int x, int y)
 {
     if (m_phase == 0)
     {
@@ -386,7 +402,7 @@ void SensorCalibration::onStickCenterData(int x, int y)
             m_stick_filter[0] = PT1(STICK_CAL_TAU, STICK_RATE_SAMPLES * 1000.0 / delta_t);
             m_stick_filter[1] = PT1(STICK_CAL_TAU, STICK_RATE_SAMPLES * 1000.0 / delta_t);
             m_sample_count = 0;
-            m_end_time = QDateTime::currentDateTime().addSecs(10);
+            m_end_time = QDateTime::currentDateTime().addSecs(CAL_TIMEOUT);
             m_phase = 2;
         }
     } else if (m_phase == 2)
@@ -395,14 +411,14 @@ void SensorCalibration::onStickCenterData(int x, int y)
         double slopey = m_stick_filter[1].getValue() - m_stick_filter[1].process(y);
 
         if (((m_last_slope[0] < 0 && slopex > 0) || (m_last_slope[0] > 0 && slopex < 0))
-            && abs(x) < STICK_THRESHOLD)
+            && abs(x) < m_stick->getDeadZone())
         {
-            m_stats[0].process(x);
+            m_offset[0].process(x);
         }
         if (((m_last_slope[1] < 0 && slopey > 0) || (m_last_slope[1] > 0 && slopey < 0))
-            && abs(y) < STICK_THRESHOLD)
+            && abs(y) < m_stick->getDeadZone())
         {
-            m_stats[2].process(y);
+            m_offset[1].process(y);
         }
 
         // there are two events with one value changed each
@@ -411,20 +427,20 @@ void SensorCalibration::onStickCenterData(int x, int y)
         if(slopey != 0)
             m_last_slope[1] = slopey;
 
-        showStickCalibrationValues(true, false,
-            m_stats[0].getMean(), m_stats[1].getMean(),
-            m_stats[2].getMean(), m_stats[3].getMean());
+        bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > 10;
+        bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > 10;
 
-        if ((m_stats[0].getRelativeErrorSq() < 0.01
-            && m_stats[2].getRelativeErrorSq() < 0.01 && m_stats[0].getCount() > 10)
-            || QDateTime::currentDateTime() > m_end_time)
-        {
+        showStickCalibrationValues(
+            xvalid, m_offset[0].getMean(), false, 1,
+            yvalid, m_offset[1].getMean(), false, 1
+        );
+
+        if ((xvalid && yvalid) || QDateTime::currentDateTime() > m_end_time)
             m_phase = 3;
-        }
     } else if (m_phase == 3)
     {
         disconnect(m_stick, &JoyControlStick::moved,
-            this, &SensorCalibration::onStickCenterData);
+            this, &SensorCalibration::onStickOffsetData);
         m_ui->steps->setText(tr(
             "Offset calibration completed. Click next to continue with gain calibration."));
         m_ui->startBtn->setEnabled(true);
@@ -437,25 +453,20 @@ void SensorCalibration::onStickGainData(int x, int y)
     double slopex = m_stick_filter[0].getValue() - m_stick_filter[0].process(x);
     double slopey = m_stick_filter[1].getValue() - m_stick_filter[1].process(y);
 
-    // XXX: use different stat processor for min and max ?
-    if (m_last_slope[0] > 0 && slopex < 0 && m_stick_filter[0].getValue() < -STICK_THRESHOLD)
+    if (m_last_slope[0] > 0 && slopex < 0 && m_stick_filter[0].getValue() < -m_stick->getDeadZone())
     {
-        // minimum
-        m_stats[1].process(-m_stick_filter[0].getValue());
-    } else if (m_last_slope[0] < 0 && slopex > 0 && m_stick_filter[0].getValue() > STICK_THRESHOLD)
+        m_min[0].process(m_stick_filter[0].getValue());
+    } else if (m_last_slope[0] < 0 && slopex > 0 && m_stick_filter[0].getValue() > m_stick->getDeadZone())
     {
-        // maximum
-        m_stats[1].process(m_stick_filter[0].getValue());
+        m_max[0].process(m_stick_filter[0].getValue());
     }
 
-    if (m_last_slope[1] > 0 && slopey < 0 && m_stick_filter[1].getValue() < -STICK_THRESHOLD)
+    if (m_last_slope[1] > 0 && slopey < 0 && m_stick_filter[1].getValue() < -m_stick->getDeadZone())
     {
-        // minimum
-        m_stats[3].process(-m_stick_filter[1].getValue());
-    } else if (m_last_slope[1] < 0 && slopey > 0 && m_stick_filter[1].getValue() > STICK_THRESHOLD)
+        m_min[1].process(m_stick_filter[1].getValue());
+    } else if (m_last_slope[1] < 0 && slopey > 0 && m_stick_filter[1].getValue() > m_stick->getDeadZone())
     {
-        // maximum
-        m_stats[3].process(m_stick_filter[1].getValue());
+        m_max[1].process(m_stick_filter[1].getValue());
     }
 
     // there are two events with one value changed each
@@ -464,14 +475,19 @@ void SensorCalibration::onStickGainData(int x, int y)
     if(slopey != 0)
         m_last_slope[1] = slopey;
 
-    showStickCalibrationValues(true, true,
-        m_stats[0].getMean(), GlobalVariables::JoyAxis::AXISMAX / (m_stats[1].getMean()),
-        m_stats[2].getMean(), GlobalVariables::JoyAxis::AXISMAX / (m_stats[3].getMean()));
+    bool xvalid =
+        m_min[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[0].getCount() > 10 &&
+        m_max[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[0].getCount() > 10;
+    bool yvalid =
+        m_min[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[1].getCount() > 10 &&
+        m_max[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[1].getCount() > 10;
 
-    // XXX: configure cal time with constant?
-    if ((m_stats[1].getRelativeErrorSq() < 0.01
-        && m_stats[3].getRelativeErrorSq() < 0.01 && m_stats[1].getCount() > 10)
-        || QDateTime::currentDateTime() > m_end_time)
+    double offsetX, gainX, offsetY, gainY;
+    stickRegression(&offsetX, &gainX, m_offset[0].getMean(), m_min[0].getMean(), m_max[0].getMean());
+    stickRegression(&offsetY, &gainY, m_offset[1].getMean(), m_min[1].getMean(), m_max[1].getMean());
+    showStickCalibrationValues(true, offsetX, xvalid, gainX, true, offsetY, yvalid, gainY);
+
+    if((xvalid && yvalid) || QDateTime::currentDateTime() > m_end_time)
     {
         disconnect(m_stick, &JoyControlStick::moved,
             this, &SensorCalibration::onStickGainData);
@@ -496,15 +512,20 @@ void SensorCalibration::saveSettings()
     if (m_type == CAL_GYROSCOPE)
     {
         m_joystick->applyGyroscopeCalibration(
-            m_stats[0].getMean(), m_stats[1].getMean(), m_stats[2].getMean());
+            m_offset[0].getMean(), m_offset[1].getMean(), m_offset[2].getMean());
     } else if (m_type == CAL_STICK)
     {
+        double offsetX, gainX, offsetY, gainY;
+        stickRegression(&offsetX, &gainX, m_offset[0].getMean(), m_min[0].getMean(), m_max[0].getMean());
+        stickRegression(&offsetY, &gainY, m_offset[1].getMean(), m_min[1].getMean(), m_max[1].getMean());
+
         m_joystick->applyStickCalibration(m_index,
-            m_stats[0].getMean(),
-            GlobalVariables::JoyAxis::AXISMAX / (m_stats[1].getMean()),
-            m_stats[2].getMean(),
-            GlobalVariables::JoyAxis::AXISMAX / (m_stats[3].getMean())
+            offsetX,
+            gainX,
+            offsetY,
+            gainY
         );
+        showStickCalibrationValues(true, offsetX, true, gainX, true, offsetY, true, gainY);
     }
     m_calibrated = true;
     m_ui->saveBtn->setEnabled(false);
@@ -512,7 +533,7 @@ void SensorCalibration::saveSettings()
 }
 
 /**
- * @brief Prepares first step of calibration - gyroscope center
+ * @brief Prepares first step of calibration - gyroscope offset
  * @return nothing
  */
 void SensorCalibration::startGyroscopeCalibration()
@@ -522,9 +543,9 @@ void SensorCalibration::startGyroscopeCalibration()
 
     if (askConfirmation())
     {
-        m_stats[0].reset();
-        m_stats[1].reset();
-        m_stats[2].reset();
+        m_offset[0].reset();
+        m_offset[1].reset();
+        m_offset[2].reset();
 
         m_sensor->resetCalibration();
         m_calibrated = false;
@@ -539,20 +560,21 @@ void SensorCalibration::startGyroscopeCalibration()
         m_ui->deviceComboBox->setEnabled(false);
         disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
         connect(m_ui->startBtn, &QPushButton::clicked, this,
-            &SensorCalibration::startGyroscopeCenterCalibration);
+            &SensorCalibration::startGyroscopeOffsetCalibration);
     }
 }
 
 /**
- * @brief Performs gyroscope center calibration.
+ * @brief Performs gyroscope offset calibration.
  * @return nothing
  */
-void SensorCalibration::startGyroscopeCenterCalibration()
+void SensorCalibration::startGyroscopeOffsetCalibration()
 {
     if (m_sensor != nullptr)
     {
-        m_end_time = QDateTime::currentDateTime().addSecs(3);
-        m_ui->steps->setText(tr("Collecting gyroscope data..."));
+        m_end_time = QDateTime::currentDateTime().addSecs(CAL_TIMEOUT);
+        m_ui->steps->setText(tr(
+            "Collecting gyroscope data...\nThis can take up to %1 seconds.").arg(CAL_TIMEOUT));
         connect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
         update();
@@ -562,15 +584,15 @@ void SensorCalibration::startGyroscopeCenterCalibration()
     }
 }
 
-void SensorCalibration::startStickCenterCalibration()
+void SensorCalibration::startStickOffsetCalibration()
 {
     if (m_stick == nullptr)
         return;
 
     if (askConfirmation())
     {
-        m_stats[0].reset();
-        m_stats[2].reset();
+        m_offset[0].reset();
+        m_offset[1].reset();
         m_last_slope[0] = 0;
         m_last_slope[1] = 0;
 
@@ -579,7 +601,8 @@ void SensorCalibration::startStickCenterCalibration()
         m_phase = 0;
 
         m_ui->steps->setText(tr(
-            "Now move the stick several times to the maximum and back to center."));
+            "Now move the stick several times to the maximum in different direction and back to center.\n"
+            "This can take up to %1 seconds.").arg(CAL_TIMEOUT));
         setWindowTitle(tr("Calibrating stick"));
         m_ui->startBtn->setText(tr("Continue calibration"));
         m_ui->startBtn->setEnabled(false);
@@ -589,7 +612,7 @@ void SensorCalibration::startStickCenterCalibration()
         connect(m_ui->startBtn, &QPushButton::clicked, this,
             &SensorCalibration::startStickGainCalibration);
         connect(m_stick, &JoyControlStick::moved,
-            this, &SensorCalibration::onStickCenterData);
+            this, &SensorCalibration::onStickOffsetData);
         update();
     }
 }
@@ -599,20 +622,23 @@ void SensorCalibration::startStickGainCalibration()
     if (m_stick == nullptr)
         return;
 
-    m_stats[1].reset();
-    m_stats[3].reset();
+    m_min[0].reset();
+    m_min[1].reset();
+    m_max[0].reset();
+    m_max[1].reset();
     m_stick_filter[0].reset();
     m_stick_filter[1].reset();
 
     m_ui->steps->setText(tr(
-        "Now move the stick in full circles for several times."));
+        "Now move the stick in full circles for several times.\n"
+        "This can take up to %1 seconds.").arg(CAL_TIMEOUT));
     m_ui->startBtn->setEnabled(false);
     update();
 
     disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
     connect(m_ui->startBtn, &QPushButton::clicked, this,
-        &SensorCalibration::startStickCenterCalibration);
+        &SensorCalibration::startStickOffsetCalibration);
     connect(m_stick, &JoyControlStick::moved,
         this, &SensorCalibration::onStickGainData);
-    m_end_time = QDateTime::currentDateTime().addSecs(10);
+    m_end_time = QDateTime::currentDateTime().addSecs(CAL_TIMEOUT);
 }

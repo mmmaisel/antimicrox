@@ -32,7 +32,6 @@ class PT1
         static const double FALLBACK_RATE;
 
     private:
-        double m_tau;
+        double m_dt_tau;
         double m_value;
-        double m_period;
 };

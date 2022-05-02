@@ -115,7 +115,7 @@
         </widget>
        </item>
        <item row="3" column="2">
-        <widget class="QLabel" name="centerZValue">
+        <widget class="QLabel" name="offsetZValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -129,7 +129,7 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QLabel" name="centerYValue">
+        <widget class="QLabel" name="offsetYValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
@@ -143,16 +143,16 @@
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QLabel" name="centerXValue">
+        <widget class="QLabel" name="offsetXValue">
          <property name="text">
           <string>TextLabel</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLabel" name="centerXLabel">
+        <widget class="QLabel" name="offsetXLabel">
          <property name="text">
-          <string>center</string>
+          <string>offset</string>
          </property>
         </widget>
        </item>
@@ -164,16 +164,16 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLabel" name="centerZLabel">
+        <widget class="QLabel" name="offsetZLabel">
          <property name="text">
-          <string>center</string>
+          <string>offset</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLabel" name="centerYLabel">
+        <widget class="QLabel" name="offsetYLabel">
          <property name="text">
-          <string>center</string>
+          <string>offset</string>
          </property>
         </widget>
        </item>
