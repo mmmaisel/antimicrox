@@ -30,15 +30,15 @@ class JoySensorButton : public JoyGradientButton
     explicit JoySensorButton(JoySensor *sensor, int index, int originset,
         SetJoystick *parentSet, QObject *parent);
 
-    virtual int getRealJoyNumber() const;
+    virtual int getRealJoyNumber() const override;
     virtual QString getPartialName(
-        bool forceFullFormat = false, bool displayNames = false) const;
-    virtual QString getXmlName();
+        bool forceFullFormat = false, bool displayNames = false) const override;
+    virtual QString getXmlName() override;
 
     virtual double getDistanceFromDeadZone() override;
     virtual double getMouseDistanceFromDeadZone() override;
 
-    virtual bool isPartRealAxis();
+    virtual bool isPartRealAxis() override;
     virtual JoyMouseCurve getDefaultMouseCurve() const override;
 
     JoySensor *getSensor() const;

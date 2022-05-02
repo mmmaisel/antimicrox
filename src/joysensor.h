@@ -47,8 +47,8 @@ class JoySensor : public QObject
 
     bool hasSlotsAssigned();
 
-    virtual QString getName(bool forceFullFormat = false, bool displayNames = false);
-    virtual QString getPartialName(bool forceFullFormat = false, bool displayNames = false);
+    QString getName(bool forceFullFormat = false, bool displayNames = false);
+    QString getPartialName(bool forceFullFormat = false, bool displayNames = false);
 
     JoySensorDirection getCurrentDirection();
 
@@ -92,8 +92,8 @@ class JoySensor : public QObject
     QString getSensorName() const;
 
     bool isDefault() const;
-    virtual void setDefaultSensorName(QString tempname);
-    virtual QString getDefaultSensorName() const;
+    void setDefaultSensorName(QString tempname);
+    QString getDefaultSensorName() const;
     void readConfig(QXmlStreamReader *xml);
     void writeConfig(QXmlStreamWriter *xml) const;
 

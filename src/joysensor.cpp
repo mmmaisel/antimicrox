@@ -691,12 +691,12 @@ void JoySensor::writeConfig(QXmlStreamWriter *xml) const
         if (!qFuzzyCompare(getDeadZone(), GlobalVariables::JoySensor::DEFAULTDEADZONE))
             xml->writeTextElement("deadZone", QString::number(getDeadZone()));
 
-        if (!qFuzzyCompare(m_max_zone, (m_type == ACCELEROMETER
+        if (!qFuzzyCompare(getMaxZone(), (m_type == ACCELEROMETER
                 ? GlobalVariables::JoySensor::ACCEL_MAX
                 : GlobalVariables::JoySensor::GYRO_MAX)))
             xml->writeTextElement("maxZone", QString::number(getMaxZone()));
 
-        if (!qFuzzyCompare(m_diagonal_range, GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE))
+        if (!qFuzzyCompare(getDiagonalRange(), GlobalVariables::JoySensor::DEFAULTDIAGONALRANGE))
             xml->writeTextElement("diagonalRange", QString::number(getDiagonalRange()));
 
         if (m_sensor_delay > GlobalVariables::JoySensor::DEFAULTSENSORDELAY)
