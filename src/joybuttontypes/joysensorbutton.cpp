@@ -33,6 +33,8 @@ JoySensorButton::JoySensorButton(JoySensor *sensor,
     : JoyGradientButton(index, originset, parentSet, parent),
     m_sensor(sensor)
 {
+    // Must be called here since virtual functions calls are disabled in constructors.
+    setMouseCurve(getDefaultMouseCurve());
 }
 
 /**
