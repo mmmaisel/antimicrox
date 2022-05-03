@@ -20,6 +20,7 @@
 #include "pt1.h"
 #include "statisticsprocessor.h"
 
+#include <QDialog>
 #include <QDateTime>
 #include <QElapsedTimer>
 
@@ -30,7 +31,7 @@ namespace Ui {
 class SensorCalibration;
 }
 
-class SensorCalibration : public QWidget
+class SensorCalibration : public QDialog
 {
     Q_OBJECT
 
@@ -46,12 +47,12 @@ class SensorCalibration : public QWidget
         CAL_INDEX_POS = 16
     };
 
-    explicit SensorCalibration(InputDevice *joystick, QWidget *parent = 0);
+    explicit SensorCalibration(InputDevice *joystick, QDialog *parent = 0);
     ~SensorCalibration();
 
   protected:
     void resetCalibrationValues();
-    bool askConfirmation();
+    bool askConfirmation(QString message, bool confirmed);
     void showGyroCalibrationValues(bool xvalid, double x, bool yvalid, double y, bool zvalid, double z);
     void showStickCalibrationValues(bool offsetXvalid, double offsetX, bool gainXvalid, double gainX,
         bool offsetYvalid, double offsetY, bool gainYvalid, double gainY);
@@ -64,6 +65,7 @@ class SensorCalibration : public QWidget
     CalibrationType m_type;
     unsigned int m_index;
     bool m_calibrated;
+    bool m_changed;
     JoySensor *m_sensor;
     JoyControlStick *m_stick;
     InputDevice *m_joystick;
@@ -78,6 +80,7 @@ class SensorCalibration : public QWidget
     int m_sample_count;
     int m_phase;
 
+    static const int CAL_MIN_SAMPLES;
     static const double CAL_ACCURACY_SQ;
     static const double STICK_CAL_TAU;
     static const int STICK_RATE_SAMPLES;
@@ -91,7 +94,8 @@ class SensorCalibration : public QWidget
     void startStickGainCalibration();
 
   protected slots:
-    void resetSettings(bool silentReset, bool clicked = false);
+    void closeEvent(QCloseEvent *event) override;
+    void resetSettings();
     void deviceSelectionChanged(int index);
     void onGyroscopeData(float x, float y, float z);
     void onStickOffsetData(int x, int y);

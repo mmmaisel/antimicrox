@@ -870,7 +870,7 @@ JoySensorDirection JoySensor::calculateAccelerometerDirection()
     if (m_shock_filter.process(abs_sum) > SHOCK_DETECT_THRESHOLD)
     {
         m_shock_suppress_count = m_rate * SHOCK_SUPPRESS_FACTOR;
-        return SENSOR_FWD;
+        return SENSOR_BWD;
     } else if (m_shock_suppress_count != 0)
     {
         --m_shock_suppress_count;
@@ -1099,8 +1099,8 @@ void JoySensor::populateButtons()
         button = new JoyAccelerometerButton(this, SENSOR_DOWN, m_originset, getParentSet(), this);
         m_buttons.insert(SENSOR_DOWN, button);
 
-        button = new JoyAccelerometerButton(this, SENSOR_FWD, m_originset, getParentSet(), this);
-        m_buttons.insert(SENSOR_FWD, button);
+        button = new JoyAccelerometerButton(this, SENSOR_BWD, m_originset, getParentSet(), this);
+        m_buttons.insert(SENSOR_BWD, button);
     } else
     {
         button = new JoyGyroscopeButton(this, SENSOR_LEFT, m_originset, getParentSet(), this);

@@ -45,10 +45,10 @@ void SensorPushButtonGroup::generateButtons()
     m_right_button = generateBtnToGrid(SENSOR_RIGHT, 1, 2);
     m_up_button = generateBtnToGrid(SENSOR_UP, 0, 1);
     m_down_button = generateBtnToGrid(SENSOR_DOWN, 2, 1);
-    m_fwd_button = generateBtnToGrid(SENSOR_FWD, 0, 2);
+    m_fwd_button = generateBtnToGrid(SENSOR_BWD, 0, 2);
 
     if (m_sensor->getType() == GYROSCOPE)
-        m_bwd_button = generateBtnToGrid(SENSOR_BWD, 2, 0);
+        m_bwd_button = generateBtnToGrid(SENSOR_FWD, 2, 0);
     else
         m_bwd_button = nullptr;
 

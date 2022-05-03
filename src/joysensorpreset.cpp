@@ -76,12 +76,14 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
 
         if (upslots->length() == 1 && downslots->length() == 1 &&
             leftslots->length() == 1 && rightslots->length() == 1 &&
-            fwdslots->length() == 0 && bwdslots->length() == 0)
+            fwdslots->length() == 1 && bwdslots->length() == 1)
         {
             JoyButtonSlot *upslot = upslots->at(0);
             JoyButtonSlot *downslot = downslots->at(0);
             JoyButtonSlot *leftslot = leftslots->at(0);
             JoyButtonSlot *rightslot = rightslots->at(0);
+            JoyButtonSlot *fwdslot = fwdslots->at(0);
+            JoyButtonSlot *bwdslot = bwdslots->at(0);
 
             if ((upslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
                 (upslot->getSlotCode() == JoyButtonSlot::MouseUp) &&
@@ -90,7 +92,9 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
                 (leftslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
                 (leftslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
                 (rightslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
-                (rightslot->getSlotCode() == JoyButtonSlot::MouseRight))
+                (rightslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
+                (fwdslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
+                (bwdslot->getSlotCode() == JoyButtonSlot::MouseRight))
             {
                 result = PRESET_MOUSE;
             } else if ((upslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
@@ -100,7 +104,9 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
                        (leftslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
                        (leftslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
                        (rightslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
-                       (rightslot->getSlotCode() == JoyButtonSlot::MouseLeft))
+                       (rightslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
+                       (fwdslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
+                       (bwdslot->getSlotCode() == JoyButtonSlot::MouseLeft))
             {
                 result = PRESET_MOUSE_INV_H;
             } else if ((upslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
@@ -110,7 +116,9 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
                        (leftslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
                        (leftslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
                        (rightslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
-                       (rightslot->getSlotCode() == JoyButtonSlot::MouseRight))
+                       (rightslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
+                       (fwdslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
+                       (bwdslot->getSlotCode() == JoyButtonSlot::MouseRight))
             {
                 result = PRESET_MOUSE_INV_V;
             } else if ((upslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
@@ -120,7 +128,9 @@ JoySensorPreset::Preset JoySensorPreset::currentPreset()
                        (leftslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
                        (leftslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
                        (rightslot->getSlotMode() == JoyButtonSlot::JoyMouseMovement) &&
-                       (rightslot->getSlotCode() == JoyButtonSlot::MouseLeft))
+                       (rightslot->getSlotCode() == JoyButtonSlot::MouseLeft) &&
+                       (fwdslot->getSlotCode() == JoyButtonSlot::MouseRight) &&
+                       (bwdslot->getSlotCode() == JoyButtonSlot::MouseLeft))
             {
                 result = PRESET_MOUSE_INV_HV;
             }
@@ -242,6 +252,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
+        fwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
+        bwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -254,6 +266,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
+        fwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
+        bwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -266,6 +280,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
+        fwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
+        bwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 
@@ -278,6 +294,8 @@ void JoySensorPreset::setSensorPreset(Preset preset)
         rightButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         upButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseDown, JoyButtonSlot::JoyMouseMovement, this);
         downButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseUp, JoyButtonSlot::JoyMouseMovement, this);
+        fwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseRight, JoyButtonSlot::JoyMouseMovement, this);
+        bwdButtonSlot = new JoyButtonSlot(JoyButtonSlot::MouseLeft, JoyButtonSlot::JoyMouseMovement, this);
         m_sensor->setDeadZone(0);
         m_sensor->setDiagonalRange(90);
 

@@ -23,19 +23,23 @@
 #include "joycontrolstick.h"
 #include "joysensor.h"
 
+#include <QCloseEvent>
 #include <QDebug>
 #include <QMessageBox>
 
+const int SensorCalibration::CAL_MIN_SAMPLES = 10;
+// Use squared accuracy to avoid root calculation. 1e-4 corresponds to an accuracy of 1%.
 const double SensorCalibration::CAL_ACCURACY_SQ = 1e-4;
 const double SensorCalibration::STICK_CAL_TAU = 0.045;
 const int SensorCalibration::STICK_RATE_SAMPLES = 100;
 const int SensorCalibration::CAL_TIMEOUT = 30;
 
-SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
-    : QWidget(parent)
+SensorCalibration::SensorCalibration(InputDevice *joystick, QDialog *parent)
+    : QDialog(parent)
     , m_ui(new Ui::SensorCalibration)
     , m_type(CAL_NONE)
     , m_calibrated(false)
+    , m_changed(false)
     , m_joystick(joystick)
 {
     m_ui->setupUi(this);
@@ -66,6 +70,8 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
 
     connect(m_joystick, &InputDevice::destroyed,
         this, &SensorCalibration::close);
+    connect(m_ui->resetBtn, &QPushButton::clicked,
+        this, &SensorCalibration::resetSettings);
     connect(m_ui->saveBtn, &QPushButton::clicked,
         this, &SensorCalibration::saveSettings);
     connect(m_ui->cancelBtn, &QPushButton::clicked,
@@ -91,38 +97,54 @@ SensorCalibration::SensorCalibration(InputDevice *joystick, QWidget *parent)
 SensorCalibration::~SensorCalibration() { delete m_ui; }
 
 /**
- * @brief Resets memory of all variables to default, updates window and shows message
- * @return Nothing
+ * @brief Ask for confirmation when the dialog is closed with unsafed changed.
  */
-void SensorCalibration::resetSettings(bool silentReset, bool)
+void SensorCalibration::closeEvent(QCloseEvent *event)
 {
-    if (!silentReset)
+    event->ignore();
+    if (m_changed)
     {
-        QMessageBox msgBox;
-        msgBox.setText(tr(
-            "Do you really want to reset settings of current sensors?"));
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-
-        switch (msgBox.exec())
+        if(askConfirmation(tr(
+            "Calibration was not saved for the preset. Do you really want to continue?"),
+            false))
         {
-        case QMessageBox::Yes:
-            resetCalibrationValues();
-            m_ui->steps->clear();
-            break;
-
-        case QMessageBox::No:
-            break;
-
-        default:
-            break;
+            event->accept();
         }
     } else
     {
-        resetCalibrationValues();
-        m_ui->steps->clear();
+        event->accept();
     }
 }
 
+/**
+ * @brief Asks for confirmation and resets calibration values of the selected device
+ *  afterwards.
+ */
+void SensorCalibration::resetSettings()
+{
+    QMessageBox msgBox;
+    msgBox.setText(tr(
+        "Do you really want to reset calibration of current device?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
+    switch (msgBox.exec())
+    {
+    case QMessageBox::Yes:
+        resetCalibrationValues();
+        m_ui->steps->clear();
+        break;
+
+    case QMessageBox::No:
+        break;
+
+    default:
+        break;
+    }
+}
+
+/**
+ * @brief Shows the gyroscope offset calibration values to the user.
+ */
 void SensorCalibration::showGyroCalibrationValues(
     bool xvalid, double x, bool yvalid, double y, bool zvalid, double z)
 {
@@ -140,6 +162,9 @@ void SensorCalibration::showGyroCalibrationValues(
     m_ui->offsetZValue->setText(QString::number(z * 180 / M_PI));
 }
 
+/**
+ * @brief Shows the stick offset and gain calibration values to the user.
+ */
 void SensorCalibration::showStickCalibrationValues(
     bool offsetXvalid, double offsetX, bool gainXvalid, double gainX,
     bool offsetYvalid, double offsetY, bool gainYvalid, double gainY)
@@ -160,6 +185,9 @@ void SensorCalibration::showStickCalibrationValues(
     m_ui->gainYValue->setText(QString::number(gainY));
 }
 
+/**
+ * @brief hides all calibration values and their labels.
+ */
 void SensorCalibration::hideCalibrationData()
 {
     m_ui->xAxisLabel->setVisible(false);
@@ -180,6 +208,11 @@ void SensorCalibration::hideCalibrationData()
     m_ui->steps->clear();
 }
 
+/**
+ * @brief Prepares calibration for the selected device type.
+ *  Show all used values and labels and connect buttons to the corresponding
+ *  event handlers.
+ */
 void SensorCalibration::selectTypeIndex(unsigned int type_index)
 {
     CalibrationType type = static_cast<CalibrationType>(type_index & CAL_TYPE_MASK);
@@ -189,9 +222,9 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
         return;
 
     disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
-    disconnect(m_ui->resetBtn, &QPushButton::clicked, this, nullptr);
     m_type = type;
     m_index = index;
+    m_changed = false;
     hideCalibrationData();
 
     if (m_type == CAL_GYROSCOPE)
@@ -230,8 +263,6 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
 
         connect(m_ui->startBtn, &QPushButton::clicked,
             this, &SensorCalibration::startGyroscopeCalibration);
-        connect(m_ui->resetBtn, &QPushButton::clicked,
-            [this](bool clicked) { resetSettings(false, clicked); });
         m_ui->startBtn->setEnabled(true);
         m_ui->resetBtn->setEnabled(true);
     } else if (m_type == CAL_STICK)
@@ -270,13 +301,23 @@ void SensorCalibration::selectTypeIndex(unsigned int type_index)
 
         connect(m_ui->startBtn, &QPushButton::clicked,
             this, &SensorCalibration::startStickOffsetCalibration);
-        connect(m_ui->resetBtn, &QPushButton::clicked,
-            [this](bool clicked) { resetSettings(false, clicked); });
         m_ui->startBtn->setEnabled(true);
         m_ui->resetBtn->setEnabled(true);
     }
 }
 
+/**
+ * @brief Performs linear regression on the measurement values of one axis to
+ *  determine offset and gain.
+ * @param[out] offset The calculated offset.
+ * @param[out] gain The calculated gain.
+ * @param[in] xoffset The measured X value at the point (x, 0)
+ * @param[in] xmin The measured X value at the point (x, AXISMIN)
+ * @param[in] xmax The measured X value at the point (x, AXISMAX)
+ *
+ * Since the sum (AXISMIN + 0 + AXISMAX) is 0, the calculation below could
+ *  be simplified.
+ */
 void SensorCalibration::stickRegression(double* offset, double* gain, double xoffset, double xmin, double xmax)
 {
     double ymin = GlobalVariables::JoyAxis::AXISMIN;
@@ -290,6 +331,10 @@ void SensorCalibration::stickRegression(double* offset, double* gain, double xof
     *gain = 3*sum_XY/(3*sum_X2-sum_X*sum_X);
 }
 
+/**
+ * @brief Resets calibration values of the currently selected device and
+ *  updates UI.
+ */
 void SensorCalibration::resetCalibrationValues()
 {
     if (m_type == CAL_GYROSCOPE && m_sensor != nullptr)
@@ -310,55 +355,74 @@ void SensorCalibration::resetCalibrationValues()
         m_ui->resetBtn->setEnabled(false);
         m_ui->stickStatusBoxWidget->update();
         showStickCalibrationValues(false, 0, false, 0, false, 0, false, 0);
-
     }
     update();
 }
 
-bool SensorCalibration::askConfirmation()
+/**
+ * @brief Asks the user for confirmation with a given message if the given
+ *  condition is false.
+ * @param[in] message The message to show.
+ * @param[in] confirmed True, if the action is already confirmed or no confirmation is necessary.
+ * @returns True, if the action was confirmed. False otherwise.
+ */
+bool SensorCalibration::askConfirmation(QString message, bool confirmed)
 {
-    bool confirmed = true;
-    if (m_calibrated)
+    if (!confirmed)
     {
         QMessageBox msgBox;
-        msgBox.setText(tr(
-            "Calibration was saved for the preset. Do you really want to reset settings?"));
+        msgBox.setText(message);
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 
         switch (msgBox.exec())
         {
         case QMessageBox::Ok:
-            confirmed = true;
-            m_ui->resetBtn->setEnabled(false);
-            break;
-
+            return true;
         case QMessageBox::Cancel:
-            confirmed = false;
-            break;
-
+            return false;
         default:
-            confirmed = true;
-            break;
+            return true;
         }
     }
-    return confirmed;
+    return true;
 }
 
+/**
+ * @brief Device change event handler. Asks for confirmation if there are unsaved changes.
+ */
 void SensorCalibration::deviceSelectionChanged(int index)
 {
-    int data = m_ui->deviceComboBox->itemData(index).toInt();
-    selectTypeIndex(data);
+    if (askConfirmation(tr(
+        "Calibration was not saved for the preset. Do you really want to continue?"),
+        !m_changed))
+    {
+        int data = m_ui->deviceComboBox->itemData(index).toInt();
+        selectTypeIndex(data);
+    } else {
+        int index = m_ui->deviceComboBox->findData(QVariant(m_type | (m_index << CAL_INDEX_POS)));
+        m_ui->deviceComboBox->blockSignals(true);
+        m_ui->deviceComboBox->setCurrentIndex(index);
+        m_ui->deviceComboBox->blockSignals(false);
+    }
 }
 
+/**
+ * @brief Gyroscope data event handler. Performs gyroscope offset estimation
+ *  and stops itself if the value was found or the process timed out.
+ *
+ * The gyroscope is only offset calibrated since gain calibration would require
+ *  an accurate turntable to apply a known rotation rate on all axes.
+ *  The offset is determined by calculation the mean output value at rest.
+ */
 void SensorCalibration::onGyroscopeData(float x, float y, float z)
 {
     m_offset[0].process(x);
     m_offset[1].process(y);
     m_offset[2].process(z);
 
-    bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > 10;
-    bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > 10;
-    bool zvalid = m_offset[2].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[2].getCount() > 10;
+    bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > CAL_MIN_SAMPLES;
+    bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > CAL_MIN_SAMPLES;
+    bool zvalid = m_offset[2].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[2].getCount() > CAL_MIN_SAMPLES;
 
     showGyroCalibrationValues(
         xvalid, m_offset[0].getMean(),
@@ -371,6 +435,7 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
 
     if ((xvalid && yvalid && zvalid) || (QDateTime::currentDateTime() > m_end_time))
     {
+        m_changed = true;
         disconnect(m_sensor, &JoySensor::moved,
             this, &SensorCalibration::onGyroscopeData);
         disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
@@ -385,7 +450,15 @@ void SensorCalibration::onGyroscopeData(float x, float y, float z)
     }
 }
 
-// XXX: describe calibration algorithm
+/**
+ * @brief Stick data event handler. Performs stick offset estimation
+ *  and stops itself if the value was found or the process timed out.
+ *
+ * At the beginning, it waits for the first stick moved event and calculates
+ *  the event rate for the denoise lag filter.
+ * Then it looks for local minima and maxima within the sticks dead zone
+ *  which are used to estimate the sticks center position.
+ */
 void SensorCalibration::onStickOffsetData(int x, int y)
 {
     if (m_phase == 0)
@@ -421,14 +494,16 @@ void SensorCalibration::onStickOffsetData(int x, int y)
             m_offset[1].process(y);
         }
 
-        // there are two events with one value changed each
+        // There are two move events generated for every hardware event,
+        // one updates the X the other the Y value. This causes every second
+        // derivate value to be zero. Ignore those values to get the real derivative.
         if(slopex != 0)
             m_last_slope[0] = slopex;
         if(slopey != 0)
             m_last_slope[1] = slopey;
 
-        bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > 10;
-        bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > 10;
+        bool xvalid = m_offset[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[0].getCount() > CAL_MIN_SAMPLES;
+        bool yvalid = m_offset[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_offset[1].getCount() > CAL_MIN_SAMPLES;
 
         showStickCalibrationValues(
             xvalid, m_offset[0].getMean(), false, 1,
@@ -448,6 +523,13 @@ void SensorCalibration::onStickOffsetData(int x, int y)
     }
 }
 
+/**
+ * @brief Stick data event handler. Performs stick gain estimation
+ *  and stops itself if the value was found or the process timed out.
+ *
+ * It looks for local minima and maxima outside the sticks dead zone
+ *  which are used to estimate the sticks minimum and maximum position.
+ */
 void SensorCalibration::onStickGainData(int x, int y)
 {
     double slopex = m_stick_filter[0].getValue() - m_stick_filter[0].process(x);
@@ -469,18 +551,20 @@ void SensorCalibration::onStickGainData(int x, int y)
         m_max[1].process(m_stick_filter[1].getValue());
     }
 
-    // there are two events with one value changed each
+    // There are two move events generated for every hardware event,
+    // one updates the X the other the Y value. This causes every second
+    // derivate value to be zero. Ignore those values to get the real derivative.
     if(slopex != 0)
         m_last_slope[0] = slopex;
     if(slopey != 0)
         m_last_slope[1] = slopey;
 
     bool xvalid =
-        m_min[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[0].getCount() > 10 &&
-        m_max[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[0].getCount() > 10;
+        m_min[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[0].getCount() > CAL_MIN_SAMPLES &&
+        m_max[0].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[0].getCount() > CAL_MIN_SAMPLES;
     bool yvalid =
-        m_min[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[1].getCount() > 10 &&
-        m_max[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[1].getCount() > 10;
+        m_min[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_min[1].getCount() > CAL_MIN_SAMPLES &&
+        m_max[1].getRelativeErrorSq() < CAL_ACCURACY_SQ && m_max[1].getCount() > CAL_MIN_SAMPLES;
 
     double offsetX, gainX, offsetY, gainY;
     stickRegression(&offsetX, &gainX, m_offset[0].getMean(), m_min[0].getMean(), m_max[0].getMean());
@@ -489,6 +573,7 @@ void SensorCalibration::onStickGainData(int x, int y)
 
     if((xvalid && yvalid) || QDateTime::currentDateTime() > m_end_time)
     {
+        m_changed = true;
         disconnect(m_stick, &JoyControlStick::moved,
             this, &SensorCalibration::onStickGainData);
         disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
@@ -504,8 +589,7 @@ void SensorCalibration::onStickGainData(int x, int y)
 }
 
 /**
- * @brief iSave calibration values into JoySensor object
- * @return nothing
+ * @brief Save calibration values into the device object.
  */
 void SensorCalibration::saveSettings()
 {
@@ -527,21 +611,23 @@ void SensorCalibration::saveSettings()
         );
         showStickCalibrationValues(true, offsetX, true, gainX, true, offsetY, true, gainY);
     }
+    m_changed = false;
     m_calibrated = true;
     m_ui->saveBtn->setEnabled(false);
     m_ui->resetBtn->setEnabled(true);
 }
 
 /**
- * @brief Prepares first step of calibration - gyroscope offset
- * @return nothing
+ * @brief Shows user instructions for gyroscope calibration and initializes estimators.
  */
 void SensorCalibration::startGyroscopeCalibration()
 {
     if(m_sensor == nullptr)
         return;
 
-    if (askConfirmation())
+    if (askConfirmation(
+        tr("Calibration was saved for the preset. Do you really want to reset settings?"),
+        !m_calibrated))
     {
         m_offset[0].reset();
         m_offset[1].reset();
@@ -557,6 +643,7 @@ void SensorCalibration::startGyroscopeCalibration()
         m_ui->startBtn->setText(tr("Continue calibration"));
         update();
 
+        m_ui->resetBtn->setEnabled(false);
         m_ui->deviceComboBox->setEnabled(false);
         disconnect(m_ui->startBtn, &QPushButton::clicked, this, nullptr);
         connect(m_ui->startBtn, &QPushButton::clicked, this,
@@ -565,8 +652,7 @@ void SensorCalibration::startGyroscopeCalibration()
 }
 
 /**
- * @brief Performs gyroscope offset calibration.
- * @return nothing
+ * @brief Show calibration message to the user and enable gyroscope data event handler.
  */
 void SensorCalibration::startGyroscopeOffsetCalibration()
 {
@@ -584,12 +670,18 @@ void SensorCalibration::startGyroscopeOffsetCalibration()
     }
 }
 
+/**
+ * @brief Shows user instructions for stick offset calibration, initializes estimators
+ *  and connects stick data event handlers.
+ */
 void SensorCalibration::startStickOffsetCalibration()
 {
     if (m_stick == nullptr)
         return;
 
-    if (askConfirmation())
+    if (askConfirmation(tr(
+        "Calibration was saved for the preset. Do you really want to reset settings?"),
+        !m_calibrated))
     {
         m_offset[0].reset();
         m_offset[1].reset();
@@ -604,6 +696,7 @@ void SensorCalibration::startStickOffsetCalibration()
             "Now move the stick several times to the maximum in different direction and back to center.\n"
             "This can take up to %1 seconds.").arg(CAL_TIMEOUT));
         setWindowTitle(tr("Calibrating stick"));
+        m_ui->resetBtn->setEnabled(false);
         m_ui->startBtn->setText(tr("Continue calibration"));
         m_ui->startBtn->setEnabled(false);
 
@@ -617,6 +710,10 @@ void SensorCalibration::startStickOffsetCalibration()
     }
 }
 
+/**
+ * @brief Shows user instructions for stick gain calibration, initializes estimators
+ *  and connects stick data event handlers.
+ */
 void SensorCalibration::startStickGainCalibration()
 {
     if (m_stick == nullptr)

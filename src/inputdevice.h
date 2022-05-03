@@ -19,6 +19,7 @@
 #ifndef INPUTDEVICE_H
 #define INPUTDEVICE_H
 
+#include "joysensortype.h"
 #include "setjoystick.h"
 
 #include <SDL2/SDL_joystick.h>
