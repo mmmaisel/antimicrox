@@ -181,6 +181,35 @@ struct EffectVibrationPs5
         frequency = freq;
         _padding2 = 0;
     }
+
+    /**
+     * @brief Builds a vibration gradient effect message.
+     *   This effect starts with a strength of zero and slowly increases
+     *   its strength until it reaches its given maximum strength at the end.
+     * @param[in] strength Strength of the feedback force. Value between 0 and 7.
+     * @param[in] frequency Virbration frequency in Hz. Value between 1 and 255.
+     */
+    inline void build_gradient(int strength, int freq)
+    {
+        active_zones = 0;
+        amplitude_zones = 0;
+        double grad = 0.0;
+
+        for (int i = 1; i <= 10; ++i)
+        {
+            int x = static_cast<int>((strength + 0.1) * grad);
+            active_zones |= (1 << i);
+            amplitude_zones |= (x << (3 * i));
+
+            grad += 0.125;
+        }
+
+        active_zones = u16tole(active_zones);
+        amplitude_zones = u32tole(amplitude_zones);
+        _padding1 = 0;
+        frequency = freq;
+        _padding2 = 0;
+    }
 };
 
 /**
@@ -327,6 +356,10 @@ void HapticTriggerPs5::to_message(TriggerEffectMsgPs5 &effect) const
         effect.mode = EFFECT_MODE_VIBRATION;
         effect.vibration.build(m_start, m_end, m_strength, m_frequency);
         return;
+    case HAPTIC_TRIGGER_VIBRATION_GRADIENT:
+        effect.mode = EFFECT_MODE_VIBRATION;
+        effect.vibration.build_gradient(m_strength, m_frequency);
+        return;
     }
 }
 
@@ -351,6 +384,9 @@ HapticTriggerModePs5 HapticTriggerPs5::from_string(const QString &name)
     } else if (name == "Vibration")
     {
         mode = HAPTIC_TRIGGER_VIBRATION;
+    } else if (name == "VibrationGradient")
+    {
+        mode = HAPTIC_TRIGGER_VIBRATION_GRADIENT;
     }
     return mode;
 }
@@ -372,6 +408,8 @@ QString HapticTriggerPs5::to_string(HapticTriggerModePs5 mode)
         return "RigidGradient";
     case HAPTIC_TRIGGER_VIBRATION:
         return "Vibration";
+    case HAPTIC_TRIGGER_VIBRATION_GRADIENT:
+        return "VibrationGradient";
     }
     return "None";
 }

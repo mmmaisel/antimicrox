@@ -121,6 +121,7 @@ const int GlobalVariables::HapticTriggerPs5::CLICKSTRENGTH = 256;
 const int GlobalVariables::HapticTriggerPs5::RIGIDSTRENGTH = 128;
 const int GlobalVariables::HapticTriggerPs5::RIGIDGRADIENTSTRENGTH = 256;
 const int GlobalVariables::HapticTriggerPs5::VIBRATIONSTRENGTH = 64;
+const int GlobalVariables::HapticTriggerPs5::VIBRATIONGRADIENTSTRENGTH = 256;
 const int GlobalVariables::HapticTriggerPs5::RANGE = 320;
 const int GlobalVariables::HapticTriggerPs5::FREQUENCY = 32;
 
