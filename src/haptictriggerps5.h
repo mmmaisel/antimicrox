@@ -68,7 +68,12 @@ class HapticTriggerPs5 : QObject
         EFFECT_MODE_NONE = 0x05,
         EFFECT_MODE_CLICK = 0x25,
         EFFECT_MODE_RIGID = 0x21,
-        EFFECT_MODE_VIBRATION = 0x26
+        EFFECT_MODE_VIBRATION = 0x26,
+
+        // unofficial effects
+        EFFECT_MODE_BOW = 0x22,
+        EFFECT_MODE_GALLOPING = 0x23,
+        EFFECT_MODE_MACHINE = 0x27
     };
 
     HapticTriggerModePs5 m_mode;

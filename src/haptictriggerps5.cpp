@@ -91,7 +91,7 @@ struct EffectRigidPs5
      */
     inline void build_gradient(int strength)
     {
-        active_zones = u16tole(0x03FE);
+        active_zones = u16tole(0x00FE);
         force_zones = 0;
         double grad = 0.0;
 
@@ -212,6 +212,37 @@ struct EffectVibrationPs5
     }
 };
 
+struct EffectBowPs5
+{
+    u16 active_zones;
+    u8 force_zones;
+    u8 _padding[7];
+
+    inline void build()
+    {
+        active_zones = (1 << 4) | (1 << 8);
+        force_zones = (7 << 0) | (7 << 3);
+        active_zones = u16tole(active_zones);
+    }
+};
+
+/// XXX: does not work
+struct EffectGallopingPs5
+{
+    u16 active_zones;
+    u8 ratio;
+    u8 frequency;
+    u8 _padding[6];
+
+    inline void build()
+    {
+        active_zones = (1 << 4) | (1 << 8);
+        ratio = (3 << 0) | (6 << 3);
+        frequency = 1;
+        active_zones = u16tole(active_zones);
+    }
+};
+
 /**
  * @brief Effect message for a single trigger.
  */
@@ -224,6 +255,8 @@ struct TriggerEffectMsgPs5
         EffectRigidPs5 rigid;
         EffectClickPs5 click;
         EffectVibrationPs5 vibration;
+        EffectBowPs5 bow;
+//        EffectGallopingPs5 galloping;
     };
 };
 
